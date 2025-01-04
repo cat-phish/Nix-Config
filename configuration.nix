@@ -127,6 +127,8 @@
         git
         firefox
         xclip
+        gcc
+        gnumake
       ])
 
       ++
