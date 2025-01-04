@@ -1,0 +1,712 @@
+"##################################
+"#####  Pre-Vim_plug Settings #####
+"##################################
+
+" TODO: This doesn't seem to be working
+let g:ale_completion_enabled = 1
+
+
+"######################
+"#####  Vim_plug  #####
+"######################
+"
+call plug#begin()
+" The default plugin directory will be as follows:
+"   - Vim (Linux/macOS): '~/.vim/plugged'
+"   - Vim (Windows): '~/vimfiles/plugged'
+"   - Neovim (Linux/macOS/Windows): stdpath('data') . '/plugged'
+" You can specify a custom plugin directory by passing it as the argument
+"   - e.g. `call plug#begin('~/.vim/plugged')`
+"   - Avoid using standard Vim directory names like 'plugin'
+" Make sure you use single quotes
+
+
+
+" Register Vim-Plug for help it's help info access
+Plug 'junegunn/vim-plug'
+
+" NerdTree Explorer
+Plug 'preservim/nerdtree', { 'on': 'NERDTreeToggle' }
+Plug 'Xuyuanp/nerdtree-git-plugin'
+
+" Syntax Highlighting
+Plug 'sheerun/vim-polyglot'
+
+" Surround Plugin
+Plug 'tpope/vim-surround'
+
+" Auto-Pairs Plugin
+if v:version >= 801
+    Plug 'cohama/lexima.vim'
+endif
+
+" LSP and Linting
+if v:version >= 801
+   Plug 'dense-analysis/ale'
+   Plug 'prabirshrestha/vim-lsp'
+   Plug 'mattn/vim-lsp-settings'
+   Plug 'rhysd/vim-lsp-ale'
+endif
+" Plug 'prabirshrestha/asyncomplete.vim'
+" Plug 'prabirshrestha/asyncomplete-lsp.vim'
+
+" Completion
+if v:version > 704 || v:version == 704 && has('patch143')
+   Plug 'lifepillar/vim-mucomplete'
+endif
+
+" File Browser
+Plug 'tpope/vim-vinegar'
+
+" Soft Capslock
+Plug 'tpope/vim-capslock'
+
+" Smooth-Scroll
+Plug 'terryma/vim-smooth-scroll'
+
+" Navigate with string search
+if v:version >= 703
+   Plug 'justinmk/vim-sneak'
+endif
+
+" CSS Color
+Plug 'ap/vim-css-color'
+
+" Git Blame
+" Plug 'f-person/git-blame.nvim'
+if v:version >= 704
+   Plug 'airblade/vim-gitgutter'
+endif
+
+" Git Plugin
+Plug 'tpope/vim-fugitive'
+
+" Start Page [doesn't work, b/c of NERDTree maybe?]
+" Plug 'mhinz/vim-startify'
+
+" Indent Visualizer
+if v:version >= 702
+   Plug 'preservim/vim-indent-guides'
+endif
+
+" Commenting Plugin
+Plug 'tpope/vim-commentary'
+
+" Disable Search Highlights after search
+if has('vim') && (v:version > 704 || v:version == 704 && has('patch2008'))
+   Plug 'romainl/vim-cool'
+endif
+
+" Status/Tabline
+Plug 'vim-airline/vim-airline'
+
+" Dev-Icons in NerdTree
+Plug 'ryanoasis/vim-devicons'
+
+" Focus Plugin
+Plug 'junegunn/goyo.vim'
+
+" Show Pasting Register
+Plug 'junegunn/vim-peekaboo'
+
+" Fuzzy Finding
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+" Window Maximizing
+Plug 'szw/vim-maximizer'
+
+" Substitutions, Coercion, and Abbreviation
+Plug 'tpope/vim-abolish'
+
+" Handle closures like 'end', 'endif', etc.
+Plug 'tpope/vim-endwise'
+
+" Handy Keybindings for things like adding new lines below the current,
+" exchanging lines, etc.
+Plug 'tpope/vim-unimpaired'
+
+" Better Dot Repeat
+Plug 'tpope/vim-repeat'
+
+" Keymap Helper
+Plug 'liuchengxu/vim-which-key'
+
+" Snippets
+" Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+
+" Session Management"
+Plug 'tpope/vim-obsession'
+Plug 'dhruvasagar/vim-prosession'
+
+" Highlight on yank
+Plug 'machakann/vim-highlightedyank'
+
+" Theme
+Plug 'gruvbox-community/gruvbox'
+Plug 'tomasiser/vim-code-dark'
+Plug 'sainnhe/everforest'
+
+" Call Which-Key Register
+"autocmd User vim-which-key call which_key#register('<Space>', 'g:which_key_map')
+
+" Initialize plugin system
+" - Automatically executes `filetype plugin indent on` and `syntax enable`.
+call plug#end()
+" You can revert the settings after the call like so:
+"   filetype indent off   " Disable file-type-specific indentation
+"   syntax off            " Disable syntax highlighting
+
+
+
+
+"####################
+"#####  Themes  #####
+"####################
+
+
+"  Terminal Colors
+"*******************
+" Set highest allowed color version
+if exists('+termguicolors')
+    " Try to set termguicolors
+    set termguicolors
+    if !&termguicolors
+        " Fallback to 256 colors if termguicolors fails
+        if &t_Co >= 256
+            set t_Co=256
+        elseif &t_Co >= 16
+            set t_Co=16
+        elseif &t_Co >= 8
+            set t_Co=8
+        else
+            set t_Co=0
+        endif
+    endif
+else
+    " Fallback to 256 colors if termguicolors doesn't exist
+    if &t_Co >= 256
+        set t_Co=256
+    elseif &t_Co >= 16
+        set t_Co=16
+    elseif &t_Co >= 8
+        set t_Co=8
+    else
+        set t_Co=0
+    endif
+endif
+
+
+"  Colorscheme
+"***************
+"" Turn on syntax highlighting
+syntax on
+let g:airline_theme = 'codedark'  " Must be before colorscheme
+let g:codedark_modern=1  " Must be before colorscheme
+colorscheme screenofdeath
+
+
+
+"#########################
+"#####  Vim Options  #####
+"#########################
+
+
+"  Vim Setup
+"*************
+set mouse=a  " enable mouse support
+set hlsearch  " search highlighting on
+set encoding=UTF-8  " set encoding
+set number  " set static line number first so when rel toggle they are still there
+set relativenumber  " relative line numbers by default
+set clipboard=unamed
+set tabstop=3 shiftwidth=3 expandtab  " spaces for tabs and width 3
+set whichwrap+=b,s,h,l,<,>  " wrap keys to next line
+set noshowmode  " disable mode since we have a status line
+set hidden  " switch buffers without saving
+set cursorline
+set scrolloff=10
+set splitbelow
+set wildchar=<C-n>
+" set fillchars+=eob:·
+filetype plugin on
+highlight Cursor guifg=black guibg=white
+" set omnifunc=syntaxcomplete#Complete
+
+
+
+"############################
+"#####  LSP/Completion  #####
+"############################
+
+
+"  ALE Options
+"***************
+let g:ale_fix_on_save = 1
+let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_insert_leave = 1
+let g:ale_lint_on_enter = 0
+let g:ale_sign_error = '>>'
+let g:ale_sign_warning = '--'
+let g:airline#extensions#ale#enabled = 1
+let g:ale_sign_column_always = 1
+let g:ale_virtualtext_cursor = 'current'
+let g:ale_linters = {
+\   'cpp': ['clangd'],
+\   'javascript': ['eslint'],
+\}
+let g:ale_fixers = {
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\   'cpp': ['clang-format'],
+\   'javascript': ['eslint'],
+\}
+set omnifunc=ale#completion#OmniFunc   " Function to keymap auto completion
+
+"  Vim LSP
+"***********
+let g:lsp_diagnostics_enabled = 0   " disable diagnostics support
+
+"  MuComplete Options
+"**********************
+" (if the LSP completion can't be setup in your
+" environment then this will be the fallback)
+set completeopt+=menuone
+set completeopt+=noselect
+set shortmess+=c   " Shut off completion messages
+set belloff+=ctrlg   " Add only if Vim beeps during completion
+let g:mucomplete#enable_auto_at_startup = 1
+let g:mucomplete#completion_delay = 1
+let g:mucomplete#no_mappings = 1
+" let g:mucomplete#cycle_with_trigger = 1
+
+
+
+"################
+"#####  UI  #####
+"################
+
+
+"  NERDTree
+"************
+let g:NERDTreeFileLines = 1  "NERDTree line numbers
+
+
+"  Tabline (Airline)
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+
+
+"  Indentguides
+"****************
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 1
+let g:indent_guides_start_level = 1
+let g:indent_guides_guide_size = 1
+" hi IndentGuidesOdd  ctermbg=lightgrey
+" hi IndentGuidesEven ctermbg=darkgrey
+
+
+"  Git Blame
+"*************
+let g:gitblame_enabled = 0  " enable git blame
+" let g:buftabline_separators = 1
+" let g:buftabline_indicators = 1
+
+
+"  Window Maximizer
+"********************
+let g:maximiz1r_set_default_mapping = 1
+
+"  Sneak
+"*********
+let g:sneak#label = 1
+
+
+"  Vim Cool
+"************
+let g:cool_total_matches = 1
+
+
+" let g:lexima_enable_endwise_rules = 1  " DISABLED bc using tpop/endwise
+
+
+"  Highlight on Yank
+"*********************
+let g:highlightedyank_highlight_duration = 500
+
+" If older Vim version fix higlight on yank
+if v:version < 800 || v:version == 800 && !has('patch-8.0.1394')
+  if !exists('##TextYankPost')
+    nmap y <Plug>(highlightedyank)
+    xmap y <Plug>(highlightedyank)
+    omap y <Plug>(highlightedyank)
+  endif
+endif
+
+
+
+"#####################
+"#####  Keymaps  #####
+"#####################
+
+"***********************
+"**  Whichkey Titles  **
+"***********************
+
+let g:which_key_map =  {}
+let g:which_key_map.b = { 'name' : '+buffer' }
+let g:which_key_map.c = { 'name' : '+code' }
+let g:which_key_map.f = { 'name' : '+find/file' }
+let g:which_key_map.h = { 'name' : '+git' }
+let g:which_key_map.q = { 'name' : '+quit/session' }
+let g:which_key_map.s = { 'name' : '+search' }
+let g:which_key_map.u = { 'name' : '+ui' }
+let g:which_key_map.w = { 'name' : '+windows' }
+
+
+"***********************
+"**  Keymap Settings  **
+"***********************
+
+" Key Timeout
+" By default timeoutlen is 1000 ms
+set timeout
+set timeoutlen=300
+set ttimeout
+set ttimeoutlen=50
+
+" Loop through the alphabet and map the Alt key
+for i in range(97,122)
+   let c = nr2char(i)
+   exec "map \e".c." <M-".c.">"
+   exec "map! \e".c." <M-".c.">"
+endfor
+
+" Leader Key
+let g:mapleader = "\<Space>"
+let g:maplocalleader = ','
+nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
+nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
+
+
+"***********************
+"**  Navigation Maps  **
+"***********************
+
+" Beginning/End of Line
+nnoremap <silent> H ^
+nnoremap <silent> L $
+vnoremap <silent> H ^
+vnoremap <silent> L $
+
+" Sneak
+map f <Plug>Sneak_f
+map F <Plug>Sneak_F
+map t <Plug>Sneak_t
+map T <Plug>Sneak_T
+map <C-n> <Plug>Sneak_;
+map <C-p> <Plug>Sneak_,
+
+" Saner Behavior for n and N
+" https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
+nnoremap <expr> n  'Nn'[v:searchforward]
+xnoremap <expr> n  'Nn'[v:searchforward]
+onoremap <expr> n  'Nn'[v:searchforward]
+nnoremap <expr> N  'nN'[v:searchforward]
+xnoremap <expr> N  'nN'[v:searchforward]
+onoremap <expr> N  'nN'[v:searchforward]
+
+
+
+"********************
+"**  Editing Maps  **
+"********************
+
+" Capslock
+nmap <silent> <C-a> gC
+imap <silent> <C-a> <C-g>c
+
+" C-l Delete
+imap <silent> <C-l> <Del>
+
+" Better Indent
+vnoremap < <gv
+vnoremap > >gv
+
+" Move Lines
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+vnoremap <A-j> :m '>+1<CR>gv=gv
+vnoremap <A-k> :m '<-2<CR>gv=gv
+" These are inadvisable because escaping to normal
+" mode and pressing j or k too quickly will cause
+" lines to shift
+" inoremap <A-j> <Esc>:m .+1<CR>==gi
+" inoremap <A-k> <Esc>:m .-2<CR>==gi
+
+" Comments
+xmap xx  <Plug>Commentary
+nmap xx  <Plug>Commentary
+omap xx  <Plug>Commentary
+nmap xx  <Plug>CommentaryLine
+nmap xxx <Plug>Commentary<Plug>Commentary
+
+" C-s to save
+noremap <silent> <C-s>          :update<CR>
+vnoremap <silent> <C-s>         <Esc>:update<CR>
+inoremap <silent> <C-s>         <Esc>:update<CR>
+
+" Easier Redo
+" nnoremap <silent> U <C-r>
+
+" Quick Macro
+nnoremap <silent> Q @q
+
+" Remap tab in cmdline (not working but it does disable tab insertion)
+cnoremap <silent> <Tab> <C-N>
+
+
+"*******************
+"**  Coding Maps  **
+"*******************
+
+" Line Diagnostics
+nnoremap <leader>cd :ALEDetail<CR>
+let g:which_key_map.c.d = 'Line diagnostics'
+
+" Format
+nnoremap <leader>cf :ALEFix<CR>
+let g:which_key_map.c.f = 'Format'
+
+" Search TODO
+nnoremap <leader>st /TODO:<CR>
+let g:which_key_map.s.t = 'Search TODO'
+
+" Search TODO/FIX/FIXME
+nnoremap <leader>sT /TODO:\\|FIX:\\|FIXME:<CR>
+let g:which_key_map.s.T = 'Search TODO/FIX/FIXME'
+
+" Vinegar Browser
+nnoremap <leader>fo <Plug>VinegarUp<CR>
+let g:which_key_map.f.o = 'Vinegar browser'
+
+" Completion (disable up/down arrow selection)
+inoremap <expr> <up> pumvisible() ? '<c-e><up>' : '<up>'
+inoremap <expr> <down> pumvisible() ? '<c-e><down>' : '<down>'
+
+
+"**********************
+"**  File Mgmt Maps  **
+"**********************
+
+" Find File
+nnoremap <leader>ff :e<space>
+let g:which_key_map.f.f = 'Find file'
+
+" New File
+nnoremap <leader>N  :enew<CR>
+let g:which_key_map.N = 'New file'
+
+
+"***************
+"**  UI Maps  **
+"***************
+
+" Quit Session
+nnoremap <silent> <leader>qq :qa<CR>
+let g:which_key_map.q.q = 'Quit Vim'
+
+" Toggle Relative Line Numbers
+nnoremap <silent> <leader>n :set rnu!<CR>
+let g:which_key_map.n = 'Toggle relative numbers'
+
+" NERDTree
+"nnoremap <leader>ef :NERDTreeFocus<CR>
+
+" NERDTree Toggle
+nnoremap <silent> <leader>e :NERDTreeToggle<CR>
+let g:which_key_map.e = 'Explorer toggle'
+
+" NERDTree Open
+nnoremap <silent> <leader>ue :NERDTree<CR>
+let g:which_key_map.u.e = 'Explorer open'
+
+" nnoremap <silent> <leader>se :NERDTreeFind<CR>
+
+" Smooth-Scroll
+noremap <silent> <c-u> :call smooth_scroll#up(&scroll, 15, 2)<CR>
+noremap <silent> <c-d> :call smooth_scroll#down(&scroll, 15, 2)<CR>
+noremap <silent> <c-b> :call smooth_scroll#up(&scroll*2, 30, 4)<CR>
+noremap <silent> <c-f> :call smooth_scroll#down(&scroll*2, 30, 4)<CR>
+
+" Clear Search with Esc
+nnoremap <silent> <Esc> :nohlsearch<CR><Esc>
+
+" Redraw Screen
+nnoremap <silent> <leader>ur :redraw!<CR>
+let g:which_key_map.u.r = 'Redraw screen'
+
+
+"*******************
+"**  Buffer Maps  **
+"*******************
+
+" next buffer
+nnoremap <silent> ' :bnext<CR>
+" previous buffer
+nnoremap <silent> ; :bprevious<CR>
+
+" switch to last buffer
+nnoremap <silent> <leader>bb :e #<CR>
+let g:which_key_map.b.b = 'Last buffer'
+nnoremap <silent> <leader>` :e #<CR>
+let g:which_key_map['`'] = 'Last Buffer'
+
+" delete buffer
+nnoremap <silent> <leader>bd :bn<CR>:bd#<CR>
+let g:which_key_map.b.d = 'Delete buffer'
+
+" delete other buffers [Not worrking]
+" nnoremap <silent> <leader>bo :%bd|e#|bd#<CR>
+
+" search for buffer with substring
+nnoremap <silent> <leader><Space> :b<space>
+let g:which_key_map['<leader>'] = { 'name' : 'Find Buffer' }
+
+
+"*******************
+"**  Window Maps  **
+"*******************
+
+" Navigate Windows
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Switch to Other Window
+nnoremap <leader>ww <C-w>w
+let g:which_key_map.w.w = 'Last window'
+
+" Split Window Below
+nnoremap <leader>w- <C-w>s
+let g:which_key_map.w['-'] = 'Split window below'
+
+" Split Window Right
+nnoremap <leader>w<Bar> <C-w>v
+let g:which_key_map.w['|'] = 'Split window right'
+
+" Delete Window
+nnoremap <leader>wd <C-w>c
+let g:which_key_map.w.d = 'Delete window'
+
+" Toggle Maximized Window
+nnoremap <silent> <leader>wm :MaximizerToggle!<CR>
+let g:which_key_map.w.m = 'Maximize toggle'
+
+
+
+" Resize Windows
+nnoremap <C-Up> :resize +2<CR>
+nnoremap <C-Down> :resize -2<CR>
+nnoremap <C-Left> :vertical resize -2<CR>
+nnoremap <C-Right> :vertical resize +2<CR>
+
+
+"********************
+"**  Session Maps  **
+"********************
+
+" Open Session
+nnoremap <leader>qo :Prosession<CR>
+let g:which_key_map.q.o = 'Open session (cwd)'
+
+" Open Session by Name
+nnoremap <leader>qO :Prosession<space>
+let g:which_key_map.q.O = 'Open session by name'
+
+" Delete Session
+nnoremap <leader>qd :ProsessionDelete<CR>
+let g:which_key_map.q.d = 'Delete session'
+
+" Delete Session by Name
+nnoremap <leader>qD :ProsessionDelete<space>
+let g:which_key_map.q.D = 'Delete session by name'
+
+" Clean Unused Sessions (Directories don't exist)
+nnoremap <leader>qC :ProsessionClean<CR>
+let g:which_key_map.q.C = 'Clean unused sessions'
+
+
+"*****************
+"**  Hack Maps  **
+"*****************
+
+" Disable Middle Mouse Paste
+nnoremap <MiddleMouse> <Nop>
+inoremap <MiddleMouse> <Nop>
+vnoremap <MiddleMouse> <Nop>
+nnoremap <2-MiddleMouse> <Nop>
+inoremap <2-MiddleMouse> <Nop>
+vnoremap <2-MiddleMouse> <Nop>
+nnoremap <3-MiddleMouse> <Nop>
+inoremap <3-MiddleMouse> <Nop>
+vnoremap <3-MiddleMouse> <Nop>
+
+
+"****************************
+"**  Whichkey Ignore/Call  **
+"****************************
+
+" let g:which_key_map.i = 'which_key_ignore'
+" let g:which_key_map["i"] = 'which_key_ignore'
+let g:which_key_map["\<Space>"] = 'which_key_ignore'
+
+" let g:which_key_ignore_outside_mappings = 1
+call which_key#register('<Space>', "g:which_key_map")
+
+
+
+"########################
+"##### Autocommands #####
+"########################
+
+" Change cursor for insert mode
+let &t_SI = "\e[6 q"
+let &t_EI = "\e[2 q"
+" reset the cursor on start (for older versions of vim, usually not required)
+augroup myCmds
+au!
+autocmd VimEnter * silent !echo -ne "\e[2 q"
+let g:maximizer_set_mapping_with_bang = 1
+augroup END
+
+" Auto switch to absolute line numbers on numerous events
+autocmd BufLeave,InsertEnter * if &nu | set relativenumber | endif
+
+" Auto switch back to relative line numbers on numerous events
+" autocmd BufLeave,FocusLost,InsertEnter,CmdlineEnter,WinLeave * if &nu | set relativenumber | redraw | endif
+
+
+" Start NERDTree when Vim starts with a directory argument.
+"autocmd StdinReadPre * let s:std_in=1
+"autocmd VimEnter * if argc() == 1 && isdirectory(argv()[0]) && !exists('s:std_in') |
+"   \ execute 'NERDTree' argv()[0] | wincmd p | enew | execute 'cd '.argv()[0] | endif
+
+" Start NERDTree. If a file is specified, move the cursor to its window.
+autocmd StdinReadPre * let s:std_in=1
+autocmd VimEnter * NERDTree | if argc() > 0 || exists("s:std_in") | wincmd p | endif
+
+" Open the existing NERDTree on each new tab.
+" autocmd BufWinEnter * if &buftype != 'quickfix' && getcmdwintype() == '' | silent NERDTreeMirror | endif
+
+
+" TODO: this seems to be broken on remote only
+" If another buffer tries to replace NERDTree, put it in the other window, and bring back NERDTree.
+"autocmd BufEnter * if winnr() == winnr('h') && bufname('#') =~ 'NERD_tree_\d\+' && bufname('%') !~ 'NERD_tree_\d\+' && winnr('$') > 1 |
+"    \ let buf=bufnr() | buffer# | execute "normal! \<C-W>w" | execute 'buffer'.buf | endif
+
+" Exit Vim if NERDTree is the only window remaining in the only tab.
+autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+
