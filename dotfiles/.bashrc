@@ -4,6 +4,8 @@ case $- in
 *) return ;;
 esac
 
+source "~/.nix-profile/etc/profile.d/hm-session-vars.sh"
+
 # Path to your oh-my-bash installation.
 export OSH='/home/jordan/.oh-my-bash'
 
