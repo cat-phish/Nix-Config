@@ -21,6 +21,7 @@
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
     pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
+    nixCats = mynvim.packages.${system};
   in {
     nixosConfigurations = {
       jordans-desktop = lib.nixosSystem {
@@ -53,7 +54,7 @@
         ];
         extraSpecialArgs = {
           inherit pkgs-unstable;
-          inherit mynvim;
+          inherit nixCats;
         };
       };
       "jordan@jordans-laptop" = home-manager.lib.homeManagerConfiguration {
@@ -64,7 +65,7 @@
         ];
         extraSpecialArgs = {
           inherit pkgs-unstable;
-          inherit mynvim;
+          inherit nixCats;
         };
       };
     };
