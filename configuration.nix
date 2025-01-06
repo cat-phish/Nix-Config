@@ -1,15 +1,17 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
-
-{ config, lib, pkgs, pkgs-unstable, machineProfile, ... }:
-
 {
-  imports =
-    [
-      # Include the results of the hardware scan.
-      # ./hardware-configuration.nix
-    ];
+  config,
+  lib,
+  pkgs,
+  pkgs-unstable,
+  ...
+}: {
+  imports = [
+    # Include the results of the hardware scan.
+    # ./hardware-configuration.nix
+  ];
 
   options = {
     my.arbitrary.option = lib.mkOption {
@@ -19,7 +21,6 @@
   };
 
   config = {
-
     my.arbitrary.option = "test";
     # Bootloader.
     boot.loader.grub.enable = true;
@@ -97,7 +98,7 @@
     users.users.jordan = {
       isNormalUser = true;
       description = "Jordan";
-      extraGroups = [ "networkmanager" "wheel" ];
+      extraGroups = ["networkmanager" "wheel"];
       packages = with pkgs; [
         kdePackages.kate
         #  thunderbird
@@ -111,14 +112,13 @@
     nixpkgs.config.allowUnfree = true;
 
     # Enable the Flakes feature and the accompanying new nix command-line tool
-    nix.settings.experimental-features = [ "nix-command" "flakes" ];
+    nix.settings.experimental-features = ["nix-command" "flakes"];
 
     virtualisation.virtualbox.host.enable = true;
     nixpkgs.config.virtualbox.host.enableExtensionPack = true;
     # List packages installed in system profile. To search, run:
     # $ nix search wget
     environment.systemPackages =
-
       (with pkgs; [
         vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
         tmux
@@ -130,13 +130,8 @@
         gcc
         gnumake
       ])
-
-      ++
-
-      (with pkgs-unstable; [
-      ])
-
-    ;
+      ++ (with pkgs-unstable; [
+        ]);
 
     # Some programs need SUID wrappers, can be configured further or are
     # started in user sessions.
@@ -166,6 +161,5 @@
     # Before changing this value read the documentation for this option
     # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
     system.stateVersion = "24.11"; # Did you read the comment?
-
   };
 }

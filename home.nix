@@ -2,7 +2,7 @@
   config,
   pkgs,
   pkgs-unstable,
-  nixCats,
+  mynvim,
   ...
 }: {
   # Home Manager needs a bit of information about you and the paths it should
@@ -56,8 +56,8 @@
       # neovim
     ])
     # Personal nixCats Nvim Flake
-    ++ (with nixCats; [
-      nvim
+    ++ (with mynvim; [
+      packages.${pkgs.system}.nvim
     ])
     # Overrides
     ++ [
@@ -93,7 +93,7 @@
     # '';
 
     # Add ~/.nix/dotfiles/ dotfiles individually here
-    # ".bashrc".source = ./dotfiles/.bashrc;
+    ".bashrc".source = ./dotfiles/.bashrc;
     ".vim" = {
       source = ./dotfiles/.vim;
       recursive = true;
@@ -105,7 +105,7 @@
     #   recursive = true;
     # };
   };
-  programs.bash.enable = true; # deprecated in favor of exist existing bashrc
+  # programs.bash.enable = true; # deprecated in favor of exist existing bashrc
 
   # Home Manager can also manage your environment variables through
   # 'home.sessionVariables'. These will be explicitly sourced when using a

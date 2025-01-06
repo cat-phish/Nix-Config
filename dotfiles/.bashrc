@@ -168,8 +168,8 @@ alias refresh-bash="source ~/.bashrc"
 # alias v="nvim"
 # alias vv="nvim ."
 # Add the alias for nixcats
-# alias v="~/nixCats/result/bin/nixcats"
-# alias vv="~/nixCats/result/bin/nixcats ."
+alias v="~/nixCats/result/bin/nixcats"
+alias vv="~/nixCats/result/bin/nixcats ."
 
 # Tmux
 alias t="tmux"
