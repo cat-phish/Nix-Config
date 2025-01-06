@@ -4,7 +4,10 @@ case $- in
 *) return ;;
 esac
 
-. "~/.nix-profile/etc/profile.d/hm-session-vars.sh"
+# Source the .env file if it exists
+if [ -f "$HOME/.env" ]; then
+  export $(grep -v '^#' $HOME/.env | xargs)
+fi
 
 # Path to your oh-my-bash installation.
 export OSH='/home/jordan/.oh-my-bash'
@@ -130,6 +133,15 @@ source "$OSH"/oh-my-bash.sh
 export VISUAL='nvim'
 export EDITOR='$VISUAL'
 
+# Source Home Manager session variables
+if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+elif [ -f ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
+  source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+fi
+
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
@@ -153,8 +165,11 @@ alias refresh-bash="source ~/.bashrc"
 # Application Aliases
 
 # Neovim
-alias v="nvim"
-alias vv="nvim ."
+# alias v="nvim"
+# alias vv="nvim ."
+# Add the alias for nixcats
+alias v="~/nixCats/result/bin/nixcats"
+alias vv="~/nixCats/result/bin/nixcats ."
 
 # Tmux
 alias t="tmux"
