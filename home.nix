@@ -101,10 +101,10 @@
     };
 
     # Recursively adds dotfiles from ~/.nix/dotfiles/config/
-    "${config.xdg.configHome}" = {
-      source = ./dotfiles/.config;
-      recursive = true;
-    };
+    # "${config.xdg.configHome}" = {
+    #   source = ./dotfiles/.config;
+    #   recursive = true;
+    # };
   };
 
   # Home Manager can also manage your environment variables through
