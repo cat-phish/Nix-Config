@@ -10,6 +10,7 @@
   config = {
     environment.systemPackages =
       (with pkgs; [
+        fuse
         kmonad
         lsp-plugins
       ])

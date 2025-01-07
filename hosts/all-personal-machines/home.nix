@@ -14,7 +14,7 @@
 
       #beets
       beets
-      beetsPackages.copyartifacts
+      # beetsPackages.copyartifacts # TODO: causing build issue
       python312Packages.discogs-client
       python312Packages.flask
       python312Packages.pyacoustid
@@ -32,7 +32,7 @@
     ])
     ++ (with pkgs-unstable; [
       google-chrome
-      # wavebox
+      wavebox
     ]);
 
   home.file = {
