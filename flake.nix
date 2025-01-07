@@ -20,14 +20,19 @@
     lib = nixpkgs.lib;
     system = "x86_64-linux";
     pkgs = nixpkgs.legacyPackages.${system};
-    pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
+    # pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
+    pkgs-unstable = import nixpkgs-unstable {
+      inherit system;
+      config.allowUnfree = true;
+    };
   in {
     nixosConfigurations = {
       jordans-desktop = lib.nixosSystem {
         inherit system;
         modules = [
           ./configuration.nix
-          ./hosts/desktop/configuration-desktop.nix
+          ./hosts/all-personal-machines/configuration.nix
+          ./hosts/desktop/configuration.nix
         ];
         specialArgs = {
           inherit pkgs-unstable;
@@ -37,7 +42,8 @@
         inherit system;
         modules = [
           ./configuration.nix
-          ./hosts/laptop/configuration-laptop.nix
+          ./hosts/all-personal-machines/configuration.nix
+          ./hosts/laptop/configuration.nix
         ];
         specialArgs = {
           inherit pkgs-unstable;
@@ -49,7 +55,8 @@
         inherit pkgs;
         modules = [
           ./home.nix
-          ./hosts/desktop/home-desktop.nix
+          ./hosts/all-personal-machines/home.nix
+          ./hosts/desktop/home.nix
         ];
         extraSpecialArgs = {
           inherit pkgs-unstable;
@@ -60,7 +67,8 @@
         inherit pkgs;
         modules = [
           ./home.nix
-          ./hosts/laptop/home-laptop.nix
+          ./hosts/all-personal-machines/home.nix
+          ./hosts/laptop/home.nix
         ];
         extraSpecialArgs = {
           inherit pkgs-unstable;

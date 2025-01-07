@@ -19,6 +19,8 @@
   # release notes.
   home.stateVersion = "24.11"; # Please read the comment before changing.
 
+  nixpkgs.config.allowUnfree = true;
+
   programs.git = {
     enable = true;
     userName = "cat-phish";
@@ -28,7 +30,15 @@
     };
   };
 
-  # programs.neovim = {
+  programs.lazygit = {
+    enable = true;
+  };
+
+  # programs.zsh = {
+  #   enable = true;
+  # };
+
+  # programs.neovim = { # NOTE: deprecated in favor of nixCats flake
   #   enable = true;
   #   package = pkgs.neovim-nightly;
   #   withNodJs = true;
@@ -48,12 +58,13 @@
   home.packages =
     # Stable Packages
     (with pkgs; [
-      activate-linux
-      audacity
+      keepassxc
+
+      oh-my-zsh
     ])
     # Unstable Packages
     ++ (with pkgs-unstable; [
-      # neovim
+      wezterm
     ])
     # Personal nixCats Nvim Flake
     ++ (with mynvim; [
@@ -94,10 +105,15 @@
 
     # Add ~/.nix/dotfiles/ dotfiles individually here
     ".bashrc".source = ./dotfiles/.bashrc;
+    "${config.xdg.configHome}/tmux" = {
+      source = ./dotfiles/.config/tmux;
+      recursive = true;
+    };
     ".vim" = {
       source = ./dotfiles/.vim;
       recursive = true;
     };
+    ".zshrc".source = ./dotfiles/.zshrc;
 
     # Recursively adds dotfiles from ~/.nix/dotfiles/config/
     # "${config.xdg.configHome}" = {
@@ -125,6 +141,7 @@
   #
   home.sessionVariables = {
     EDITOR = "vim";
+    SHELL = pkgs.zsh;
   };
 
   # Let Home Manager install and manage itself.

@@ -165,11 +165,11 @@ alias refresh-bash="source ~/.bashrc"
 # Application Aliases
 
 # Neovim
-# alias v="nvim"
-# alias vv="nvim ."
+alias v="nvim"
+alias vv="nvim ."
 # Add the alias for nixcats
-alias v="~/nixCats/result/bin/nixcats"
-alias vv="~/nixCats/result/bin/nixcats ."
+alias nixcats="~/nixCats/result/bin/nvim"
+alias nixcats="~/nixCats/result/bin/nvim ."
 
 # Tmux
 alias t="tmux"

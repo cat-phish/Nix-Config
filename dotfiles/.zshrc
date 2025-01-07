@@ -4,7 +4,14 @@ export PATH="$HOME/.local/bin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-
+# Source Home Manager session variables
+if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+elif [ -f ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
+  source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+fi
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -204,13 +211,14 @@ zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/github/git
 ### End of Zinit's installer chunk
 ### Aliases ###
 
-# SDM
-alias sdm="$HOME/.config/sdm/sdm"
-# function sdm() {
-#    source "$HOME/.config/sdm/sdm" "$@"
-# }
-# Add autocompletion for SDM
-source "$HOME/.config/sdm/lib/sdm_zsh_completion"
+# TODO: decide if I want to keep this
+# # SDM
+# alias sdm="$HOME/.config/sdm/sdm"
+# # function sdm() {
+# #    source "$HOME/.config/sdm/sdm" "$@"
+# # }
+# # Add autocompletion for SDM
+# source "$HOME/.config/sdm/lib/sdm_zsh_completion"
 
 # General
 alias cdh="cd ~"

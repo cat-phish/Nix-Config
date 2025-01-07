@@ -103,10 +103,12 @@
         kdePackages.kate
         #  thunderbird
       ];
+      shell = pkgs.zsh;
     };
 
+    programs.zsh.enable = true;
     # Install firefox.
-    programs.firefox.enable = true;
+    # programs.firefox.enable = true;
 
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
@@ -120,15 +122,23 @@
     # $ nix search wget
     environment.systemPackages =
       (with pkgs; [
-        vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-        tmux
-        wget
-        htop
-        git
+        # bpytop # no nix pkg
+        filezilla
         firefox
-        xclip
+        fzf
         gcc
+        git
+        glibc
         gnumake
+        htop
+        nfs-utils
+        nodePackages.nodejs
+        rclone
+        tmux
+        vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
+        wget
+        xclip
+        zsh
       ])
       ++ (with pkgs-unstable; [
         ]);

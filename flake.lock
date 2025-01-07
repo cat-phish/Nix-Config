@@ -24,14 +24,15 @@
     "mynvim": {
       "inputs": {
         "nixCats": "nixCats",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "plugins-capslock-nvim": "plugins-capslock-nvim"
       },
       "locked": {
-        "lastModified": 1736135642,
-        "narHash": "sha256-1Ngqre30o3j31qHQQEwkRcet95uGFQof0L0yJ86jnWQ=",
+        "lastModified": 1736228336,
+        "narHash": "sha256-PtNWkAQh2zRw/fGUFgoQqTsX6EpFEzdaPlJqja+mjIA=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "6c81898ed73bf2883493e332f0da0ae1797b139c",
+        "rev": "e4d58bb413cdd22e4f4475c25499920a414b9afc",
         "type": "github"
       },
       "original": {
@@ -57,11 +58,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1735915915,
-        "narHash": "sha256-Q4HuFAvoKAIiTRZTUxJ0ZXeTC7lLfC9/dggGHNXNlCw=",
+        "lastModified": 1736042175,
+        "narHash": "sha256-jdd5UWtLVrNEW8K6u5sy5upNAFmF3S4Y+OIeToqJ1X8=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "a27871180d30ebee8aa6b11bf7fef8a52f024733",
+        "rev": "bf689c40d035239a489de5997a4da5352434632e",
         "type": "github"
       },
       "original": {
@@ -73,11 +74,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1735834308,
-        "narHash": "sha256-dklw3AXr3OGO4/XT1Tu3Xz9n/we8GctZZ75ZWVqAVhk=",
+        "lastModified": 1736012469,
+        "narHash": "sha256-/qlNWm/IEVVH7GfgAIyP6EsVZI6zjAx1cV5zNyrs+rI=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "6df24922a1400241dae323af55f30e4318a6ca65",
+        "rev": "8f3e1f807051e32d8c95cd12b9b421623850a34d",
         "type": "github"
       },
       "original": {
@@ -99,6 +100,22 @@
         "owner": "NixOS",
         "ref": "nixos-24.11",
         "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "plugins-capslock-nvim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1653140207,
+        "narHash": "sha256-Dyg0fFclhDC6ulr9+7oIivvWm3N21tJZmUsniralfbk=",
+        "owner": "barklan",
+        "repo": "capslock.nvim",
+        "rev": "35b560dd5585cd60e45a2367ad6ff9873f4c21a2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "barklan",
+        "repo": "capslock.nvim",
         "type": "github"
       }
     },
