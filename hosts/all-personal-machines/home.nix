@@ -9,17 +9,23 @@
     (with pkgs; [
       activate-linux
       audacity
+      chirp
+      deskreen
 
       #beets
       beets
+      beetsPackages.copyartifacts
       python312Packages.discogs-client
       python312Packages.flask
       python312Packages.pyacoustid
       python312Packages.pylast
       python312Packages.requests
 
-      neofetch
+      hypnotix
+      libreoffice-fresh
       mpv
+      multiviewer-for-f1
+      neofetch
       pinta
       vlc
       yt-dlp
@@ -30,8 +36,10 @@
     ]);
 
   home.file = {
-    # Add or override desktop-specific files here
-    # Recursively adds dotfiles from ~/.nix/dotfiles/config/
+    "${config.xdg.configHome}/kmonad" = {
+      source = ../../dotfiles/.config/kmonad;
+      recursive = true;
+    };
   };
   # Add any laptop-specific configurations here
 }

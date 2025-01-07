@@ -114,12 +114,6 @@
       recursive = true;
     };
     ".zshrc".source = ./dotfiles/.zshrc;
-
-    # Recursively adds dotfiles from ~/.nix/dotfiles/config/
-    # "${config.xdg.configHome}" = {
-    #   source = ./dotfiles/.config;
-    #   recursive = true;
-    # };
   };
   # programs.bash.enable = true; # deprecated in favor of exist existing bashrc
 

@@ -7,6 +7,10 @@
     home-manager.url = "github:nix-community/home-manager/release-24.11";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     mynvim.url = "github:cat-phish/Neovim";
+    kmonad = {
+      url = "git+https://github.com/kmonad/kmonad?submodules=1&dir=nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -15,6 +19,7 @@
     nixpkgs-unstable,
     home-manager,
     mynvim,
+    kmonad,
     ...
   }: let
     lib = nixpkgs.lib;
@@ -33,6 +38,7 @@
           ./configuration.nix
           ./hosts/all-personal-machines/configuration.nix
           ./hosts/desktop/configuration.nix
+          kmonad.nixosModules.default
         ];
         specialArgs = {
           inherit pkgs-unstable;
@@ -44,6 +50,7 @@
           ./configuration.nix
           ./hosts/all-personal-machines/configuration.nix
           ./hosts/laptop/configuration.nix
+          kmonad.nixosModules.default
         ];
         specialArgs = {
           inherit pkgs-unstable;
