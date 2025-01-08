@@ -3,6 +3,19 @@
 This repository contains my personal NixOS config including configurations for
 various applications, themes, and icons.
 
+## Installation
+
+Install NixOS and setup graphically or via command line, enter the OS and then
+run the following command:
+
+```sh
+nix-shell -p git --run '
+  git clone https://github.com/your/repo.git $HOME/.nix &&
+  cd $HOME/.nix &&
+  ./init.sh
+'
+```
+
 ## Licensing
 
 - The dotfiles and configurations are licensed under the MIT License. See
