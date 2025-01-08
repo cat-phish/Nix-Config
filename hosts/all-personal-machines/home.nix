@@ -21,6 +21,7 @@
       python312Packages.pylast
       python312Packages.requests
 
+      flameshot
       hypnotix
       libreoffice-fresh
       mpv

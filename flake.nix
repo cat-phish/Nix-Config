@@ -11,6 +11,9 @@
       url = "git+https://github.com/kmonad/kmonad?submodules=1&dir=nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    plasma-manager.url = "github:mcdonc/plasma-manager/enable-look-and-feel-settings";
+    plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
+    plasma-manager.inputs.home-manager.follows = "home-manager";
   };
 
   outputs = {
@@ -20,6 +23,7 @@
     home-manager,
     mynvim,
     kmonad,
+    plasma-manager,
     ...
   }: let
     lib = nixpkgs.lib;
@@ -42,6 +46,7 @@
         ];
         specialArgs = {
           inherit pkgs-unstable;
+          inherit plasma-manager;
         };
       };
       jordans-laptop = lib.nixosSystem {
@@ -54,6 +59,7 @@
         ];
         specialArgs = {
           inherit pkgs-unstable;
+          inherit plasma-manager;
         };
       };
     };
@@ -68,6 +74,7 @@
         extraSpecialArgs = {
           inherit pkgs-unstable;
           inherit mynvim;
+          inherit plasma-manager;
         };
       };
       "jordan@jordans-laptop" = home-manager.lib.homeManagerConfiguration {
@@ -80,6 +87,7 @@
         extraSpecialArgs = {
           inherit pkgs-unstable;
           inherit mynvim;
+          inherit plasma-manager;
         };
       };
     };

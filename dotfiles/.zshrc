@@ -13,6 +13,13 @@ elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
   source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
 fi
 
+# Source the .env file if it exists
+if [ -f "$HOME/.env" ]; then
+  set -a  # Automatically export all variables
+  source "$HOME/.env"
+  set +a  # Disable automatic export
+fi
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME

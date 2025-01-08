@@ -4,6 +4,9 @@
   pkgs-unstable,
   ...
 }: {
+  # Plasma Manager KDE Configuration
+  imports = [./plasma-config.nix];
+
   home.packages =
     (with pkgs; [
       # Add desktop-specific packages here
@@ -23,5 +26,68 @@
     #   source = ../../dotfiles/.config/kmonad/kmonad_winry315.kbd;
     # };
   };
-  # Add any desktop-specific configurations here
+
+  xdg.configFile."rclone/rclone-main.conf".text = ''
+    [gdrivedesk]
+    type = drive
+    scope = drive
+    team =
+  '';
+  systemd.user.services.rclone-gdrive-mount = {
+    Unit = {
+      Description = "Mounts gdrive with rclone";
+      After = ["default.target"];
+      Requires = ["default.target"];
+    };
+    Install = {
+      WantedBy = ["default.target"];
+    };
+
+    Service = let
+      gdriveDir = "/home/jordan/gdrive";
+    in {
+      Type = "simple";
+      ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${gdriveDir}";
+      ExecStart = ''
+        ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-main.conf \
+        --vfs-cache-mode full \
+        mount gdrivedesk:/ /home/jordan/gdrive
+      '';
+      ExecStop = "/run/current-system/sw/bin/fusermount -u ${gdriveDir}";
+      Restart = "on-failure";
+      RestartSec = "10s";
+      EnvironmentFile = "/home/jordan/.env";
+      Environment = ["PATH=/run/wrappers/bin/:$PATH"];
+    };
+  };
+  # systemd.user.services.rclone-gdrive-mount = {
+  #   Unit = {
+  #     Description = "Mounting gdrive via rclone";
+  #     After = ["network-online.target"];
+  #   };
+  #   Service = {
+  #     Type = "notify";
+  #     ExecStartPre = "/run/current-system/sw/bin/mkdir -p /home/jordan/gdrive"; # Creates folder if didn't exist
+  #     ExecStart = ''
+  #       ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-main.conf mount
+  #         --config=%h/.config/rclone/rclone.conf \
+  #         --log-level INFO \
+  #         --log-file /tmp/rclone-%i.log \
+  #         --umask 022 \
+  #         --allow-other \
+  #         --dir-cache-time 100h \
+  #         --poll-interval 15s \
+  #         --cache-dir=/home/jordan/.cache/rclone \
+  #         --vfs-cache-mode full \
+  #         --vfs-cache-max-size 100G \
+  #         --vfs-cache-max-age 24h \
+  #         --vfs-read-chunk-size 128M \
+  #         --vfs-read-chunk-size-limit off \
+  #         --vfs-read-ahead 128M \
+  #         gdrive: /home/jordan/gdrive
+  #     ''; # Mounts
+  #     ExecStop = "/run/current-system/sw/bin/fusermount -u /home/jordan/gdrive"; # Dismounts
+  #   };
+  #   Install.WantedBy = ["default.target"];
+  # };
 }
