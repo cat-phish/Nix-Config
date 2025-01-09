@@ -32,6 +32,16 @@
     type = drive
     scope = drive
     team =
+
+    [mediaserversftp]
+    type = sftp
+    shell_type = unix
+    md5sum_command = md5sum
+    sha1sum_command = sha1sum
+
+    [mediaserver]
+    type = alias
+    remote = mediaserversftp:/mnt/user
   '';
   systemd.user.services.rclone-gdrive-mount = {
     Unit = {
@@ -50,10 +60,36 @@
       ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${gdriveDir}";
       ExecStart = ''
         ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-main.conf \
-        --vfs-cache-mode full \
+          --vfs-cache-mode full \
         mount gdrivedesk:/ /home/jordan/gdrive
       '';
       ExecStop = "/run/current-system/sw/bin/fusermount -u ${gdriveDir}";
+      Restart = "on-failure";
+      RestartSec = "10s";
+      EnvironmentFile = "/home/jordan/.env";
+      Environment = ["PATH=/run/wrappers/bin/:$PATH"];
+    };
+  };
+  systemd.user.services.rclone-mediaserver-mount = {
+    Unit = {
+      Description = "Mounts mediaserver with rclone";
+      After = ["default.target"];
+      Requires = ["default.target"];
+    };
+    Install = {
+      WantedBy = ["default.target"];
+    };
+
+    Service = let
+      mediaserverDir = "/home/jordan/mediaserver";
+    in {
+      Type = "simple";
+      ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${mediaserverDir}";
+      ExecStart = ''
+        ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-main.conf \
+        mount mediaserver:/ /home/jordan/mediaserver
+      '';
+      ExecStop = "/run/current-system/sw/bin/fusermount -u ${mediaserverDir}";
       Restart = "on-failure";
       RestartSec = "10s";
       EnvironmentFile = "/home/jordan/.env";
@@ -71,19 +107,19 @@
   #     ExecStart = ''
   #       ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-main.conf mount
   #         --config=%h/.config/rclone/rclone.conf \
-  #         --log-level INFO \
-  #         --log-file /tmp/rclone-%i.log \
-  #         --umask 022 \
-  #         --allow-other \
-  #         --dir-cache-time 100h \
-  #         --poll-interval 15s \
-  #         --cache-dir=/home/jordan/.cache/rclone \
-  #         --vfs-cache-mode full \
-  #         --vfs-cache-max-size 100G \
-  #         --vfs-cache-max-age 24h \
-  #         --vfs-read-chunk-size 128M \
-  #         --vfs-read-chunk-size-limit off \
-  #         --vfs-read-ahead 128M \
+  # --log-level INFO \
+  # --log-file /tmp/rclone-%i.log \
+  # --umask 022 \
+  # --allow-other \
+  # --dir-cache-time 100h \
+  # --poll-interval 15s \
+  # --cache-dir=/home/jordan/.cache/rclone \
+  # --vfs-cache-mode full \
+  # --vfs-cache-max-size 100G \
+  # --vfs-cache-max-age 24h \
+  # --vfs-read-chunk-size 128M \
+  # --vfs-read-chunk-size-limit off \
+  # --vfs-read-ahead 128M \
   #         gdrive: /home/jordan/gdrive
   #     ''; # Mounts
   #     ExecStop = "/run/current-system/sw/bin/fusermount -u /home/jordan/gdrive"; # Dismounts

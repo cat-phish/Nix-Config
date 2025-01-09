@@ -4,10 +4,10 @@ current_hostname=$(hostname)
 
 case $current_hostname in
   jordans-desktop)
-    target_file="hosts/desktop/plasma-config.nix"
+    target_file="$HOME/.nix/hosts/desktop/plasma-config.nix"
     ;;
   jordans-laptop)
-    target_file="hosts/laptop/plasma-config.nix"
+    target_file="$HOME/.nix/hosts/laptop/plasma-config.nix"
     ;;
   *)
     echo "Unknown hostname: $current_hostname. Exiting."

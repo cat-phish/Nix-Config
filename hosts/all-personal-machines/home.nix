@@ -28,8 +28,15 @@
       multiviewer-for-f1
       neofetch
       pinta
+      pocket-casts
+      wineasio
+      winetricks
+      # wineWowPackages
+      wineWowPackages.waylandFull
       vlc
+      youtube-music
       yt-dlp
+      zoom
     ])
     ++ (with pkgs-unstable; [
       google-chrome
@@ -37,6 +44,12 @@
     ]);
 
   home.file = {
+    ".clang-format" = {
+      source = ../../dotfiles/.clang-format;
+    };
+    "prettierrc" = {
+      source = ../../dotfiles/.prettierrc;
+    };
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
@@ -47,34 +60,40 @@
     };
 
     # Theming
-    ".local/share/icons/Memphis98" = {
-      source = ../../dotfiles/.local/share/icons/Memphis98;
-      recursive = true;
-    };
-    ".local/share/icons/Reactionary" = {
-      source = ../../dotfiles/.local/share/icons/Reactionary;
-      recursive = true;
-    };
+    # ".img/wallpapers/blue.jpg" = {
+    #   source = ../../dotfiles/.img/wallpapers/blue.jpg;
+    # };
 
-    ".local/share/plasma/desktoptheme/reactplus" = {
-      source = ../../dotfiles/.local/share/plasma/desktoptheme/reactplus;
-      recursive = true;
-    };
-
-    ".local/share/plasma/look-and-feel/org.magpie.reactplus.desktop" = {
-      source = ../../dotfiles/.local/share/plasma/look-and-feel/org.magpie.reactplus.desktop;
-      recursive = true;
-    };
-
-    ".local/share/plasma/desktoptheme/reactionary" = {
-      source = ../../dotfiles/.local/share/plasma/desktoptheme/reactionary;
-      recursive = true;
-    };
-
-    ".local/share/plasma/look-and-feel/Reactionary" = {
-      source = ../../dotfiles/.local/share/plasma/look-and-feel/Reactionary;
-      recursive = true;
-    };
+    # NOTE: deprecated in favor of copying once in init.sh on install
+    # due to slow switching times from icon linking
+    #
+    # ".local/share/icons/Memphis98" = {
+    #   source = ../../dotfiles/.local/share/icons/Memphis98;
+    #   recursive = true;
+    # };
+    # ".local/share/icons/Reactionary" = {
+    #   source = ../../dotfiles/.local/share/icons/Reactionary;
+    #   recursive = true;
+    # };
+    #
+    # ".local/share/plasma/desktoptheme/reactplus" = {
+    #   source = ../../dotfiles/.local/share/plasma/desktoptheme/reactplus;
+    #   recursive = true;
+    # };
+    #
+    # ".local/share/plasma/look-and-feel/org.magpie.reactplus.desktop" = {
+    #   source = ../../dotfiles/.local/share/plasma/look-and-feel/org.magpie.reactplus.desktop;
+    #   recursive = true;
+    # };
+    #
+    # ".local/share/plasma/desktoptheme/reactionary" = {
+    #   source = ../../dotfiles/.local/share/plasma/desktoptheme/reactionary;
+    #   recursive = true;
+    # };
+    #
+    # ".local/share/plasma/look-and-feel/Reactionary" = {
+    #   source = ../../dotfiles/.local/share/plasma/look-and-feel/Reactionary;
+    #   recursive = true;
+    # };
   };
-  # Add any laptop-specific configurations here
 }

@@ -59,7 +59,8 @@
     # Stable Packages
     (with pkgs; [
       keepassxc
-
+      nerdfonts
+      noto-fonts-color-emoji
       oh-my-zsh
     ])
     # Unstable Packages
@@ -76,7 +77,7 @@
       # # overrides. You can do that directly here, just don't forget the
       # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
       # # fonts?
-      (pkgs.nerdfonts.override {fonts = ["Monaspace"];})
+      # (pkgs.nerdfonts.override {fonts = ["Monaspace"];})
     ]
     # Scripts
     ++ [

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+cd ~/.nix || echo "~/.nix does not exist. Exiting" && exit 1
+
 echo "Please choose the host type:"
 echo "1) Desktop"
 echo "2) Laptop"
@@ -22,7 +24,13 @@ case $choice in
     ;;
 esac
 
-cp /etc/nixos/hardware-configuration.nix hosts/$host_type/hardware-configuration.nix
+cp /etc/nixos/hardware-configuration.nix ~/.nix/hosts/$host_type/hardware-configuration.nix
+
+mkdir -p ~/.local/share
+cp -r ~/.nix/dotfiles/.local/share/* ~/.local/share/
+
+mkdir -p ~/.icons
+cp -r ~/.nix/dotfiles/.icons/* ~/.icons/
 
 sudo nixos-rebuild switch --flake .#$nixos_flake
 
