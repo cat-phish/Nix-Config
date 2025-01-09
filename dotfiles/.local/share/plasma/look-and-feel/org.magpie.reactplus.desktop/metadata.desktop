@@ -1,0 +1,13 @@
+[Desktop Entry]
+Comment=Reacting to ReactOS
+Name=Reactionary Plus
+X-KDE-PluginInfo-Author=Mark Whittaker
+X-KDE-PluginInfo-Category=Plasma Look And Feel
+X-KDE-PluginInfo-Email=phobian@tutanota.com
+X-KDE-PluginInfo-EnabledByDefault=true
+X-KDE-PluginInfo-License=GPL 2+
+X-KDE-PluginInfo-Name=Reactionary
+X-KDE-PluginInfo-Version=5.0
+X-KDE-PluginInfo-Website=https://www.pling.com/u/phob1an/
+X-KDE-ServiceTypes=Plasma/LookAndFeel
+X-KPackage-Dependencies=kns://aurorae.knsrc/api.kde-look.org/2138257,kns://colorschemes.knsrc/api.kde-look.org/1252411,kns://plasma-themes.knsrc/api.kde-look.org/1252412,kns://wallpaper.knsrc/api.kde-look.org/1257847,kns://icons.knsrc/api.kde-look.org/2138295,kns://sddmtheme.knsrc/api.kde-look.org/1376447
