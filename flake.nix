@@ -14,6 +14,10 @@
     plasma-manager.url = "github:mcdonc/plasma-manager/enable-look-and-feel-settings";
     plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
     plasma-manager.inputs.home-manager.follows = "home-manager";
+    darkmatter-grub-theme = {
+      url = "gitlab:VandalByte/darkmatter-grub-theme";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -24,6 +28,7 @@
     mynvim,
     kmonad,
     plasma-manager,
+    darkmatter-grub-theme,
     ...
   }: let
     lib = nixpkgs.lib;
@@ -43,6 +48,7 @@
           ./hosts/all-personal-machines/configuration.nix
           ./hosts/desktop/configuration.nix
           kmonad.nixosModules.default
+          darkmatter-grub-theme.nixosModule
         ];
         specialArgs = {
           inherit pkgs-unstable;
@@ -56,6 +62,7 @@
           ./hosts/all-personal-machines/configuration.nix
           ./hosts/laptop/configuration.nix
           kmonad.nixosModules.default
+          darkmatter-grub-theme.nixosModule
         ];
         specialArgs = {
           inherit pkgs-unstable;

@@ -14,6 +14,16 @@
     };
   };
   config = {
+    # Enable CUPS to print documents.
+    services.printing.enable = true;
+
+    # Enable IPP printer discovery
+    services.avahi = {
+      enable = true;
+      nssmdns4 = true;
+      openFirewall = true;
+    };
+
     # Bootloader.
 
     # Use the systemd-boot EFI boot loader.
@@ -54,11 +64,18 @@
         #   };
         #   installPhase = "cp -r customize/nixos $out";
         # };
-        theme = pkgs.fetchFromGitHub {
-          owner = "harishnkr";
-          repo = "bsol";
-          rev = "v1.0"; # commit number
-          sha256 = "sha256-sUvlue+AXW6VkVYy3WOUuSt548b6LoDpJmQPbgcZDQw="; # attempt build with this value empty to get the hash
+        # theme = pkgs.fetchFromGitHub {
+        #   enable = false;
+        #   owner = "harishnkr";
+        #   repo = "bsol";
+        #   rev = "v1.0"; # commit number
+        #   sha256 = "sha256-sUvlue+AXW6VkVYy3WOUuSt548b6LoDpJmQPbgcZDQw="; # attempt build with this value empty to get the hash
+        # };
+        darkmatter-theme = {
+          enable = true;
+          style = "nixos";
+          icon = "color";
+          resolution = "1080p";
         };
       };
     };
@@ -70,6 +87,7 @@
         fuse
         kmonad
         lsp-plugins
+        ntfs3g
         ripgrep
         sqlite
       ])

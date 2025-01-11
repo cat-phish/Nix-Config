@@ -43,6 +43,8 @@
     type = alias
     remote = mediaserversftp:/mnt/user
   '';
+
+  # Systemd services TODO: refactor these into one
   systemd.user.services.rclone-gdrive-mount = {
     Unit = {
       Description = "Mounts gdrive with rclone";

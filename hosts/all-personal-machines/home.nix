@@ -26,6 +26,7 @@
       libreoffice-fresh
       mpv
       multiviewer-for-f1
+      navi
       neofetch
       nurl # fetching nix package options from git, maybe others
       pinta
@@ -64,6 +65,11 @@
       source = ../../dotfiles/.config/kmonad;
       recursive = true;
     };
+    # TODO: add scripts to dotfiles
+    # "scripts" = {
+    #   source = ../../dotfiles/scripts;
+    #   recursive = true;
+    # };
 
     # Theming
     # ".img/wallpapers/blue.jpg" = {
