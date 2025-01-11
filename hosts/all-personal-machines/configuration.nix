@@ -15,37 +15,53 @@
   };
   config = {
     # Bootloader.
-    #boot.loader.grub.enable = true;
-    #boot.loader.grub.device = "nodev";
-    #boot.loader.grub.useOSProber = true;
-    boot.loader.systemd-boot.enable = true;
-    boot.loader.efi.canTouchEfiVariables = true;
-    # boot.loader = {
-    #   timeout = 5;
-    #
-    #   efi = {
-    #     efiSysMountPoint = "/boot";
-    #     canTouchEfiVariables = true;
-    #   };
-    #
-    #   grub = {
-    #     enable = true;
-    #     version = 2;
-    #
-    #     efiSupport = true;
-    #     efiInstallAsRemovable = true; # Otherwise /boot/EFI/BOOT/BOOTX64.EFI isn't generated
-    #     devices = ["nodev"];
-    #     extraEntriesBeforeNixOS = true;
-    #     extraEntries = ''
-    #       menuentry "Reboot" {
-    #         reboot
-    #       }
-    #       menuentry "Poweroff" {
-    #         halt
-    #       }
-    #     '';
-    #   };
-    # };
+
+    # Use the systemd-boot EFI boot loader.
+    # boot.loader.systemd-boot.enable = true;
+    # boot.loader.efi.canTouchEfiVariables = true;
+
+    # Use the GRUB 2 boot loader.
+    boot.loader = {
+      timeout = 10;
+
+      efi = {
+        efiSysMountPoint = "/boot";
+      };
+
+      grub = {
+        enable = true;
+        efiSupport = true;
+        efiInstallAsRemovable = true; # Otherwise /boot/EFI/BOOT/BOOTX64.EFI isn't generated
+        devices = ["nodev"];
+        useOSProber = true;
+        extraEntriesBeforeNixOS = false;
+        extraEntries = ''
+          menuentry "Reboot" {
+            reboot
+          }
+          menuentry "Poweroff" {
+            halt
+          }
+        '';
+        # theme = pkgs.stdenv.mkDerivation {
+        #   pname = "bsol-grub-theme";
+        #   version = "1.0";
+        #   src = pkgs.fetchFromGitHub {
+        #     owner = "harishnkr";
+        #     repo = "bsol";
+        #     rev = "v1.0";
+        #     hash = "sha256-sUvlue+AXW6VkVYy3WOUuSt548b6LoDpJmQPbgcZDQw=";
+        #   };
+        #   installPhase = "cp -r customize/nixos $out";
+        # };
+        theme = pkgs.fetchFromGitHub {
+          owner = "harishnkr";
+          repo = "bsol";
+          rev = "v1.0"; # commit number
+          sha256 = "sha256-sUvlue+AXW6VkVYy3WOUuSt548b6LoDpJmQPbgcZDQw="; # attempt build with this value empty to get the hash
+        };
+      };
+    };
     environment.systemPackages =
       (with pkgs; [
         aspell

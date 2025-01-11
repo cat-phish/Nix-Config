@@ -27,6 +27,7 @@
       mpv
       multiviewer-for-f1
       neofetch
+      nurl # fetching nix package options from git, maybe others
       pinta
       pocket-casts
       redshift
