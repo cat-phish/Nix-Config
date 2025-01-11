@@ -29,6 +29,7 @@
       neofetch
       pinta
       pocket-casts
+      redshift
       wineasio
       winetricks
       # wineWowPackages
@@ -42,6 +43,10 @@
       google-chrome
       wavebox
     ]);
+  programs.emacs = {
+    enable = true;
+    extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
+  };
 
   home.file = {
     ".clang-format" = {

@@ -70,7 +70,7 @@ config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
 -- Font Settings
 config.font = wezterm.font_with_fallback({
 	-- "MonaspiceNe Nerd Font Mono Light",
-	{ family = "MonaspiceNe Nerd Font Mono Light", weight = "Light", stretch = "Normal", style = "Normal" },
+	{ family = "MonaspiceNe Nerd Font Mono", weight = "Light", stretch = "Normal", style = "Normal" },
 	-- "Nerd Font Symbols",
 	"Noto Color Emoji",
 })

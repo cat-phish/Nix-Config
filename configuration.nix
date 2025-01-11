@@ -22,10 +22,6 @@
 
   config = {
     my.arbitrary.option = "test";
-    # Bootloader.
-    boot.loader.grub.enable = true;
-    boot.loader.grub.device = "nodev";
-    boot.loader.grub.useOSProber = true;
 
     # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -123,6 +119,8 @@
     environment.systemPackages =
       (with pkgs; [
         # bpytop # no nix pkg
+        clang
+        coreutils
         filezilla
         firefox
         fzf
