@@ -32,6 +32,9 @@ cp -r ~/.nix/dotfiles/.local/share/* ~/.local/share/
 mkdir -p ~/.icons
 cp -r ~/.nix/dotfiles/.icons/* ~/.icons/
 
+mkdir -p ~/.themes
+cp -r ~/.nix/dotfiles/.themes/* ~/.themes/
+
 sudo nixos-rebuild switch --flake .#$nixos_flake
 
 home-manager switch --flake .#$home_manager_flake

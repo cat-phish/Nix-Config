@@ -12,6 +12,161 @@ fi
 # Path to your oh-my-bash installation.
 export OSH='/home/jordan/.oh-my-bash'
 
+alias cdh="cd /home/jordan"
+alias cdd="cd .."
+alias c="clear"
+alias lss="ls -a"
+
+alias refresh-bash="source ~/.bashrc"
+
+# Neovim
+alias v="nvim"
+alias vv="nvim ."
+alias nvim-ssh="~/.scripts/nvim-ssh.sh"
+alias nixcats="$HOME/coding/nixCats/result/bin/nvim"
+
+# SSH auto xterm-colors
+alias ssh-color="TERM=xterm-256color ssh"
+
+search-zsh-history() {
+   grep -a "$1" ~/.zsh_history
+}
+
+search-bash-history() {
+   grep -a "$1" ~/.bash_history
+}
+
+start() {
+   tmux new -d -s tmp
+   sleep 1
+   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
+   sleep 2
+   tmux kill-session -t tmp
+   tmux a -t main
+}
+
+# Kmonad
+if [[ "$(hostname)" = "jordans-desktop" ]]; then
+   kmonad-refresh() {
+      systemctl --user restart kmonad_keychron_k2_pro.service
+      systemctl --user restart kmonad_havit.service
+      systemctl --user restart kmonad_winry315.service
+   }
+elif [[ "$(hostname)" = "jordans-laptop" ]]; then
+   alias kmonad-refresh="systemctl --user restart kmonad_legion_slim_7.service"
+fi
+
+# Tmux
+alias t="tmux"
+alias tl="tmux ls"
+alias ta="tmux a -t"
+alias tam="tmux a -t main"
+alias tn="tmux new -s"
+alias tk="tmux kill-session -t"
+alias tmux-refresh="tmux source ~/.config/tmux/tmux.conf"
+
+tmux-fix() {
+   tmux detach
+   tmux kill-server
+   tmux new -- bash --noprofile --norc
+   tmux source ~/.config/tmux/tmux.conf
+   tmux kill-session -t 0
+   tmux new-session -s main
+}
+
+tim() {
+   tmux send-keys -t main:0.2 'bpytop' Enter
+   tmux send-keys -t main:0.1 'neo-matrix' Enter
+   tmux a -t main
+}
+
+tin() {
+   if [[ -z "$1" ]]; then
+      echo "No session name provided"
+      return
+   fi
+   tmux new -d -s "$1"
+   tmux splitw -h -t "$1"
+   tmux splitw -v -p 70 -t "$1"
+   tmux send-keys -t "$1":0.1 'neo-matrix' Enter
+   tmux selectp -t "$1":0.0
+   tmux renamew -t "$1":0 'sys'
+   source ~/.scripts/tmux_init "$1" &
+   tmux a -t "$1"
+}
+
+ts() {
+   tmux new -d -s tmp
+   sleep 1
+   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
+   sleep 2
+   tmux kill-session -t tmp
+   tmux a -t main
+}
+
+# Git
+alias g="git"
+alias gs="git status"
+ga() {
+   git add "$1"
+}
+alias gaa="git add ."
+gcm() {
+   git commit -m "$1"
+}
+alias gpu="git push"
+alias gpl="git pull"
+gac() {
+   if [[ -z "$1" ]]; then
+      echo "No commit message provided"
+      return
+   fi
+   git add .
+   git commit -m "$1"
+}
+gacp() {
+   if [[ -z "$1" ]]; then
+      echo "No commit message provided"
+      return
+   fi
+   git add .
+   git commit -m "$1"
+   git push
+}
+alias gco="git checkout"
+alias gcob="git checkout -b"
+
+# Run scripts from ~/.scripts with completion
+scripts() {
+  "$HOME/.scripts/$1"
+}
+_scripts_completion() {
+  local cur
+  cur="${COMP_WORDS[COMP_CWORD]}"
+  COMPREPLY=( $(compgen -W "$(ls $HOME/.scripts/)" -- "$cur") )
+}
+complete -F _scripts_completion scripts
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# Add ~/.local/bin to path
+# export PATH="$HOME/.local/bin:$PATH"
+
+# alias sdm="$HOME/.config/sdm/sdm"
+
+function sdm() {
+	source "$HOME/.config/sdm/sdm" "$@"
+}
+
+# Add autocompletion for SDM
+source "$HOME/.config/sdm/lib/sdm_bash_completion"
+
+### OH-MY-BASH CONFIG ###
+
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-bash is loaded.
 OSH_THEME="agnoster"
@@ -156,79 +311,4 @@ fi
 # Example aliases
 # alias bashconfig="mate ~/.bashrc"
 # alias ohmybash="mate ~/.oh-my-bash"
-alias cdh="cd /home/jordan"
-alias cdd="cd .."
-alias c="clear"
-alias lss="ls -a"
-alias refresh-bash="source ~/.bashrc"
 
-# Application Aliases
-
-# Neovim
-alias v="nvim"
-alias vv="nvim ."
-# Add the alias for nixcats
-alias nixcats="~/nixCats/result/bin/nvim"
-alias nixcats="~/nixCats/result/bin/nvim ."
-
-# Tmux
-alias t="tmux"
-alias tl="tmux ls"
-alias ta="tmux a"
-alias tat="tmux a -t"
-alias tam="tmux a -t main"
-alias tn="tmux new -s"
-alias tk="tmux kill-session -t"
-alias refresh-tmux="tmux source ~/.config/tmux/tmux.conf"
-function tim() {
-	tmux send-keys -t main:0.2 'bpytop' Enter
-	tmux send-keys -t main:0.1 'neo-matrix' Enter
-	tmux a -t main
-}
-function tin() {
-	if [[ -z "$1" ]]; then
-		echo "No session name provided"
-		return
-	fi
-	tmux new -d -s "$1"
-	tmux splitw -h -t "$1"
-	tmux splitw -v -p 70 -t "$1"
-	tmux send-keys -t "$1":0.1 'neo-matrix' Enter
-	tmux selectp -t "$1":0.0
-	# tmux neww -t "$1" -n 'main'
-	tmux renamew -t "$1":0 'sys'
-	# tmux send-keys -t "$1":0.2 'bpytop' Enter
-	source ~/.scripts/startup/tmux_init_session.sh "$1" &
-	tmux a -t "$1"
-}
-
-# Git
-alias g="git"
-alias gs="git status"
-alias ga="git add"
-alias gaa="git add ."
-alias gc="git commit"
-alias gcm="git commit -m"
-alias gcd="Update $(date +'%Y-%m-%d %H:%M:%S')"
-alias gco="git checkout"
-alias gcb="git checkout -b"
-alias gp="git push"
-alias gpf="git push --force-with-lease"
-
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash_completion
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# Add ~/.local/bin to path
-# export PATH="$HOME/.local/bin:$PATH"
-
-# alias sdm="$HOME/.config/sdm/sdm"
-
-function sdm() {
-	source "$HOME/.config/sdm/sdm" "$@"
-}
-
-# Add autocompletion for SDM
-source "$HOME/.config/sdm/lib/sdm_bash_completion"

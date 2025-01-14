@@ -106,10 +106,11 @@
 
     # Add ~/.nix/dotfiles/ dotfiles individually here
     ".bashrc".source = ./dotfiles/.bashrc;
-    "${config.xdg.configHome}/tmux" = {
-      source = ./dotfiles/.config/tmux;
-      recursive = true;
-    };
+    ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
+    # "${config.xdg.configHome}/tmux" = {
+    #   source = ./dotfiles/.config/tmux;
+    #   recursive = true;
+    # };
     ".vim" = {
       source = ./dotfiles/.vim;
       recursive = true;

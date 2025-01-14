@@ -53,17 +53,6 @@
             halt
           }
         '';
-        # theme = pkgs.stdenv.mkDerivation {
-        #   pname = "bsol-grub-theme";
-        #   version = "1.0";
-        #   src = pkgs.fetchFromGitHub {
-        #     owner = "harishnkr";
-        #     repo = "bsol";
-        #     rev = "v1.0";
-        #     hash = "sha256-sUvlue+AXW6VkVYy3WOUuSt548b6LoDpJmQPbgcZDQw=";
-        #   };
-        #   installPhase = "cp -r customize/nixos $out";
-        # };
         # theme = pkgs.fetchFromGitHub {
         #   enable = false;
         #   owner = "harishnkr";
@@ -75,7 +64,6 @@
           enable = true;
           style = "nixos";
           icon = "color";
-          resolution = "1080p";
         };
       };
     };

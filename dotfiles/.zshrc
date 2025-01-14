@@ -1,6 +1,7 @@
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/.config/.emacs.d/bin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
@@ -19,6 +20,155 @@ if [ -f "$HOME/.env" ]; then
   source "$HOME/.env"
   set +a  # Disable automatic export
 fi
+
+### Aliases ###
+
+# TODO: decide if I want to keep this
+# # SDM
+# alias sdm="$HOME/.config/sdm/sdm"
+# # function sdm() {
+# #    source "$HOME/.config/sdm/sdm" "$@"
+# # }
+# # Add autocompletion for SDM
+# source "$HOME/.config/sdm/lib/sdm_zsh_completion"
+
+# General
+alias cdh="cd ~"
+alias cdd="cd .."
+alias c="clear"
+alias lss="ls -a"
+
+alias refresh-zsh="source ~/.zshrc"
+
+# Neovim
+alias v="nvim"
+alias vv="nvim ."
+alias nvim-ssh="~/.scripts/nvim-ssh.sh"
+alias nixcats="$HOME/coding/nixCats/result/bin/nvim"
+
+# SSH auto xterm-colors
+alias ssh-color="TERM=xterm-256color ssh"
+
+function search-zsh-history() {
+   grep -a "$1" ~/.zsh_history
+}
+function search-bash-history() {
+   grep -a "$1" ~/.bash_history
+}
+function start() {
+   tmux new -d -s tmp
+   sleep 1
+   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
+   sleep 2
+   tmux kill-session -t tmp
+   tmux a -t main
+}
+
+# Run scripts with completion
+scripts() {
+  "$HOME/.scripts/$1"
+}
+_scripts_completion() {
+  local -a scripts
+  scripts=(${(f)"$(ls $HOME/.scripts/)"})
+  _describe 'script' scripts
+}
+compdef _scripts_completion scripts
+
+
+
+# Kmonad
+if [[ "$(hostname)" = "jordans-desktop" ]]; then
+   function kmonad-refresh() {
+      systemctl --user restart kmonad_keychron_k2_pro.service
+      systemctl --user restart kmonad_havit.service
+      systemctl --user restart kmonad_winry315.service
+   }
+elif [[ "$(hostname)" = "jordans-laptop" ]]; then
+   alias kmonad-refresh="systemctl --user restart kmonad_legion_slim_7.service"
+fi
+
+
+
+# Tmux
+alias t="tmux"
+alias tl="tmux ls"
+alias ta="tmux a -t"
+alias tam="tmux a -t main"
+alias tn="tmux new -s"
+alias tk="tmux kill-session -t"
+alias tmux-refresh="tmux source ~/.config/tmux/tmux.conf"
+function tmux-fix() {
+   tmux detach
+   tmux kill-server
+   tmux new -- bash --noprofile --norc
+   tmux source ~/.config/tmux/tmux.conf
+   tmux kill-session -t 0
+   tmux new-session -s main
+}
+function tim() {
+	tmux send-keys -t main:0.2 'bpytop' Enter
+	tmux send-keys -t main:0.1 'neo-matrix' Enter
+	tmux a -t main
+}
+function tin() {
+	if [[ -z "$1" ]]; then
+		echo "No session name provided"
+		return
+	fi
+	tmux new -d -s "$1"
+	tmux splitw -h -t "$1"
+	tmux splitw -v -p 70 -t "$1"
+	tmux send-keys -t "$1":0.1 'neo-matrix' Enter
+	tmux selectp -t "$1":0.0
+	tmux renamew -t "$1":0 'sys'
+	source ~/.scripts/tmux_init "$1" &
+	tmux a -t "$1"
+}
+function ts() {
+   tmux new -d -s tmp
+   sleep 1
+   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
+   sleep 2
+   tmux kill-session -t tmp
+   tmux a -t main
+}
+
+
+# Git
+alias g="git"
+alias gs="git status"
+function ga() {
+   git add "$1"
+}
+alias gaa="git add ."
+function gcm() {
+   git commit -m "$1"
+}
+alias gpu="git push"
+alias gpl="git pull"
+function gac() {
+   if [[ -z "$1" ]]; then
+      echo "No commit message provided"
+      return
+   fi
+   git add .
+   git commit -m "$1"
+}
+function gacp() {
+   if [[ -z "$1" ]]; then
+      echo "No commit message provided"
+      return
+   fi
+   git add .
+   git commit -m "$1"
+   git push
+}
+alias gco="git checkout"
+alias gcob="git checkout -b"
+
+
+### OH-MY-ZSH CONFIG ###
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -216,194 +366,3 @@ zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/zsh-intera
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/github/github.plugin.zsh'
 
 ### End of Zinit's installer chunk
-### Aliases ###
-
-# TODO: decide if I want to keep this
-# # SDM
-# alias sdm="$HOME/.config/sdm/sdm"
-# # function sdm() {
-# #    source "$HOME/.config/sdm/sdm" "$@"
-# # }
-# # Add autocompletion for SDM
-# source "$HOME/.config/sdm/lib/sdm_zsh_completion"
-
-# General
-alias cdh="cd ~"
-alias cdd="cd .."
-alias c="clear"
-alias lss="ls -a"
-alias refresh-zsh="source ~/.zshrc"
-function search-zsh-history() {
-   grep -a "$1" ~/.zsh_history
-}
-function search-bash-history() {
-   grep -a "$1" ~/.bash_history
-}
-function start() {
-   sdm pull
-   if [[ "$(hostname)" = "jordans-pc" ]]; then
-         systemctl --user restart kmonad_keychron_k2_pro.service
-         systemctl --user restart kmonad_havit.service
-         systemctl --user restart kmonad_winry315.service
-   elif [[ "$(hostname)" = "jordans-laptop" ]]; then
-      systemctl --user restart kmonad_legion_slim_7.service
-   fi
-   source ~/.zshrc
-   tmux new -d -s tmp
-   sleep 1
-   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
-   sleep 2
-   tmux kill-session -t tmp
-   tmux a -t main
-}
-
-# SSH auto xterm-colors
-alias ssh-color="TERM=xterm-256color ssh"
-
-# Kmonad
-if [[ "$(hostname)" = "jordans-pc" ]]; then
-   function refresh-kmonad() {
-      systemctl --user restart kmonad_keychron_k2_pro.service
-      systemctl --user restart kmonad_havit.service
-      systemctl --user restart kmonad_winry315.service
-   }
-elif [[ "$(hostname)" = "jordans-laptop" ]]; then
-   alias refresh-kmonad="systemctl --user restart kmonad_legion_slim_7.service"
-fi
-
-# Neovim
-alias v="nvim"
-alias vv="nvim ."
-alias vz='NVIM_APPNAME=nvim-lazyvim nvim'
-alias vm='NVIM_APPNAME=nvim-myvim nvim'
-
-# Tmux
-alias t="tmux"
-alias tl="tmux ls"
-alias ta="tmux a -t"
-alias tam="tmux a -t main"
-alias tn="tmux new -s"
-alias tk="tmux kill-session -t"
-alias refresh-tmux="tmux source ~/.config/tmux/tmux.conf"
-function tim() {
-	tmux send-keys -t main:0.2 'bpytop' Enter
-	tmux send-keys -t main:0.1 'neo-matrix' Enter
-	tmux a -t main
-}
-function tin() {
-	if [[ -z "$1" ]]; then
-		echo "No session name provided"
-		return
-	fi
-	tmux new -d -s "$1"
-	tmux splitw -h -t "$1"
-	tmux splitw -v -p 70 -t "$1"
-	tmux send-keys -t "$1":0.1 'neo-matrix' Enter
-	tmux selectp -t "$1":0.0
-	tmux renamew -t "$1":0 'sys'
-	source ~/.scripts/tmux_init "$1" &
-	tmux a -t "$1"
-}
-function ts() {
-   tmux new -d -s tmp
-   sleep 1
-   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
-   sleep 2
-   tmux kill-session -t tmp
-   tmux a -t main
-}
-# function tin() {
-# 	if [[ -z "$1" ]]; then
-# 		echo "No session name provided"
-# 		return
-# 	fi
-# 	tmux new -d -s "$1"
-# 	tmux splitw -h -t "$1"
-#    tmux selectp -t "$1":0.0
-# 	tmux splitw -v -p 70 -t "$1"
-# 	tmux send-keys -t "$1":0.0 'neo-matrix' Enter
-# 	tmux selectp -t "$1":0.2
-# 	tmux renamew -t "$1":0 '[SYS]'
-# 	source ~/.scripts/tmux_init "$1" &
-# 	tmux a -t "$1"
-# }
-
-# Git
-alias g="git"
-alias gs="git status"
-function ga() {
-   git add "$1"
-}
-alias gaa="git add ."
-function gc() {
-   git commit -m "$1"
-}
-alias gpu="git push"
-alias gpl="git pull"
-function gac() {
-   if [[ -z "$1" ]]; then
-      echo "No commit message provided"
-      return
-   fi
-   git add .
-   git commit -m "$1"
-}
-function gacp() {
-   if [[ -z "$1" ]]; then
-      echo "No commit message provided"
-      return
-   fi
-   git add .
-   git commit -m "$1"
-   git push
-}
-
-# YADM
-alias y="yadm"
-alias ya="yadm add"
-alias yc="yadm commit -m"
-alias ypl="yadm pull"
-function ypu() {
-	yadm add ~/.bashrc
-	yadm add ~/.clang-format
-	yadm add ~/.config/autostart/
-	yadm add ~/.config/fontconfig/
-	yadm add ~/.config/kglobalshortcutsrc
-	yadm add ~/.config/kmonad/
-	yadm add ~/.config/nvim/
-	yadm add ~/.config/OpenRGB/
-	yadm add ~/.config/rclone/
-	yadm add ~/.config/tmux/
-	yadm add ~/.config/touchegg/
-	yadm add ~/.config/ulauncher/
-	yadm add ~/.config/xremap/
-	yadm add ~/.config/yadm/
-	yadm add ~/.img/
-	yadm add ~/.local/share/fonts/
-	yadm add ~/.scripts/
-	yadm add ~/.software/
-	yadm add ~/.terminal-backgrounds/
-	yadm add ~/.wezterm.lua
-   yadm add ~/.zshrc
-	yadm commit -m "Update $(date +'%Y-%m-%d %H:%M:%S')"
-	yadm push
-}
-# Dotfiles Edit
-function ye() {
-   if [[ -z "$1" ]]; then
-      echo "No file provided"
-      return
-   fi
-   yadm pull
-   nvim "$1"
-   # yadm add "$1"
-   ypu
-   if [[ "$1" == *".zshrc"* ]]; then
-      source ~/.zshrc
-   elif [[ "$1" == *"tmux.conf"* ]]; then
-      tmux source-file ~/.config/tmux/tmux.conf
-   fi
-}
-
-# Created by `pipx` on 2024-10-07 16:14:37
-export PATH="$PATH:/home/jordan/.local/bin"

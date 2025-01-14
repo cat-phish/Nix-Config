@@ -33,6 +33,8 @@ config.enable_kitty_graphics = true
 
 --config.prompt_order = { "CurrentDir", "GitBranch" }
 
+config.max_fps = 144
+
 -- F11 for Fullscreen
 config.keys = {
 	{

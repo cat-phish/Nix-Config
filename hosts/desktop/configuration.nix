@@ -12,11 +12,19 @@
   config = {
     networking.hostName = "jordans-desktop";
 
+    environment.systemPackages =
+      (with pkgs; [
+        ])
+      ++ (with pkgs-unstable; [
+        ]);
+
+    ### Services ###
+
     # Kmonad configuration
     # see here before enabling:
     # https://github.com/kmonad/kmonad/blob/master/doc/installation.md#configurationnix
     services.kmonad = {
-      enable = true; # TODO: enable this when off of VM
+      enable = true;
       keyboards = {
         kmonad_keychron_k2_pro = {
           device = "/dev/input/by-id/usb-Keychron_Keychron_K2_Pro-event-kbd";
@@ -32,6 +40,19 @@
         };
       };
     };
+
+    ### Bootloader ###
+
+    boot.loader = {
+      grub = {
+        darkmatter-theme = {
+          resolution = "1440p";
+        };
+      };
+    };
+
+    ### Graphics ###
+
     # Enable OpenGL
     hardware.graphics = {
       enable = true;
@@ -70,11 +91,5 @@
       # Optionally, you may need to select the appropriate driver version for your specific GPU.
       package = config.boot.kernelPackages.nvidiaPackages.beta;
     };
-
-    environment.systemPackages =
-      (with pkgs; [
-        ])
-      ++ (with pkgs-unstable; [
-        ]);
   };
 }

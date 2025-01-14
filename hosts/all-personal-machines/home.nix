@@ -8,6 +8,7 @@
   home.packages =
     (with pkgs; [
       activate-linux
+      appimage-run
       audacity
       chirp
       deskreen
@@ -28,6 +29,7 @@
       multiviewer-for-f1
       navi
       neofetch
+      neovide
       nurl # fetching nix package options from git, maybe others
       pinta
       pocket-casts
@@ -57,6 +59,10 @@
     "prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
+    ".scripts" = {
+      source = ../../dotfiles/.scripts;
+      recursive = true;
+    };
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
@@ -68,43 +74,6 @@
     # TODO: add scripts to dotfiles
     # "scripts" = {
     #   source = ../../dotfiles/scripts;
-    #   recursive = true;
-    # };
-
-    # Theming
-    # ".img/wallpapers/blue.jpg" = {
-    #   source = ../../dotfiles/.img/wallpapers/blue.jpg;
-    # };
-
-    # NOTE: deprecated in favor of copying once in init.sh on install
-    # due to slow switching times from icon linking
-    #
-    # ".local/share/icons/Memphis98" = {
-    #   source = ../../dotfiles/.local/share/icons/Memphis98;
-    #   recursive = true;
-    # };
-    # ".local/share/icons/Reactionary" = {
-    #   source = ../../dotfiles/.local/share/icons/Reactionary;
-    #   recursive = true;
-    # };
-    #
-    # ".local/share/plasma/desktoptheme/reactplus" = {
-    #   source = ../../dotfiles/.local/share/plasma/desktoptheme/reactplus;
-    #   recursive = true;
-    # };
-    #
-    # ".local/share/plasma/look-and-feel/org.magpie.reactplus.desktop" = {
-    #   source = ../../dotfiles/.local/share/plasma/look-and-feel/org.magpie.reactplus.desktop;
-    #   recursive = true;
-    # };
-    #
-    # ".local/share/plasma/desktoptheme/reactionary" = {
-    #   source = ../../dotfiles/.local/share/plasma/desktoptheme/reactionary;
-    #   recursive = true;
-    # };
-    #
-    # ".local/share/plasma/look-and-feel/Reactionary" = {
-    #   source = ../../dotfiles/.local/share/plasma/look-and-feel/Reactionary;
     #   recursive = true;
     # };
   };

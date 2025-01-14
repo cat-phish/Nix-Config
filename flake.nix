@@ -18,6 +18,8 @@
       url = "gitlab:VandalByte/darkmatter-grub-theme";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-snapd.url = "github:nix-community/nix-snapd";
+    nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
   };
 
   outputs = {
@@ -29,6 +31,7 @@
     kmonad,
     plasma-manager,
     darkmatter-grub-theme,
+    nix-snapd,
     ...
   }: let
     lib = nixpkgs.lib;
@@ -49,6 +52,10 @@
           ./hosts/desktop/configuration.nix
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
+          nix-snapd.nixosModules.default
+          {
+            services.snap.enable = true;
+          }
         ];
         specialArgs = {
           inherit pkgs-unstable;
