@@ -121,11 +121,11 @@
         "plugins-capslock-nvim": "plugins-capslock-nvim"
       },
       "locked": {
-        "lastModified": 1736741539,
-        "narHash": "sha256-1DgXNqrpzbFa0Gh5IRZAqaNuFIVC9ZDTtgR7myG54XM=",
+        "lastModified": 1736913760,
+        "narHash": "sha256-8zouBj7t8IEWTM9B3annxdIKhjON8c4Yd37uHJkAA9U=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "50c690bfe74d01d8f3bdd214eee94d7aaef41606",
+        "rev": "c4c8a4818d1b61bf6dd34f623b11abaa3054b7d9",
         "type": "github"
       },
       "original": {
@@ -201,11 +201,11 @@
     },
     "nixpkgs-unstable": {
       "locked": {
-        "lastModified": 1736523798,
-        "narHash": "sha256-Xb8mke6UCYjge9kPR9o4P1nVrhk7QBbKv3xQ9cj7h2s=",
+        "lastModified": 1736798957,
+        "narHash": "sha256-qwpCtZhSsSNQtK4xYGzMiyEDhkNzOCz/Vfu4oL2ETsQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "130595eba61081acde9001f43de3248d8888ac4a",
+        "rev": "9abb87b552b7f55ac8916b6fc9e5cb486656a2f3",
         "type": "github"
       },
       "original": {
@@ -216,11 +216,11 @@
     },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1736549401,
-        "narHash": "sha256-ibkQrMHxF/7TqAYcQE+tOnIsSEzXmMegzyBWza6uHKM=",
+        "lastModified": 1736867362,
+        "narHash": "sha256-i/UJ5I7HoqmFMwZEH6vAvBxOrjjOJNU739lnZnhUln8=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "1dab772dd4a68a7bba5d9460685547ff8e17d899",
+        "rev": "9c6b49aeac36e2ed73a8c472f1546f6d9cf1addc",
         "type": "github"
       },
       "original": {

@@ -19,86 +19,91 @@ if wezterm.config_builder then
 	config = wezterm.config_builder()
 end
 
---config.term = "wezterm"
+config = {
+	--term = "wezterm",
 
-config.default_gui_startup_args = { "start" }
+	default_gui_startup_args = { "start" },
 
-config.default_cwd = "~/"
+	enable_wayland = true,
 
--- Fix Wezterm crash after sleep
-config.front_end = "OpenGL"
+	default_cwd = "~/",
 
--- Enable kitty graphics protocol (Buggy)
-config.enable_kitty_graphics = true
+	-- Fix Wezterm crash after sleep
+	front_end = "OpenGL",
 
---config.prompt_order = { "CurrentDir", "GitBranch" }
+	-- Enable kitty graphics protocol (Buggy)
+	enable_kitty_graphics = true,
 
-config.max_fps = 144
+	--prompt_order = { "CurrentDir", "GitBranch" },
 
--- F11 for Fullscreen
-config.keys = {
-	{
-		key = "F11",
-		mods = "NONE",
-		action = wezterm.action.ToggleFullScreen,
-	},
-	-- disable default new window spawn
-	{
-		key = "Enter",
-		mods = "ALT",
-		action = wezterm.action.DisableDefaultAssignment,
-	},
-}
+	max_fps = 165,
 
--- Disable middle click pastes
-config.mouse_bindings = {
-	{
-		event = { Down = { streak = 1, button = "Middle" } },
-		mods = "NONE",
-		action = act.Nop,
+	hide_tab_bar_if_only_one_tab = false,
+
+	-- F11 for Fullscreen
+	keys = {
+		{
+			key = "F11",
+			mods = "NONE",
+			action = wezterm.action.ToggleFullScreen,
+		},
+		-- disable default new window spawn
+		{
+			key = "Enter",
+			mods = "ALT",
+			action = wezterm.action.DisableDefaultAssignment,
+		},
 	},
 
-	-- NOTE that binding only the 'Up' event can give unexpected behaviors.
-	-- Read more below on the gotcha of binding an 'Up' event only.
+	-- Disable middle click pastes
+	mouse_bindings = {
+		{
+			event = { Down = { streak = 1, button = "Middle" } },
+			mods = "NONE",
+			action = act.Nop,
+		},
+
+		-- NOTE that binding only the 'Up' event can give unexpected behaviors.
+		-- Read more below on the gotcha of binding an 'Up' event only.
+	},
+
+	--#######################
+	--#### FONT SETTINGS ####
+	--#######################
+
+	-- Disable ligatures
+	harfbuzz_features = { "calt=0", "clig=0", "liga=0" },
+
+	-- Font Settings
+	font = wezterm.font_with_fallback({
+		-- "MonaspiceNe Nerd Font Mono Light",
+		{ family = "MonaspiceNe Nerd Font Mono", weight = "Light", stretch = "Normal", style = "Normal" },
+		-- "Nerd Font Symbols",
+		"Noto Color Emoji",
+	}),
+
+	font_size = 14.0,
+
+	--#######################
+	--#### COLOR SETTINGS ###
+	--#######################
+
+	-- For example, changing the color scheme:
+	-- color_scheme = "Tokyo Night"
+	--color_scheme = "Bright (base16)"
+	-- color_scheme = "Brogrammer"
+	-- color_scheme = "Builtin Dark"
+	-- color_scheme = "Borland (Gogh)"
+	-- color_scheme = "Breeze"
+	color_scheme = "Breeze (Gogh)",
+
+	colors = {
+		foreground = "#d1d4dc",
+		background = "#000050",
+		cursor_bg = "#d1d4dc",
+		cursor_fg = "black",
+	},
 }
-
---#######################
---#### FONT SETTINGS ####
---#######################
-
--- Disable ligatures
-config.harfbuzz_features = { "calt=0", "clig=0", "liga=0" }
-
--- Font Settings
-config.font = wezterm.font_with_fallback({
-	-- "MonaspiceNe Nerd Font Mono Light",
-	{ family = "MonaspiceNe Nerd Font Mono", weight = "Light", stretch = "Normal", style = "Normal" },
-	-- "Nerd Font Symbols",
-	"Noto Color Emoji",
-})
-
-config.font_size = 14.0
-
---#######################
---#### COLOR SETTINGS ###
---#######################
-
--- For example, changing the color scheme:
--- config.color_scheme = "Tokyo Night"
---config.color_scheme = "Bright (base16)"
--- config.color_scheme = "Brogrammer"
--- config.color_scheme = "Builtin Dark"
--- config.color_scheme = "Borland (Gogh)"
--- config.color_scheme = "Breeze"
-config.color_scheme = "Breeze (Gogh)"
-
-config.colors = {
-	foreground = "#d1d4dc",
-	background = "#000050",
-	cursor_bg = "#d1d4dc",
-	cursor_fg = "black",
-}
-
 --##########################
 --#### ADVANCED SETTINGS ###
 --##########################

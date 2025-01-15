@@ -62,7 +62,7 @@ uuid="D5AE-9E4C"
 
 # Amount of time to sleep in seconds after mounting the drive in seconds
 # (workaround for slow mounting of some devices while using Rockbox file transfer)
-sleep_time=60
+sleep_time=10
 
 # Append podcast name to end of the episode file name? (yes or no)
 # Podgrab does not add the podcast name to the episode file name, which can cause some

@@ -3,6 +3,14 @@ case $- in
 *i*) ;;
 *) return ;;
 esac
+# Source Home Manager session variables
+if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+elif [ -f ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh ]; then
+  source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
+  source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+fi
 
 # Source the .env file if it exists
 if [ -f "$HOME/.env" ]; then
