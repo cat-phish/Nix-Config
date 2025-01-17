@@ -23,8 +23,14 @@
       nssmdns4 = true;
       openFirewall = true;
     };
+    
+    nix.gc = {
+      automatic = true;
+      dates = "weekly";
+      options = "--delete-older-than +20";
+    }
 
-    # Bootloader.
+    #### Bootloader ###
 
     # Use the systemd-boot EFI boot loader.
     # boot.loader.systemd-boot.enable = true;
@@ -65,6 +71,7 @@
           style = "nixos";
           icon = "color";
         };
+        configurationLimit = 20;
       };
     };
     environment.systemPackages =

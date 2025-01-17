@@ -3,7 +3,41 @@
   pkgs,
   pkgs-unstable,
   ...
-}: {
+}: let
+  # beets-copyartifacts3 = pkgs.python3Packages.buildPythonPackage rec {
+  #   pname = "beets-copyartifacts3";
+  #   version = "0.1.5"; # Use the appropriate version
+  #
+  #   src = pkgs.fetchFromGitHub {
+  #     owner = "adammillerio";
+  #     repo = "beets-copyartifacts";
+  #     rev = "v${version}";
+  #     sha256 = ""; # Replace with the actual sha256 value
+  #   };
+  #
+  #   propagatedBuildInputs = [pkgs.python3Packages.beets];
+  #
+  #   meta = with pkgs.lib; {
+  #     description = "A beets plugin to copy artifact files when importing";
+  #     homepage = "https://github.com/adammillerio/beets-copyartifacts";
+  #     license = licenses.mit;
+  #     maintainers = with maintainers; [];
+  #   };
+  # };
+  beets-copyartifacts3 = pkgs.python3Packages.buildPythonPackage rec {
+    pname = "beets-copyartifacts3";
+    version = "0.1.5";
+
+    src = pkgs.fetchFromGitHub {
+      owner = "adammillerio";
+      repo = "beets-copyartifacts";
+      rev = "v${version}";
+      sha256 = "UTZh7T6Z288PjxFgyFxHnPt0xpAH3cnr8/jIrlJhtyU=";
+    };
+
+    doCheck = false; # check requires infrastructure
+  };
+in {
   # nixpkgs.config.allowUnfree = true;
   home.packages =
     (with pkgs; [
@@ -13,9 +47,9 @@
       chirp
       deskreen
 
-      #beets
+      # beets and plugins
       beets
-      # beetsPackages.copyartifacts # TODO: causing build issue
+      beets-copyartifacts3
       python312Packages.discogs-client
       python312Packages.flask
       python312Packages.pyacoustid
@@ -33,6 +67,7 @@
       nurl # fetching nix package options from git, maybe others
       pinta
       pocket-casts
+      python39
       redshift
       wineasio
       winetricks
@@ -56,7 +91,7 @@
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;
     };
-    "prettierrc" = {
+    ".prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
     ".scripts" = {
@@ -66,15 +101,12 @@
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
-
+    "${config.xdg.configHome}/beets/config.yaml" = {
+      source = ../../dotfiles/.config/beets/config.yaml;
+    };
     "${config.xdg.configHome}/kmonad" = {
       source = ../../dotfiles/.config/kmonad;
       recursive = true;
     };
-    # TODO: add scripts to dotfiles
-    # "scripts" = {
-    #   source = ../../dotfiles/scripts;
-    #   recursive = true;
-    # };
   };
 }

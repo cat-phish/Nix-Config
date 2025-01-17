@@ -41,6 +41,22 @@
       };
     };
 
+    ### Filesystem Mounts ###
+
+    boot.supportedFilesystems = ["ntfs"];
+
+    fileSystems."/mnt/music_hdd" = {
+      device = "/dev/disk/by-uuid/5E74057374054EE9";
+      fsType = "ntfs-3g";
+      options = ["rw" "uid=1000"];
+    };
+
+    fileSystems."/mnt/music_ssd" = {
+      device = "/dev/disk/by-uuid/7652D37D52D34093";
+      fsType = "ntfs-3g";
+      options = ["rw" "uid=1000"];
+    };
+
     ### Bootloader ###
 
     boot.loader = {
