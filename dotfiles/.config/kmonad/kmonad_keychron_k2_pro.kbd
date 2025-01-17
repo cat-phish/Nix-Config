@@ -160,6 +160,7 @@ testing te
    d (tap-hold 200 d (layer-toggle shortcuts)) ;; s on short press, toggle shortcuts layer on hold
    k (tap-hold 200 k (layer-toggle shortcuts)) ;; k on short press, toggle shortcuts layer on hold
    a (tap-hold 200 a (layer-toggle altcuts))  ;; a on short press, toggle altcuts layer on hold
+   s (tap-hold 200 s alt)  ;; s on short press, alt on hold
 
    ;; shortcuts layer aliases
    acr A-ret  ;; tap alt-ret
@@ -212,8 +213,8 @@ testing te
   caps f1   f2   f3   f4   f7   f6   f7   f8   f9   f10  f11  f12  ssrq ins del
   grv   1    2    3    4    5    6    7    8    9    0    -    =     bspc   pgup
   tab    q    w    e    r    t    y    u    i    o    p    [    ]     \     home
-  @ectl  @a    s    @d   f    g    h    j    k   l    ;    '        ret     end
-  @lsft     z    x    c   v    b    n    m    ,    .    /       rsft   up   pgdn
+  @ectl  @a    @s   @d   f    g    h    j    k    l    ;    '        ret     end
+  @lsft    z    x    c    v    b    n    m    ,    .    /       rsft   up   pgdn
   lctl lmet lalt             spc                   @ralt    rctl left down rght
 )
 
@@ -240,6 +241,16 @@ testing te
 )
 
 ;; this layer is for lesser used shortcuts and app/script launching
+(deflayer scuts
+   XX  XX   XX   XX   XX   XX   XX   XX   XX   XX    XX   XX   XX   XX   XX  XX
+   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX     XX     XX
+   XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX    XX     XX
+   XX     XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX        XX     XX
+   XX      XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      XX     XX    XX
+   XX  XX   XX              XX                       XX      XX    XX  XX   XX
+)
+
+;; this layer is for lesser used shortcuts and app/script launching
 (deflayer altcuts
    XX  XX   XX   XX   XX   XX   XX   XX   XX   XX    XX   XX   XX   XX   XX  XX
    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX     XX     XX
@@ -249,7 +260,7 @@ testing te
    XX  XX   XX              XX                       XX      XX    XX  XX   XX
 )
 
-;; this layer is just a templater for new layers that should have most keys
+;; this layer is just a template for new layers that should have most keys
 ;; disabled
 (deflayer all-xes
    XX  XX   XX   XX   XX   XX   XX   XX   XX   XX    XX   XX   XX   XX   XX  XX

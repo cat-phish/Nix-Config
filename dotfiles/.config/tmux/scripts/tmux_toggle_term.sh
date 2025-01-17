@@ -28,6 +28,7 @@ CURRENT_PANE=$(tmux display-message -p "#{pane_id}")
 
 create_toggle_term_pane() {
   local direction=$1
+  # TODO: allow split to the laft and above
   tmux select-pane -T "$PRIMARY_PANE_NAME" -t "$CURRENT_PANE"
   if [[ "$direction" == "bottom" ]]; then
     PANE_ID=$(tmux split-window -v -p "$SPLIT_SIZE" -P -F "#{pane_id}" -t "$CURRENT_PANE" "$CURRENT_SHELL")
@@ -71,30 +72,6 @@ else
     fi
   else
     if [[ "$NON_TOGGLETERM_COUNT" -eq 1 ]]; then
-      # PRIMARY_PANE=$(tmux list-panes -F "#{pane_title},#{pane_id}" | grep -v "^$TERMINAL_PANE_NAME," | cut -d',' -f2)
-      # if [[ "$CURRENT_PANE" != "$PRIMARY_PANE" ]]; then
-      #   echo "$CURRENT_PANE" > "$STATE_FILE"
-      #   tmux select-pane -T "$PRIMARY_PANE_NAME" -t "$PRIMARY_PANE"
-      #   tmux resize-pane -Z -t "$PRIMARY_PANE"
-      # else
-      #   # DONE: in this current pane == primary pane branch, consider if we want the trigger
-      #   # to first detect if the primary pane is zoomed, and if it is not we could zoom it
-      #   # to hide the toggle term
-      #   if [[ -f "$STATE_FILE" ]]; then
-      #     LAST_PANE=$(cat "$STATE_FILE")
-      #     if [[ "$LAST_PANE" == "$CURRENT_PANE" ]]; then
-      #       tmux select-pane -t :.+
-      #     elif tmux list-panes -F "#{pane_id}" | grep -q "$LAST_PANE"; then
-      #       tmux select-pane -t "$LAST_PANE"
-      #     else
-      #       tmux select-pane -T "$PRIMARY_PANE_NAME" -t "$CURRENT_PANE"
-      #       tmux select-pane -t :.+
-      #     fi
-      #   else
-      #     tmux select-pane -T "$PRIMARY_PANE_NAME" -t "$CURRENT_PANE"
-      #     tmux select-pane -t :.+
-      #   fi
-      # fi
       PRIMARY_PANE=$(tmux list-panes -F "#{pane_title},#{pane_id}" | grep -v "^$TERMINAL_PANE_NAME," | cut -d',' -f2)
       if [[ "$CURRENT_PANE" != "$PRIMARY_PANE" ]]; then
         echo "$CURRENT_PANE" > "$STATE_FILE"
@@ -127,7 +104,7 @@ else
 
       if [[ "$PRIMARY_PANE_COUNT" -ge 1 ]]; then
         if [[ "$PRIMARY_PANE_COUNT" -gt 1 ]]; then
-          tmux display-message "Multiple primary panes detected, using the first one."
+          tmux display-message "Multiple primary panes detected, setting the first one as primary."
         fi
         PRIMARY_PANE=$(echo "$PRIMARY_PANES" | head -n 1 | cut -d',' -f2)
         tmux list-panes -F "#{pane_id}" | while read -r pane_id; do

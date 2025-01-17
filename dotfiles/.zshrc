@@ -5,6 +5,8 @@ export PATH="$HOME/.config/.emacs.d/bin:$PATH"
 # Path to your oh-my-zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+# TODO: add nixos update shortcuts to here and bashrc
+
 # Source Home Manager session variables
 if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
   source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
@@ -45,6 +47,9 @@ alias v="nvim"
 alias vv="nvim ."
 alias nvim-ssh="~/.scripts/nvim-ssh.sh"
 alias nixcats="$HOME/coding/nixCats/result/bin/nvim"
+
+# Emacs
+alias org="emacs --init-directory=~/.config/emacs"
 
 # SSH auto xterm-colors
 alias ssh-color="TERM=xterm-256color ssh"
