@@ -23,12 +23,12 @@
       nssmdns4 = true;
       openFirewall = true;
     };
-    
+
     nix.gc = {
       automatic = true;
       dates = "weekly";
       options = "--delete-older-than +20";
-    }
+    };
 
     #### Bootloader ###
 

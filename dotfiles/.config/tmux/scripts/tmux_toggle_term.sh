@@ -26,15 +26,27 @@ NON_TOGGLETERM_COUNT=$(tmux list-panes -F "#{pane_title}" | grep -vc "^$TERMINAL
 CURRENT_PANE=$(tmux display-message -p "#{pane_id}")
 
 
+# create_toggle_term_pane() {
+#   local direction=$1
+#   # TODO: allow split to the laft and above
+#   tmux select-pane -T "$PRIMARY_PANE_NAME" -t "$CURRENT_PANE"
+#   if [[ "$direction" == "bottom" ]]; then
+#     PANE_ID=$(tmux split-window -v -p "$SPLIT_SIZE" -P -F "#{pane_id}" -t "$CURRENT_PANE" "$CURRENT_SHELL")
+#     tmux select-pane -T "$TERMINAL_PANE_NAME" -t "$PANE_ID"
+#   elif [[ "$direction" == "right" ]]; then
+#     PANE_ID=$(tmux split-window -h -p "$SPLIT_SIZE" -P -F "#{pane_id}" -t "$CURRENT_PANE" "$CURRENT_SHELL")
+#     tmux select-pane -T "$TERMINAL_PANE_NAME" -t "$PANE_ID"
+#   fi
+# }
 create_toggle_term_pane() {
   local direction=$1
-  # TODO: allow split to the laft and above
+  local current_dir=$(tmux display-message -p "#{pane_current_path}")
   tmux select-pane -T "$PRIMARY_PANE_NAME" -t "$CURRENT_PANE"
   if [[ "$direction" == "bottom" ]]; then
-    PANE_ID=$(tmux split-window -v -p "$SPLIT_SIZE" -P -F "#{pane_id}" -t "$CURRENT_PANE" "$CURRENT_SHELL")
+    PANE_ID=$(tmux split-window -v -p "$SPLIT_SIZE" -P -F "#{pane_id}" -c "$current_dir" -t "$CURRENT_PANE" "$CURRENT_SHELL")
     tmux select-pane -T "$TERMINAL_PANE_NAME" -t "$PANE_ID"
   elif [[ "$direction" == "right" ]]; then
-    PANE_ID=$(tmux split-window -h -p "$SPLIT_SIZE" -P -F "#{pane_id}" -t "$CURRENT_PANE" "$CURRENT_SHELL")
+    PANE_ID=$(tmux split-window -h -p "$SPLIT_SIZE" -P -F "#{pane_id}" -c "$current_dir" -t "$CURRENT_PANE" "$CURRENT_SHELL")
     tmux select-pane -T "$TERMINAL_PANE_NAME" -t "$PANE_ID"
   fi
 }

@@ -4,28 +4,8 @@
   pkgs-unstable,
   ...
 }: let
-  # beets-copyartifacts3 = pkgs.python3Packages.buildPythonPackage rec {
-  #   pname = "beets-copyartifacts3";
-  #   version = "0.1.5"; # Use the appropriate version
-  #
-  #   src = pkgs.fetchFromGitHub {
-  #     owner = "adammillerio";
-  #     repo = "beets-copyartifacts";
-  #     rev = "v${version}";
-  #     sha256 = ""; # Replace with the actual sha256 value
-  #   };
-  #
-  #   propagatedBuildInputs = [pkgs.python3Packages.beets];
-  #
-  #   meta = with pkgs.lib; {
-  #     description = "A beets plugin to copy artifact files when importing";
-  #     homepage = "https://github.com/adammillerio/beets-copyartifacts";
-  #     license = licenses.mit;
-  #     maintainers = with maintainers; [];
-  #   };
-  # };
   beets-copyartifacts3 = pkgs.python3Packages.buildPythonPackage rec {
-    pname = "beets-copyartifacts3";
+    pname = "copyartifacts";
     version = "0.1.5";
 
     src = pkgs.fetchFromGitHub {
@@ -38,7 +18,6 @@
     doCheck = false; # check requires infrastructure
   };
 in {
-  # nixpkgs.config.allowUnfree = true;
   home.packages =
     (with pkgs; [
       activate-linux
@@ -50,11 +29,15 @@ in {
       # beets and plugins
       beets
       beets-copyartifacts3
+      # python312Packages.chromaprint
+      python312Packages.pyacoustid
       python312Packages.discogs-client
       python312Packages.flask
+      python312Packages.pylyrics
       python312Packages.pyacoustid
       python312Packages.pylast
       python312Packages.requests
+      # python312Packages.pip
 
       flameshot
       hypnotix
@@ -69,6 +52,7 @@ in {
       pocket-casts
       python39
       redshift
+      restic
       wineasio
       winetricks
       # wineWowPackages

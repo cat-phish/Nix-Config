@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-sudo nix flake update ~/.nix
+sudo nix flake update --flake ~/.nix
 
 sudo nixos-rebuild switch --flake ~/.nix
 

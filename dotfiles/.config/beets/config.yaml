@@ -1,75 +1,74 @@
 directory: /mnt/music_hdd/New/2 - Beets Sorted
 library: /mnt/music_hdd/New/2 - Beets Sorted/musiclibrary.blb
 import:
-    move: yes
-    log: /mnt/music_hdd/New/beets.log
+  move: yes
+  log: /mnt/music_hdd/New/beets.log
 
 plugins:
-    - lyrics
-    - chroma
-    - lastgenre
-    - fetchart
-    - discogs
-    - copyartifacts
-    - ftintitle
-    - fromfilename
-    - inline
-    - web
-    - rewrite
-    - spotify
-    - export
-    - unimported
+  - lyrics
+  - chroma
+  - lastgenre
+  - fetchart
+  - discogs
+  - copyartifacts
+  - ftintitle
+  - fromfilename
+  - inline
+  # - web
+  - rewrite
+  - spotify
+  - export
+  - unimported
   # - extrafiles
 
-
 paths:
-    default: $albumartist_sort/$album%aunique{} ($original_year) [$format]/%if{$multidisc,Disc $disc/}$track. $title
-    singleton: Non-Album/$artist/$title
-    comp: Compilations/$album%aunique{}/$track $title
-    albumtype:soundtrack: Soundtracks/$album/$track $title
+  default: $albumartist_sort/$album%aunique{} ($original_year) [$format]/%if{$multidisc,Disc $disc/}$track. $title
+  singleton: Non-Album/$artist/$title
+  comp: Compilations/$album%aunique{}/$track $title
+  albumtype:soundtrack: Soundtracks/$album/$track $title
 
 item_fields:
-    multidisc: 1 if disctotal > 1 else 0
+  multidisc: 1 if disctotal > 1 else 0
 
 original_date: no
 
 match:
-    preferred:
-        countries: ['US', 'GB|UK']
-        media: ['CD', 'Digital Media|File']
-        original_year: yes
+  preferred:
+    countries: ["US", "GB|UK"]
+    media: ["CD", "Digital Media|File"]
+    original_year: yes
 
 replaygain:
-    backend: gstreamer
-    auto: yes
-    noclip: yes
-    peak: true
+  backend: gstreamer
+  auto: yes
+  noclip: yes
+  peak: true
 
 lyrics:
-    auto: yes
-    fallback: 'No lyrics found'
+  auto: yes
+  fallback: "No lyrics found"
 
 acoustid:
-    apikey: 71GWJOVv
+  apikey:
 
 lastgenre:
-    canonical: ''
-    source: artist
-    count: 3
-    
-    separator: '; '
+  canonical: ""
+  source: artist
+  count: 3
+
+  separator: "; "
 
 copyartifacts:
-    print_ignored: yes
+  print_ignored: yes
 extrafiles:
-    patterns:
-        all: '*.*'
-        artworkdir:
-          - '[sS]cans/'
-          - '[aA]rtwork/'
-    paths:
-        artworkdir: $albumpath/artwork
+  patterns:
+    all: "*.*"
+    artworkdir:
+      - "[sS]cans/"
+      - "[aA]rtwork/"
+  paths:
+    artworkdir: $albumpath/artwork
 
 unimported:
-    ignore_extensions: jpg png
-    ignore_subdirectories: NonMusic data temp
+  ignore_extensions: jpg png
+  ignore_subdirectories: NonMusic data temp

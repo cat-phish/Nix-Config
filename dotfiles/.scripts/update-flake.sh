@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-sudo nix flake update
+sudo nix flake update --flake ~/.nix

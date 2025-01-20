@@ -70,17 +70,17 @@ function start() {
 }
 
 # Run scripts with completion
-scripts() {
+# # if ! command -v run &> /dev/null; then
+run() {
   "$HOME/.scripts/$1"
 }
-_scripts_completion() {
+_run_completion() {
   local -a scripts
   scripts=(${(f)"$(ls $HOME/.scripts/)"})
   _describe 'script' scripts
 }
-compdef _scripts_completion scripts
-
-
+compdef _run_completion run
+# # fi
 
 # Kmonad
 if [[ "$(hostname)" = "jordans-desktop" ]]; then
