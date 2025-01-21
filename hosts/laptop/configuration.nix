@@ -7,6 +7,7 @@
 }: {
   imports = [
     ./hardware-configuration.nix
+    ../../modules/nvidiaGPU.nix
   ];
   config = {
     networking.hostName = "jordans-laptop";

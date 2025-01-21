@@ -59,7 +59,10 @@
     services.xserver.enable = true;
 
     # Enable the KDE Plasma Desktop Environment.
-    services.displayManager.sddm.enable = true;
+    services.displayManager.sddm = {
+      enable = true;
+      theme = "reactionary";
+    };
     services.desktopManager.plasma6.enable = true;
 
     # Configure keymap in X11
@@ -97,7 +100,7 @@
       extraGroups = ["networkmanager" "wheel"];
       packages = with pkgs; [
         kdePackages.kate
-        #  thunderbird
+        kdePackages.kcalc
       ];
       shell = pkgs.zsh;
     };
