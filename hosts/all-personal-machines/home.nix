@@ -25,14 +25,6 @@ in {
       audacity
       chirp
       deskreen
-
-      # beets and plugins
-      # beets-copyartifacts3
-      # beetsPackages.copyartifacts
-      # python312Packages.chromaprint
-
-      # python312Packages.pip
-
       flameshot
       hypnotix
       libreoffice-fresh
@@ -79,9 +71,6 @@ in {
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
-    # "${config.xdg.configHome}/beets/config.yaml" = {
-    #   source = ../../dotfiles/.config/beets/config.yaml;
-    # };
     "${config.xdg.configHome}/kmonad" = {
       source = ../../dotfiles/.config/kmonad;
       recursive = true;

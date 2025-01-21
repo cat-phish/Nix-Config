@@ -1,20 +1,20 @@
 # Enable the subsequent settings only in interactive sessions
 case $- in
-*i*) ;;
-*) return ;;
+    *i*) ;;
+    *) return ;;
 esac
 # Source Home Manager session variables
 if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
-  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+    source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 elif [ -f ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh ]; then
-  source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+    source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
 elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
-  source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+    source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
 fi
 
 # Source the .env file if it exists
 if [ -f "$HOME/.env" ]; then
-  export $(grep -v '^#' $HOME/.env | xargs)
+    export $(grep -v '^#' $HOME/.env | xargs)
 fi
 
 # Path to your oh-my-bash installation.
@@ -24,6 +24,41 @@ alias cdh="cd /home/jordan"
 alias cdd="cd .."
 alias c="clear"
 alias lss="ls -a"
+
+# Delete empty directories including subdirectories
+# delete_empty_dirs_bulk() {
+#     find . -type d -empty -print
+#     echo "Do you want to delete all the above directories? (y/n)"
+#     read -r choice
+#     if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+#         find . -type d -empty -exec rm -r {} +
+#         echo "Deleted all empty directories."
+#     else
+#         echo "Operation canceled."
+#     fi
+# }
+
+delete_empty_dirs_bulk() {
+    echo "Top-level directories that will remain:"
+    find . -mindepth 1 -maxdepth 1 -type d -not -empty
+    echo ""
+    echo "Directories to delete (item counts shown):"
+    find . -type d -empty -print0 | while IFS= read -r -d '' dir; do
+        echo "$dir (0 items)"
+    done
+
+    echo "Do you want to delete all the above directories? (y/n)"
+    read -r choice
+    if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+        find . -type d -empty -exec rm -r {} +
+        echo "Deleted all empty directories."
+    else
+        echo "Operation canceled."
+    fi
+
+    echo "Top-level directories that will remain:"
+    find . -mindepth 1 -maxdepth 1 -type d -not -empty
+}
 
 alias refresh-bash="source ~/.bashrc"
 
@@ -37,31 +72,31 @@ alias nixcats="$HOME/coding/nixCats/result/bin/nvim"
 alias ssh-color="TERM=xterm-256color ssh"
 
 search-zsh-history() {
-   grep -a "$1" ~/.zsh_history
+    grep -a "$1" ~/.zsh_history
 }
 
 search-bash-history() {
-   grep -a "$1" ~/.bash_history
+    grep -a "$1" ~/.bash_history
 }
 
 start() {
-   tmux new -d -s tmp
-   sleep 1
-   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
-   sleep 2
-   tmux kill-session -t tmp
-   tmux a -t main
+    tmux new -d -s tmp
+    sleep 1
+    tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
+    sleep 2
+    tmux kill-session -t tmp
+    tmux a -t main
 }
 
 # Kmonad
 if [[ "$(hostname)" = "jordans-desktop" ]]; then
-   kmonad-refresh() {
-      systemctl --user restart kmonad_keychron_k2_pro.service
-      systemctl --user restart kmonad_havit.service
-      systemctl --user restart kmonad_winry315.service
-   }
+    kmonad-refresh() {
+        systemctl --user restart kmonad_keychron_k2_pro.service
+        systemctl --user restart kmonad_havit.service
+        systemctl --user restart kmonad_winry315.service
+    }
 elif [[ "$(hostname)" = "jordans-laptop" ]]; then
-   alias kmonad-refresh="systemctl --user restart kmonad_legion_slim_7.service"
+    alias kmonad-refresh="systemctl --user restart kmonad_legion_slim_7.service"
 fi
 
 # Tmux
@@ -74,84 +109,84 @@ alias tk="tmux kill-session -t"
 alias tmux-refresh="tmux source ~/.config/tmux/tmux.conf"
 
 tmux-fix() {
-   tmux detach
-   tmux kill-server
-   tmux new -- bash --noprofile --norc
-   tmux source ~/.config/tmux/tmux.conf
-   tmux kill-session -t 0
-   tmux new-session -s main
+    tmux detach
+    tmux kill-server
+    tmux new -- bash --noprofile --norc
+    tmux source ~/.config/tmux/tmux.conf
+    tmux kill-session -t 0
+    tmux new-session -s main
 }
 
 tim() {
-   tmux send-keys -t main:0.2 'bpytop' Enter
-   tmux send-keys -t main:0.1 'neo-matrix' Enter
-   tmux a -t main
+    tmux send-keys -t main:0.2 'bpytop' Enter
+    tmux send-keys -t main:0.1 'neo-matrix' Enter
+    tmux a -t main
 }
 
 tin() {
-   if [[ -z "$1" ]]; then
-      echo "No session name provided"
-      return
-   fi
-   tmux new -d -s "$1"
-   tmux splitw -h -t "$1"
-   tmux splitw -v -p 70 -t "$1"
-   tmux send-keys -t "$1":0.1 'neo-matrix' Enter
-   tmux selectp -t "$1":0.0
-   tmux renamew -t "$1":0 'sys'
-   source ~/.scripts/tmux_init "$1" &
-   tmux a -t "$1"
+    if [[ -z "$1" ]]; then
+        echo "No session name provided"
+        return
+    fi
+    tmux new -d -s "$1"
+    tmux splitw -h -t "$1"
+    tmux splitw -v -p 70 -t "$1"
+    tmux send-keys -t "$1":0.1 'neo-matrix' Enter
+    tmux selectp -t "$1":0.0
+    tmux renamew -t "$1":0 'sys'
+    source ~/.scripts/tmux_init "$1" &
+    tmux a -t "$1"
 }
 
 ts() {
-   tmux new -d -s tmp
-   sleep 1
-   tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
-   sleep 2
-   tmux kill-session -t tmp
-   tmux a -t main
+    tmux new -d -s tmp
+    sleep 1
+    tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
+    sleep 2
+    tmux kill-session -t tmp
+    tmux a -t main
 }
 
 # Git
 alias g="git"
 alias gs="git status"
 ga() {
-   git add "$1"
+    git add "$1"
 }
 alias gaa="git add ."
 gcm() {
-   git commit -m "$1"
+    git commit -m "$1"
 }
 alias gpu="git push"
 alias gpl="git pull"
 gac() {
-   if [[ -z "$1" ]]; then
-      echo "No commit message provided"
-      return
-   fi
-   git add .
-   git commit -m "$1"
+    if [[ -z "$1" ]]; then
+        echo "No commit message provided"
+        return
+    fi
+    git add .
+    git commit -m "$1"
 }
 gacp() {
-   if [[ -z "$1" ]]; then
-      echo "No commit message provided"
-      return
-   fi
-   git add .
-   git commit -m "$1"
-   git push
+    if [[ -z "$1" ]]; then
+        echo "No commit message provided"
+        return
+    fi
+    git add .
+    git commit -m "$1"
+    git push
 }
 alias gco="git checkout"
 alias gcob="git checkout -b"
 
 # Run scripts from ~/.scripts with completion
 scripts() {
-  "$HOME/.scripts/$1"
+    "$HOME/.scripts/$1"
 }
 _scripts_completion() {
-  local cur
-  cur="${COMP_WORDS[COMP_CWORD]}"
-  COMPREPLY=( $(compgen -W "$(ls $HOME/.scripts/)" -- "$cur") )
+    local cur
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    COMPREPLY=( $(compgen -W "$(ls $HOME/.scripts/)" -- "$cur") )
 }
 complete -F _scripts_completion scripts
 
@@ -167,7 +202,7 @@ export NVM_DIR="$HOME/.nvm"
 # alias sdm="$HOME/.config/sdm/sdm"
 
 function sdm() {
-	source "$HOME/.config/sdm/sdm" "$@"
+    source "$HOME/.config/sdm/sdm" "$@"
 }
 
 # Add autocompletion for SDM
@@ -249,9 +284,9 @@ OMB_USE_SUDO=true
 # Example format: completions=(ssh git bundler gem pip pip3)
 # Add wisely, as too many completions slow down shell startup.
 completions=(
-	git
-	composer
-	ssh
+    git
+    composer
+    ssh
 )
 
 # Which aliases would you like to load? (aliases can be found in ~/.oh-my-bash/aliases/*)
@@ -259,7 +294,7 @@ completions=(
 # Example format: aliases=(vagrant composer git-avh)
 # Add wisely, as too many aliases slow down shell startup.
 aliases=(
-	general
+    general
 )
 
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-bash/plugins/*)
@@ -267,8 +302,8 @@ aliases=(
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-	git
-	bashmarks
+    git
+    bashmarks
 )
 
 # Which plugins would you like to conditionally load? (plugins can be found in ~/.oh-my-bash/plugins/*)
@@ -298,11 +333,11 @@ export EDITOR='$VISUAL'
 
 # Source Home Manager session variables
 if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
-  source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+    source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 elif [ -f ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh ]; then
-  source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+    source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
 elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
-  source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+    source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
 fi
 
 # Compilation flags

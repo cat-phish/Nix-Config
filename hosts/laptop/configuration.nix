@@ -15,6 +15,7 @@
     environment.systemPackages =
       (with pkgs; [
         openrgb-with-all-plugins
+        touchegg
       ])
       ++ (with pkgs-unstable; [
         ]);

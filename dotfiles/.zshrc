@@ -17,9 +17,9 @@ elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
 fi
 
 # Source the .env file if it exists
-if [ -f "$HOME/.env" ]; then
+if [ -f "$HOME/.env/.env" ]; then
   set -a  # Automatically export all variables
-  source "$HOME/.env"
+  source "$HOME/.env/.env"
   set +a  # Disable automatic export
 fi
 
@@ -39,6 +39,38 @@ alias cdh="cd ~"
 alias cdd="cd .."
 alias c="clear"
 alias lss="ls -a"
+
+# Delete empty directories including subdirectories
+# function delete_empty_dirs_bulk() {
+#   find . -type d -empty -print
+#   echo "Do you want to delete all the above directories? (y/n)"
+#   read -q "choice?"; echo
+#   if [[ "$choice" == "y" ]]; then
+#     find . -type d -empty -exec rm -r {} +
+#     echo "Deleted all empty directories."
+#   else
+#     echo "Operation canceled."
+#   fi
+# }
+
+function delete_empty_dirs_bulk() {
+  echo "Top-level directories that will remain:"
+  find . -mindepth 1 -maxdepth 1 -type d -not -empty
+  echo ""
+  echo "Directories to delete (item counts shown):"
+  find . -type d -empty -print0 | while IFS= read -r -d '' dir; do
+    echo "$dir (0 items)"
+  done
+
+  echo "Do you want to delete all the above directories? (y/n)"
+  read -r choice
+  if [[ "$choice" == "y" || "$choice" == "Y" ]]; then
+    find . -type d -empty -exec rm -r {} +
+    echo "Deleted all empty directories."
+  else
+    echo "Operation canceled."
+  fi
+}
 
 alias refresh-zsh="source ~/.zshrc"
 
@@ -147,12 +179,12 @@ function ga() {
    git add "$1"
 }
 alias gaa="git add ."
-# function gcm() {
-#    git commit -m "$1"
-# }
 function gcm() {
-   git commit -m "$*"
+   git commit -m $1
 }
+
+# alias gcm="git commit -m"
+
 alias gpu="git push"
 alias gpl="git pull"
 function gac() {
