@@ -3,17 +3,57 @@
   pkgs,
   pkgs-unstable,
   ...
-}: {
+}: let
+  customBeets = pkgs.beets.override {
+    pluginOverrides = {
+      copyartifacts = {
+        enable = true;
+        propagatedBuildInputs = [pkgs.beetsPackages.copyartifacts];
+      };
+    };
+  };
+in {
   # Plasma Manager KDE Configuration
   imports = [./plasma-config.nix];
 
   home.packages =
     (with pkgs; [
-      # Add desktop-specific packages here
+      python312Packages.pyacoustid
+      python312Packages.discogs-client
+      python312Packages.flask
+      python312Packages.pylyrics
+      python312Packages.pyacoustid
+      python312Packages.pylast
+      python312Packages.requests
     ])
     ++ (with pkgs-unstable; [
       # Add unstable packages here
     ]);
+
+  # programs.beets = {
+  #   enable = true;
+  #   package = customBeets;
+  #   settingsFile = null;
+  # };
+  programs.beets = {
+    enable = true;
+    package = pkgs.beets.override {
+      pluginOverrides = {
+        copyartifacts = {
+          enable = true;
+          propagatedBuildInputs = [pkgs.beetsPackages.copyartifacts];
+        };
+      };
+    };
+
+    # Ensure `settings` is empty to avoid creating a default config.yaml
+    settings = {};
+
+    # # Optionally manage your `config.yaml` manually
+    # home.file.".config/beets/config.yaml" = {
+    #   source = ../../dotfiles/.config/beets/config.yaml; # Replace with the path to your custom config.yaml
+    # };
+  };
 
   home.file = {
   };

@@ -147,8 +147,11 @@ function ga() {
    git add "$1"
 }
 alias gaa="git add ."
+# function gcm() {
+#    git commit -m "$1"
+# }
 function gcm() {
-   git commit -m "$1"
+   git commit -m "$*"
 }
 alias gpu="git push"
 alias gpl="git pull"

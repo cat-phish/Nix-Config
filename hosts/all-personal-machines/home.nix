@@ -27,16 +27,10 @@ in {
       deskreen
 
       # beets and plugins
-      beets
-      beets-copyartifacts3
+      # beets-copyartifacts3
+      # beetsPackages.copyartifacts
       # python312Packages.chromaprint
-      python312Packages.pyacoustid
-      python312Packages.discogs-client
-      python312Packages.flask
-      python312Packages.pylyrics
-      python312Packages.pyacoustid
-      python312Packages.pylast
-      python312Packages.requests
+
       # python312Packages.pip
 
       flameshot
@@ -85,9 +79,9 @@ in {
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
-    "${config.xdg.configHome}/beets/config.yaml" = {
-      source = ../../dotfiles/.config/beets/config.yaml;
-    };
+    # "${config.xdg.configHome}/beets/config.yaml" = {
+    #   source = ../../dotfiles/.config/beets/config.yaml;
+    # };
     "${config.xdg.configHome}/kmonad" = {
       source = ../../dotfiles/.config/kmonad;
       recursive = true;

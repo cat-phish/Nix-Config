@@ -89,6 +89,14 @@
       ++ (with pkgs-unstable; [
         ]);
 
+    # nixpkgs.config = {
+    packageOverrides = pkgs: {
+      beets-plus-ca = pkgs.beets.override {
+        enableCopyArtifacts = true;
+      };
+    };
+    # };
+
     # Enable numlock on boot
     systemd.services.numLockOnTty = {
       wantedBy = ["multi-user.target"];
