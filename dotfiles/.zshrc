@@ -59,8 +59,8 @@ function delete_empty_dirs_bulk() {
   echo ""
   echo "Directories to delete (item counts shown):"
   find . -type d -empty -print0 | while IFS= read -r -d '' dir; do
-    echo "$dir (0 items)"
-  done
+    echo -e "$dir\t(0 items)"
+  done | column -t -s $'\t'
 
   echo "Do you want to delete all the above directories? (y/n)"
   read -r choice
