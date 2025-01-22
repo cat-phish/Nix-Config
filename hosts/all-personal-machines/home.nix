@@ -25,6 +25,7 @@ in {
       audacity
       chirp
       deskreen
+      dropbox
       flameshot
       hypnotix
       libreoffice-fresh
@@ -39,6 +40,7 @@ in {
       python39
       redshift
       restic
+      syncthing
       wineasio
       winetricks
       # wineWowPackages
