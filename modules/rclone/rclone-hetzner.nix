@@ -31,7 +31,7 @@
         Type = "simple";
         ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${hetznerDir}";
         ExecStart = ''
-          ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-main.conf \
+          ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-hetzner.conf \
           mount hetznercrypt: ${hetznerDir}
         '';
         ExecStop = "/run/current-system/sw/bin/fusermount -u ${hetznerDir}";
