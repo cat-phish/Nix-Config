@@ -33,7 +33,7 @@
         ExecStop = "/run/current-system/sw/bin/fusermount -u ${mediaserverDir}";
         Restart = "on-failure";
         RestartSec = "10s";
-        EnvironmentFile = "/home/jordan/.env";
+        EnvironmentFile = "/home/jordan/.env/.env";
         Environment = ["PATH=/run/wrappers/bin/:$PATH"];
       };
     };
