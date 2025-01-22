@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd ~/.nix || echo "~/.nix does not exist. Exiting" && exit 1
+#cd ~/.nix || echo "~/.nix does not exist. Exiting" && exit 1
 
 echo "Please choose the host type:"
 echo "1) Desktop"

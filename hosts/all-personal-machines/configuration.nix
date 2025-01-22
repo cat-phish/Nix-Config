@@ -90,11 +90,11 @@
         ]);
 
     # nixpkgs.config = {
-    packageOverrides = pkgs: {
-      beets-plus-ca = pkgs.beets.override {
-        enableCopyArtifacts = true;
-      };
-    };
+    #packageOverrides = pkgs: {
+     # beets-plus-ca = pkgs.beets.override {
+      #  enableCopyArtifacts = true;
+     # };
+    #};
     # };
 
     # Enable numlock on boot

@@ -19,7 +19,7 @@
 
   home.file = {
     "${config.xdg.configHome}/OpenRGB/" = {
-      source = ../../dotfiles/.config/OpenRGB/;
+      source = ../../dotfiles/.config/OpenRGB;
       recursive = true;
     };
     "${config.xdg.configHome}/touchegg/touchegg.conf" = {
