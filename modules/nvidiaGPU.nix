@@ -1,13 +1,14 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   ...
 }: {
-  environment.systemPackages = with pkgs-unstable; [cudatoolkit];
+  environment.systemPackages = with pkgs; [cudatoolkit];
 
   hardware.graphics.enable = true;
-  boot.kernelPackages = pkgs-unstable.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
   services.xserver.videoDrivers = ["nvidia"];
 
   boot.kernelParams = [
@@ -15,9 +16,9 @@
     "nvidia-drm.fbdev=1"
   ];
 
-  nixpkgs.config = {
-    packageOverrides = _: {inherit (pkgs-unstable) linuxPackages_latest nvidia_x11;};
-  };
+  # nixpkgs.config = {
+  #   packageOverrides = _: {inherit (pkgs-unstable) linuxPackages_latest nvidia_x11;};
+  # };
 
   hardware.nvidia = {
     # Modesetting is required.
@@ -49,6 +50,6 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 }

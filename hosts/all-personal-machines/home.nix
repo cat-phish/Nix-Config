@@ -1,23 +1,9 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   ...
-}: let
-  beets-copyartifacts3 = pkgs.python3Packages.buildPythonPackage rec {
-    pname = "copyartifacts";
-    version = "0.1.5";
-
-    src = pkgs.fetchFromGitHub {
-      owner = "adammillerio";
-      repo = "beets-copyartifacts";
-      rev = "v${version}";
-      sha256 = "UTZh7T6Z288PjxFgyFxHnPt0xpAH3cnr8/jIrlJhtyU=";
-    };
-
-    doCheck = false; # check requires infrastructure
-  };
-in {
+}: {
   home.packages =
     (with pkgs; [
       activate-linux
@@ -27,6 +13,8 @@ in {
       deskreen
       dropbox
       flameshot
+      ghostty
+      google-chrome
       hypnotix
       libreoffice-fresh
       mpv
@@ -41,6 +29,7 @@ in {
       redshift
       restic
       syncthing
+      wavebox
       wineasio
       winetricks
       # wineWowPackages
@@ -50,10 +39,8 @@ in {
       yt-dlp
       zoom
     ])
-    ++ (with pkgs-unstable; [
-      google-chrome
-      wavebox
-    ]);
+    ++ (with pkgs-stable; [
+      ]);
   programs.emacs = {
     enable = true;
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired

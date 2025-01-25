@@ -1,6 +1,6 @@
 {
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   ...
 }: {
   xdg.configFile."rclone/rclone-mediaserversmb.conf".text = ''

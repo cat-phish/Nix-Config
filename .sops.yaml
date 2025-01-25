@@ -1,0 +1,11 @@
+keys:
+  - &users:
+    - &primary age1pjup5wy2qc9x6e64ms9gvuqzh9nj4vv27f89kr80yhz56r6ve4qqjftyww
+  - &hosts:
+    - &desktop age15xckghhe86clljm539lmwhg6jw6e0wk2955yaqd4wcgy065g6v6s56dnwg
+creation_rules:
+  - path_regex: secrets.yaml$
+    key_groups:
+    - age:
+      - *primary
+      - *desktop

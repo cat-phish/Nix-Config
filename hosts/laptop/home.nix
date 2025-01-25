@@ -1,7 +1,7 @@
 {
   config,
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   ...
 }: {
   imports = [
@@ -14,7 +14,7 @@
   home.packages =
     (with pkgs; [
       ])
-    ++ (with pkgs-unstable; [
+    ++ (with pkgs-sstable; [
       ]);
 
   home.file = {

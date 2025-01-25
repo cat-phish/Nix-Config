@@ -2,10 +2,11 @@
   description = "My Flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
-    nixpkgs-unstable.url = "nixpkgs/nixos-unstable";
-    home-manager.url = "github:nix-community/home-manager/release-24.11";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
+    sops-nix.url = "github:Mic92/sops-nix";
     mynvim.url = "github:cat-phish/Neovim";
     kmonad = {
       url = "git+https://github.com/kmonad/kmonad?submodules=1&dir=nix";
@@ -25,20 +26,23 @@
   outputs = {
     self,
     nixpkgs,
-    nixpkgs-unstable,
+    nixpkgs-stable,
     home-manager,
+    # sops-nix,
     mynvim,
     kmonad,
     plasma-manager,
     darkmatter-grub-theme,
     nix-snapd,
     ...
-  }: let
+  } @ inputs: let
     lib = nixpkgs.lib;
     system = "x86_64-linux";
-    pkgs = nixpkgs.legacyPackages.${system};
-    # pkgs-unstable = nixpkgs-unstable.legacyPackages.${system};
-    pkgs-unstable = import nixpkgs-unstable {
+    pkgs = import nixpkgs {
+      inherit system;
+      config.allowUnfree = true;
+    };
+    pkgs-stable = import nixpkgs-stable {
       inherit system;
       config.allowUnfree = true;
     };
@@ -58,7 +62,8 @@
           }
         ];
         specialArgs = {
-          inherit pkgs-unstable;
+          inherit inputs;
+          inherit pkgs-stable;
           inherit plasma-manager;
         };
       };
@@ -68,11 +73,13 @@
           ./configuration.nix
           ./hosts/all-personal-machines/configuration.nix
           ./hosts/laptop/configuration.nix
+          # sops-nix.nixosModules.sops
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
         ];
         specialArgs = {
-          inherit pkgs-unstable;
+          inherit inputs;
+          inherit pkgs-stable;
           inherit plasma-manager;
         };
       };
@@ -86,7 +93,8 @@
           ./hosts/desktop/home.nix
         ];
         extraSpecialArgs = {
-          inherit pkgs-unstable;
+          inherit inputs;
+          inherit pkgs-stable;
           inherit mynvim;
           inherit plasma-manager;
         };
@@ -99,7 +107,8 @@
           ./hosts/laptop/home.nix
         ];
         extraSpecialArgs = {
-          inherit pkgs-unstable;
+          inherit inputs;
+          inherit pkgs-stable;
           inherit mynvim;
           inherit plasma-manager;
         };

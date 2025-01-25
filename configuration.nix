@@ -4,13 +4,15 @@
 {
   config,
   lib,
+  inputs,
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   ...
 }: {
   imports = [
     # Include the results of the hardware scan.
     # ./hardware-configuration.nix
+    inputs.sops-nix.nixosModules.sops
   ];
 
   options = {
@@ -75,7 +77,7 @@
     services.printing.enable = true;
 
     # Enable sound with pipewire.
-    hardware.pulseaudio.enable = false;
+    services.pulseaudio.enable = false;
     security.rtkit.enable = true;
     services.pipewire = {
       enable = true;
@@ -105,6 +107,30 @@
       shell = pkgs.zsh;
     };
 
+    # Enable sops-nix
+    sops = {
+      defaultSopsFile = ./secrets.yaml;
+      defaultSopsFormat = "yaml";
+      age = {
+        # automatically import host SSH keys as age keys
+        keyFile = "$HOME/.config/sops/age";
+        # uses age key that is expected to already be in filesystem
+        sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+        # generate key if the key above does not exist
+        generateKey = true;
+      };
+
+      # secrets will be output to /run/secrets
+      # e.g. /run/secrets/msmtp-password
+      # secrets required for user creation are handled in respective /users/<username>.nix files
+      # because they will be output to /run/secrets-for-users and only when a user is assigned to a host
+      secrets = {
+        # beets_acoustid_api = {
+        #   owner = config.users.users.jordan.name;
+        # };
+      };
+    };
+
     programs.zsh.enable = true;
     # Install firefox.
     # programs.firefox.enable = true;
@@ -123,6 +149,7 @@
     environment.systemPackages =
       (with pkgs; [
         # bpytop # no nix pkg
+        age
         clang
         coreutils
         filezilla
@@ -136,13 +163,14 @@
         nfs-utils
         nodePackages.nodejs
         rclone
+        sops
         tmux
         vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
         wget
         xclip
         zsh
       ])
-      ++ (with pkgs-unstable; [
+      ++ (with pkgs-stable; [
         ]);
 
     # Some programs need SUID wrappers, can be configured further or are

@@ -1,10 +1,15 @@
 {
   config,
+  inputs,
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   mynvim,
   ...
 }: {
+  imports = [
+    inputs.sops-nix.homeManagerModules.sops
+  ];
+
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
   home.username = "jordan";
@@ -20,6 +25,26 @@
   home.stateVersion = "24.11"; # Please read the comment before changing.
 
   nixpkgs.config.allowUnfree = true;
+
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    defaultSopsFormat = "yaml";
+    age = {
+      # automatically import host SSH keys as age keys
+      keyFile = "$HOME/.config/sops/age";
+      # uses age key that is expected to already be in filesystem
+      sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+      # generate key if the key above does not exist
+      generateKey = true;
+    };
+
+    # secrets will be output to /run/secrets
+    # e.g. /run/secrets/msmtp-password
+    # secrets required for user creation are handled in respective /users/<username>.nix files
+    # because they will be output to /run/secrets-for-users and only when a user is assigned to a host
+    secrets = {
+    };
+  };
 
   programs.git = {
     enable = true;
@@ -56,16 +81,16 @@
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages =
-    # Stable Packages
+    # Unstable Packages
     (with pkgs; [
-      keepassxc
-      nerdfonts
       noto-fonts-color-emoji
       oh-my-zsh
-    ])
-    # Unstable Packages
-    ++ (with pkgs-unstable; [
       wezterm
+    ])
+    # Stable Packages
+    ++ (with pkgs-stable; [
+      nerdfonts # moved to stable because the unstable requires individual fonts to be specified
+      keepassxc
     ])
     # Personal nixCats Nvim Flake
     ++ (with mynvim; [

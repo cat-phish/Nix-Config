@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  pkgs-unstable,
+  pkgs-stable,
   ...
 }: {
   imports = [
@@ -86,14 +86,14 @@
         ripgrep
         sqlite
       ])
-      ++ (with pkgs-unstable; [
+      ++ (with pkgs-stable; [
         ]);
 
     # nixpkgs.config = {
     #packageOverrides = pkgs: {
-     # beets-plus-ca = pkgs.beets.override {
-      #  enableCopyArtifacts = true;
-     # };
+    # beets-plus-ca = pkgs.beets.override {
+    #  enableCopyArtifacts = true;
+    # };
     #};
     # };
 
