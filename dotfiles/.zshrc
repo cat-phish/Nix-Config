@@ -1,11 +1,17 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/.emacs.d/bin:$PATH"
 # Path to your oh-my-zsh installation.
-export ZSH="$HOME/.oh-my-zsh"
-
-# TODO: add nixos update shortcuts to here and bashrc
+# export ZSH="$HOME/.oh-my-zsh"
 
 # Source Home Manager session variables
 if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
@@ -35,23 +41,10 @@ fi
 # source "$HOME/.config/sdm/lib/sdm_zsh_completion"
 
 # General
-alias cdh="cd ~"
 alias cdd="cd .."
 alias c="clear"
-alias lss="ls -a"
-
-# Delete empty directories including subdirectories
-# function delete_empty_dirs_bulk() {
-#   find . -type d -empty -print
-#   echo "Do you want to delete all the above directories? (y/n)"
-#   read -q "choice?"; echo
-#   if [[ "$choice" == "y" ]]; then
-#     find . -type d -empty -exec rm -r {} +
-#     echo "Deleted all empty directories."
-#   else
-#     echo "Operation canceled."
-#   fi
-# }
+# alias ls="eza"
+# alias ls="eza --color=always --long --git --no-filesize --icons=always --no-time --no-user --no-permissions"
 
 function delete_empty_dirs_bulk() {
   echo "Top-level directories that will remain:"
@@ -102,7 +95,6 @@ function start() {
 }
 
 # Run scripts with completion
-# # if ! command -v run &> /dev/null; then
 run() {
   "$HOME/.scripts/$1"
 }
@@ -112,7 +104,6 @@ _run_completion() {
   _describe 'script' scripts
 }
 compdef _run_completion run
-# # fi
 
 # Kmonad
 if [[ "$(hostname)" = "jordans-desktop" ]]; then
@@ -222,50 +213,51 @@ alias gcob="git checkout -b"
 # https://github.com/ryanoasis/nerd-fonts
 #
 #
-function last_two_dir {
-  # if we're at ~/ just display ~
-  if [ $PWD = $HOME ]; then
-    echo '%c'
-  # display cwd and parent directory
-  else
-    echo '%2d'
-  fi
-}
 
-function display_git {
-  if [ $(git_current_branch) ]; then
-    echo " {$(git_current_branch)}"
-  fi
-}
-
-# local cwd_color=040
+# function last_two_dir {
+#   # if we're at ~/ just display ~
+#   if [ $PWD = $HOME ]; then
+#     echo '%c'
+#   # display cwd and parent directory
+#   else
+#     echo '%2d'
+#   fi
+# }
+#
+# function display_git {
+#   if [ $(git_current_branch) ]; then
+#     echo " {$(git_current_branch)}"
+#   fi
+# }
+#
+# # local cwd_color=040
+# # local git_branch_color=028
+# # local arrow_color=040
+# # local arrow=''
+#
+# local cwd_color=255
 # local git_branch_color=028
-# local arrow_color=040
+# local arrow_color=255
 # local arrow=''
-
-local cwd_color=255
-local git_branch_color=028
-local arrow_color=255
-local arrow=''
-
-# add indicator for when inside vim spawned shell
-if [ $VIMRUNTIME ]; then
-  arrow_color=196
-  arrow=' '
-fi
-
-PROMPT='%{$FG[$cwd_color]%}$(last_two_dir)%{$FG[$git_branch_color]%}$(display_git) \
-%{$FG[$arrow_color]%}$arrow%{$reset_color%} '
-
-RPROMPT='$(git_prompt_status)%{$reset_color%}'
-
-ZSH_THEME_GIT_PROMPT_ADDED="%{$fg[green]%} ✚"
-ZSH_THEME_GIT_PROMPT_MODIFIED="%{$fg[blue]%} ✹"
-ZSH_THEME_GIT_PROMPT_DELETED="%{$fg[red]%} ✖"
-ZSH_THEME_GIT_PROMPT_RENAMED="%{$fg[magenta]%} ➜"
-ZSH_THEME_GIT_PROMPT_UNMERGED="%{$fg[yellow]%} ═"
-ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✭"
-
+#
+# # add indicator for when inside vim spawned shell
+# if [ $VIMRUNTIME ]; then
+#   arrow_color=196
+#   arrow=' '
+# fi
+#
+# PROMPT='%{$FG[$cwd_color]%}$(last_two_dir)%{$FG[$git_branch_color]%}$(display_git) \
+# %{$FG[$arrow_color]%}$arrow%{$reset_color%} '
+#
+# RPROMPT='$(git_prompt_status)%{$reset_color%}'
+#
+# ZSH_THEME_GIT_PROMPT_ADDED="%{$fg[green]%} ✚"
+# ZSH_THEME_GIT_PROMPT_MODIFIED="%{$fg[blue]%} ✹"
+# ZSH_THEME_GIT_PROMPT_DELETED="%{$fg[red]%} ✖"
+# ZSH_THEME_GIT_PROMPT_RENAMED="%{$fg[magenta]%} ➜"
+# ZSH_THEME_GIT_PROMPT_UNMERGED="%{$fg[yellow]%} ═"
+# ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✭"
+#
 
 # Set list of themes to pick from when loading at random
 # Setting this variable when ZSH_THEME=random will cause zsh to load
@@ -295,16 +287,16 @@ ZSH_THEME_GIT_PROMPT_UNTRACKED="%{$fg[cyan]%} ✭"
 # DISABLE_LS_COLORS="true"
 
 # Uncomment the following line to disable auto-setting terminal title.
-DISABLE_AUTO_TITLE="true"
-
-# Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
-
-# Uncomment the following line to display red dots whilst waiting for completion.
-# You can also set it to another string to have that shown instead of the default red dots.
-# e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
-# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
-COMPLETION_WAITING_DOTS="true"
+# DISABLE_AUTO_TITLE="true"
+#
+# # Uncomment the following line to enable command auto-correction.
+# ENABLE_CORRECTION="true"
+#
+# # Uncomment the following line to display red dots whilst waiting for completion.
+# # You can also set it to another string to have that shown instead of the default red dots.
+# # e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
+# # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
+# COMPLETION_WAITING_DOTS="true"
 
 # Uncomment the following line if you want to disable marking untracked files
 # under VCS as dirty. This makes repository status check for large repositories
@@ -330,14 +322,10 @@ COMPLETION_WAITING_DOTS="true"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(
-   git
-   history-substring-search
-   colored-man-pages
-   fzf
-)
+# plugins=(
+# )
 
-source $ZSH/oh-my-zsh.sh
+# source $ZSH/oh-my-zsh.sh
 
 # User configuration
 
@@ -365,7 +353,6 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 
 ### ZINIT PLUGIN MANAGER ###
@@ -386,23 +373,91 @@ zinit light-mode for \
     zdharma-continuum/zinit-annex-patch-dl \
     zdharma-continuum/zinit-annex-rust
 
+zinit ice depth=1; zinit light romkatv/powerlevel10k
 zinit ice depth=1
 zinit light jeffreytse/zsh-vi-mode
 zinit ice wait"1" lucid
 zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-syntax-highlighting
+zinit light zsh-users/zsh-completions
 zinit light agkozak/zsh-z
 
 # oh-my-zsh plugins
 zinit ice wait"1" lucid
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/colored-man-pages/colored-man-pages.plugin.zsh'
+zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/command-not-found/command-not-found.plugin.zsh' # offers suggestions for missing pkgs
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/copyfile/copyfile.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/copypath/copypath.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/extract/extract.plugin.zsh'
+zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/fzf/fzf.plugin.zsh'
+zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/git.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git-auto-fetch/git-auto-fetch.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/gitignore/gitignore.plugin.zsh'
-zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/rsync/rsync.plugin.zsh'
-zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/github/github.plugin.zsh'
+zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/rsync/rsync.plugin.zsh'
+zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/sudo/sudo.plugin.zsh' # press esc twice to prepend sudo to last command
+zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh'
+zinit light 'zsh-users/zsh-history-substring-search'
+zinit ice wait atload'_history_substring_search_config'
 
 ### End of Zinit's installer chunk
+
+# Load zsh-completions
+autoload -U compinit && compinit
+zinit cdreplay -q
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# zsh-autosuggestions setup
+HISTSIZE=5000
+HISTFILE=~/.zsh_history
+SAVEHIST=$HISTSIZE
+setopt appendhistory
+setopt sharehistory
+setopt hist_ignore_space # this makes it so you can prepend a space to a command to keep it out of history
+setopt hist_ignore_all_dups
+setopt hist_ignore_dups
+setopt hist_save_no_dups
+setopt hist_find_no_dups
+
+# Completion styling
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+# zstyle ':completion:*' menu no
+
+# history-substring-search mappings
+bindkey -M viins "$terminfo[kcuu1]" history-substring-search-up
+bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
+
+
+# Set up fzf key bindings and fuzzy completion
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source <(fzf --zsh)
+export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=header,grid --line-range :500 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+_fzf_comprun() {
+  local cmd=$1
+  shift
+
+  case "$cmd" in
+    cd)             fzf --preview  'eza --tree --color=always {} | head -200' "$@" ;;
+    export|unset)   fzf --preview "eval 'echo \$ {}'" "$@" ;;
+    *)              fzf --preview "--preview bat --color=always --style=header,grid --line-range :500 {}" "$@" ;;
+  esac
+}
+
+# zsh-vi-mode setup
+ZVM_VI_EDITOR=nvim
+
+# Set Bat Theme
+export BAT_THEME="1337"
+
+# set eza as default
+alias ls="eza --color=always --long --no-filesize --icons=always --no-time --no-user --no-permissions"
+
+# thefuck alias for commmand correction
+eval "$(thefuck --alias)"
+
+# Zoxide
+eval "$(zoxide init --cmd cd zsh)"

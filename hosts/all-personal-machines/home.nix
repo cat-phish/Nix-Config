@@ -8,10 +8,14 @@
     (with pkgs; [
       activate-linux
       appimage-run
+      asciiquarium-transparent # an aquarium, duh
       audacity
+      bat # cat replacement with syntax highlighting
       chirp
+      cmatrix # just take the blue pill
       deskreen
       dropbox
+      eza # ls replacement
       flameshot
       ghostty
       google-chrome
@@ -29,15 +33,18 @@
       redshift
       restic
       syncthing
+      thefuck # correct messed up commands
+      tlrc # abbreviated man pages
       wavebox
       wineasio
       winetricks
-      # wineWowPackages
-      wineWowPackages.waylandFull
+      wineWowPackages.unstable
+      # wineWowPackages.waylandFull
       vlc
       youtube-music
       yt-dlp
       zoom
+      zoxide
     ])
     ++ (with pkgs-stable; [
       ]);

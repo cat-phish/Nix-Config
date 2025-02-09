@@ -19,8 +19,13 @@
       url = "gitlab:VandalByte/darkmatter-grub-theme";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-flatpak.url = "github:gmodena/nix-flatpak";
     nix-snapd.url = "github:nix-community/nix-snapd";
     nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
+    erosanix = {
+      url = "github:emmanuelrosa/erosanix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -34,6 +39,7 @@
     plasma-manager,
     darkmatter-grub-theme,
     nix-snapd,
+    nix-flatpak,
     ...
   } @ inputs: let
     lib = nixpkgs.lib;
@@ -56,6 +62,7 @@
           ./hosts/desktop/configuration.nix
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
+          nix-flatpak.nixosModules.nix-flatpak
           nix-snapd.nixosModules.default
           {
             services.snap.enable = true;
@@ -65,6 +72,7 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit plasma-manager;
+          # inherit erosanix;
         };
       };
       jordans-laptop = lib.nixosSystem {
@@ -76,6 +84,7 @@
           # sops-nix.nixosModules.sops
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
+          nix-flatpak.nixosModules.nix-flatpak
         ];
         specialArgs = {
           inherit inputs;
@@ -97,6 +106,7 @@
           inherit pkgs-stable;
           inherit mynvim;
           inherit plasma-manager;
+          # inherit erosanix;
         };
       };
       "jordan@jordans-laptop" = home-manager.lib.homeManagerConfiguration {
@@ -111,6 +121,7 @@
           inherit pkgs-stable;
           inherit mynvim;
           inherit plasma-manager;
+          # inherit erosanix;
         };
       };
     };

@@ -96,6 +96,9 @@
     ++ (with mynvim; [
       packages.${pkgs.system}.nvim
     ])
+    # ++ (with inputs.erosanix; [
+    #   packages.i686-linux.foobar2000
+    # ])
     # Overrides
     ++ [
       # # It is sometimes useful to fine-tune packages, for example, by applying

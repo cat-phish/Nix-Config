@@ -3,6 +3,7 @@
   lib,
   pkgs,
   pkgs-stable,
+  # erosanix,
   ...
 }: {
   imports = [
@@ -22,6 +23,21 @@
       enable = true;
       nssmdns4 = true;
       openFirewall = true;
+    };
+
+    hardware.printers = {
+      ensurePrinters = [
+        {
+          name = "Brother_DCP-L2550DW_series";
+          location = "Home";
+          deviceUri = "dnssd://Brother%20DCP-L2550DW%20series._ipp._tcp.local/?uuid=e3248000-80ce-11db-8000-3c2af47e31d5";
+          model = "drv:///sample.drv/generpcl.ppd";
+          ppdOptions = {
+            PageSize = "Letter";
+          };
+        }
+      ];
+      ensureDefaultPrinter = "Brother_DCP-L2550DW_series";
     };
 
     nix.gc = {
@@ -80,22 +96,34 @@
         efibootmgr
         fd
         fuse
+        gutenprint # generic printer drivers
         kmonad
         lsp-plugins
         ntfs3g
         ripgrep
         sqlite
+        # erosanix.packages.i686-linux.foobar2000
       ])
       ++ (with pkgs-stable; [
         ]);
 
-    # nixpkgs.config = {
-    #packageOverrides = pkgs: {
-    # beets-plus-ca = pkgs.beets.override {
-    #  enableCopyArtifacts = true;
-    # };
-    #};
-    # };
+    services.flatpak = {
+      remotes = lib.mkOptionDefault [
+        {
+          name = "flathub";
+          location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+        }
+      ];
+      packages = [
+        # {
+        #   appId = "com.brave.Browser";
+        #   origin = "flathub";
+        # }
+        "com.usebottles.bottles"
+      ];
+      update.auto.enable = false;
+      uninstallUnmanaged = false;
+    };
 
     # Enable numlock on boot
     systemd.services.numLockOnTty = {
