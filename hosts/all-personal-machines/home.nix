@@ -36,10 +36,8 @@
       thefuck # correct messed up commands
       tlrc # abbreviated man pages
       wavebox
-      wineasio
-      winetricks
-      wineWowPackages.unstable
-      # wineWowPackages.waylandFull
+      # wineasio
+      # winetricks
       vlc
       youtube-music
       yt-dlp
@@ -71,5 +69,13 @@
       source = ../../dotfiles/.config/kmonad;
       recursive = true;
     };
+    "${config.xdg.dataHome}/applications/foobar2000.desktop".text = ''
+      [Desktop Entry]
+      Name=foobar2000
+      Exec=env WINEPREFIX="$HOME/.wine-foobar2000" WINEARCH=win32 wine "$HOME/wineapps/foobar2000_2.0/foobar2000.exe"
+      Type=Application
+      Icon="$HOME/.nix/dotfiles/.img/foobar.jpg"
+      Categories=AudioVideo;Player;
+    '';
   };
 }

@@ -9,7 +9,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     mynvim.url = "github:cat-phish/Neovim";
     kmonad = {
-      url = "git+https://github.com/kmonad/kmonad?submodules=1&dir=nix";
+      url = "github:kmonad/kmonad?dir=nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     plasma-manager.url = "github:mcdonc/plasma-manager/enable-look-and-feel-settings";

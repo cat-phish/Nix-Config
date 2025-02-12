@@ -102,6 +102,15 @@
         ntfs3g
         ripgrep
         sqlite
+        wine
+        wineasio
+        winetricks
+        wineWowPackages.full
+        pkgs.pkgsi686Linux.alsa-plugins
+        pkgs.pkgsi686Linux.libpulseaudio
+        pkgs.pkgsi686Linux.openal
+        # wineWowPackages.unstable
+        # wineWowPackages.waylandFull
         # erosanix.packages.i686-linux.foobar2000
       ])
       ++ (with pkgs-stable; [
