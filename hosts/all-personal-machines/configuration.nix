@@ -98,6 +98,7 @@
         fuse
         gutenprint # generic printer drivers
         kmonad
+        lshw
         lsp-plugins
         ntfs3g
         ripgrep

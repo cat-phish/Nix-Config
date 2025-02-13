@@ -14,11 +14,11 @@
   home.packages =
     (with pkgs; [
       ])
-    ++ (with pkgs-sstable; [
+    ++ (with pkgs-stable; [
       ]);
 
   home.file = {
-    "${config.xdg.configHome}/OpenRGB/" = {
+    "${config.xdg.configHome}/OpenRGB" = {
       source = ../../dotfiles/.config/OpenRGB;
       recursive = true;
     };
