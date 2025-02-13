@@ -63,7 +63,7 @@
     # Enable the KDE Plasma Desktop Environment.
     services.displayManager.sddm = {
       enable = true;
-      theme = "reactionary";
+      theme = "reactplus";
     };
     services.desktopManager.plasma6.enable = true;
 

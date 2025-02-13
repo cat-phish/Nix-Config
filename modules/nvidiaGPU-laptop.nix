@@ -10,9 +10,13 @@
     enable = true;
     enable32Bit = true;
   };
+
+  # Set specific kernel to use for gpu compatibility
   # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
-  services.xserver.videoDrivers = ["nvidia"];
+  boot.kernelPackages = pkgs.linuxPackages_6_12; # set to 6.12 for now because of issue with latest kernel
+
+  # Nvidia drivers and modesetting
+  services.xserver.videoDrivers = ["nvidia" "modesetting"];
 
   boot.kernelParams = [
     "nvidia-drm.modeset=1"

@@ -9,7 +9,7 @@
   hardware.graphics.enable = true;
   # boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelPackages = pkgs.linuxPackages_6_12;
-  services.xserver.videoDrivers = ["nvidia" "modesetting"];
+  services.xserver.videoDrivers = ["nvidia"];
 
   boot.kernelParams = [
     "nvidia-drm.modeset=1"

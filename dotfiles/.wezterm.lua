@@ -24,7 +24,7 @@ config = {
 
 	default_gui_startup_args = { "start" },
 
-	enable_wayland = true,
+	-- enable_wayland = true,
 
 	default_cwd = "~/",
 
