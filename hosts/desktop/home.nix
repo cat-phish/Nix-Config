@@ -16,6 +16,7 @@
 
   sops.secrets = {
     beets_acoustid_api = {};
+    env_file = {};
   };
 
   home.packages =
@@ -96,5 +97,6 @@
   };
 
   home.file = {
+    # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
   };
 }

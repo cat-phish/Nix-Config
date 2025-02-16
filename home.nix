@@ -30,9 +30,9 @@
     defaultSopsFile = ./secrets.yaml;
     defaultSopsFormat = "yaml";
     age = {
-      # automatically import host SSH keys as age keys
-      keyFile = "$HOME/.config/sops/age";
       # uses age key that is expected to already be in filesystem
+      keyFile = "$HOME/.config/sops/age";
+      # automatically import host SSH keys as age keys
       sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
       # generate key if the key above does not exist
       generateKey = true;

@@ -23,9 +23,9 @@ elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
 fi
 
 # Source the .env file if it exists
-if [ -f "$HOME/.env/.env" ]; then
+if [ -f "$HOME/.ssh/.env" ]; then
   set -a  # Automatically export all variables
-  source "$HOME/.env/.env"
+  source "$HOME/.ssh/.env"
   set +a  # Disable automatic export
 fi
 
@@ -75,6 +75,18 @@ alias nixcats="$HOME/coding/nixCats/result/bin/nvim"
 
 # Emacs
 alias org="emacs --init-directory=~/.config/emacs"
+
+# Restic Backups
+backup() {
+  if [ -z "$1" ]; then
+    echo "Usage: backup <path> <restic-commands>"
+    return 1
+  fi
+
+  local repo="$RESTIC_HOST/home/backup/$1"
+  shift
+  restic -r "$repo" "$@"
+}
 
 # SSH auto xterm-colors
 alias ssh-color="TERM=xterm-256color ssh"
@@ -164,39 +176,39 @@ function ts() {
 
 
 # Git
-alias g="git"
-alias gs="git status"
-function ga() {
-   git add "$1"
-}
-alias gaa="git add ."
-function gcm() {
-   git commit -m $1
-}
-
-# alias gcm="git commit -m"
-
-alias gpu="git push"
-alias gpl="git pull"
-function gac() {
-   if [[ -z "$1" ]]; then
-      echo "No commit message provided"
-      return
-   fi
-   git add .
-   git commit -m "$1"
-}
-function gacp() {
-   if [[ -z "$1" ]]; then
-      echo "No commit message provided"
-      return
-   fi
-   git add .
-   git commit -m "$1"
-   git push
-}
-alias gco="git checkout"
-alias gcob="git checkout -b"
+# alias g="git"
+# alias gs="git status"
+# function ga() {
+#    git add "$1"
+# }
+# alias gaa="git add ."
+# function gcm() {
+#    git commit -m $1
+# }
+#
+# # alias gcm="git commit -m"
+#
+# alias gpu="git push"
+# alias gpl="git pull"
+# function gac() {
+#    if [[ -z "$1" ]]; then
+#       echo "No commit message provided"
+#       return
+#    fi
+#    git add .
+#    git commit -m "$1"
+# }
+# function gacp() {
+#    if [[ -z "$1" ]]; then
+#       echo "No commit message provided"
+#       return
+#    fi
+#    git add .
+#    git commit -m "$1"
+#    git push
+# }
+# alias gco="git checkout"
+# alias gcob="git checkout -b"
 
 
 ### OH-MY-ZSH CONFIG ###
@@ -454,7 +466,7 @@ ZVM_VI_EDITOR=nvim
 export BAT_THEME="1337"
 
 # set eza as default
-alias ls="eza --color=always --long --no-filesize --icons=always --no-time --no-user --no-permissions"
+alias lss="eza --color=always --long --no-filesize --icons=always --no-time --no-user --no-permissions"
 
 # thefuck alias for commmand correction
 eval "$(thefuck --alias)"
