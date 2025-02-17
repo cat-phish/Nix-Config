@@ -16,6 +16,8 @@
 
     hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
+    services.libinput.touchpad.disableWhileTyping = true;
+
     environment.systemPackages =
       (with pkgs; [
         openrgb-with-all-plugins
