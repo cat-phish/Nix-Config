@@ -1,0 +1,21 @@
+{
+	"name": "Vimium C",
+	"@time": "2/16/2025, 9:14:36 AM",
+	"time": 1739726076682,
+	"environment": {
+		"extension": "2.11.3",
+		"platform": "linux",
+		"chromium": 132
+	},
+	"allBrowserUrls": true,
+	"keyLayout": 2,
+	"keyMappings": [
+		"#!no-check",
+		"unmap f",
+		"unmap F",
+		"map s LinkHints.activate",
+		"map S LinkHints.activateOpenInNewForegroundTab",
+		""
+	],
+	"vimSync": true
+}

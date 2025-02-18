@@ -20,6 +20,8 @@
       ghostty
       google-chrome
       hypnotix
+      kdePackages.konversation
+      kvirc
       libreoffice-fresh
       mpv
       multiviewer-for-f1

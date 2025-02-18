@@ -1,0 +1,22 @@
+[
+  {
+    "id": "ace1b668-2569-4699-a107-20321c01638a",
+    "sites": "",
+    "sitesArray": [
+      ""
+    ],
+    "key": "ctrl+y",
+    "label": "Next Tab",
+    "action": "movetabright"
+  },
+  {
+    "key": "ctrl+g",
+    "label": "Prev Tab",
+    "action": "movetableft",
+    "id": "e95daeaa-87d4-4275-a7ea-deee803e317c",
+    "sites": "",
+    "sitesArray": [
+      ""
+    ]
+  }
+]
