@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 
-
-current_exit=$(tailscale status --json | jq -r '.Self.ExitNodeID // empty')
+current_exit_ip=$(tailscale status --json | jq -r '.Self.ExitNodeIP // empty')
 
 get_exit_nodes() {
-    tailscale status --json | jq -r '.Peer | to_entries[] | select(.value.ExitNodeOption == true) | "\(.key) (\(.value.HostName))"'
+    tailscale status --json | jq -r '.Peer | to_entries[] | select(.value.ExitNodeOption == true) | "\(.value.TailscaleIPs[0]) (\(.value.HostName))"'
 }
 
-if [[ -z "$current_exit" ]]; then
+if [[ -z "$current_exit_ip" ]]; then
     echo "No exit node is currently set."
     available_nodes=$(get_exit_nodes)
     
@@ -16,20 +15,21 @@ if [[ -z "$current_exit" ]]; then
         exit 1
     fi
     
-    echo "Available exit nodes:"
+    echo "Available exit nodes (Tailscale IP and Hostname):"
     echo "$available_nodes"
     
-    echo "Enter the exit node ID to connect (or press Enter to cancel):"
-    read -r exit_node_id
+    echo "Enter the Tailscale IP of the exit node to connect (or press Enter to cancel):"
+    read -r exit_node_ip
     
-    if [[ -n "$exit_node_id" ]]; then
-        sudo tailscale set --exit-node="$exit_node_id"
-        echo "Connected to exit node: $exit_node_id"
+    if [[ -n "$exit_node_ip" ]]; then
+        sudo tailscale set --exit-node="$exit_node_ip"
+        echo "Connected to exit node: $exit_node_ip"
     else
         echo "No exit node selected."
     fi
 else
-    echo "Currently using exit node: $current_exit"
+    current_exit_host=$(tailscale status --json | jq -r '.Peer | to_entries[] | select(.value.TailscaleIPs[0] == "'"$current_exit_ip"'") | .value.HostName')
+    echo "Currently using exit node: $current_exit_ip ($current_exit_host)"
     echo "Would you like to disconnect? (y/n)"
     read -r response
     if [[ "$response" == "y" ]]; then
@@ -39,4 +39,3 @@ else
         echo "Exit node remains connected."
     fi
 fi
-
