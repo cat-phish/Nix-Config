@@ -46,6 +46,8 @@
       options = "--delete-older-than +20";
     };
 
+    services.tailscale.enable = true;
+
     #### Bootloader ###
 
     # Use the systemd-boot EFI boot loader.
