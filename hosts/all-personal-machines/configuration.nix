@@ -104,6 +104,7 @@
         ntfs3g
         ripgrep
         sqlite
+        traceroute
         wine
         wineasio
         winetricks
