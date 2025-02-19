@@ -46,8 +46,6 @@
       options = "--delete-older-than +20";
     };
 
-    services.tailscale.enable = true;
-
     #### Bootloader ###
 
     # Use the systemd-boot EFI boot loader.
@@ -99,6 +97,7 @@
         fd
         fuse
         gutenprint # generic printer drivers
+        jq
         kmonad
         lshw
         lsp-plugins
