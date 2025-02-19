@@ -24,6 +24,23 @@
       ++ (with pkgs-stable; [
         ]);
 
+    services.xserver = {
+      xrandrHeads = [
+        {
+          output = "DP-1";
+          primary = true;
+        }
+        {
+          output = "DP-2";
+          monitorConfig = ''Option "Enable" "false"'';
+        }
+        {
+          output = "HDMI-0";
+          monitorConfig = ''Option "Enable" "false"'';
+        }
+      ];
+      exportConfiguration = true;
+    };
     ### Services ###
 
     # Kmonad configuration
