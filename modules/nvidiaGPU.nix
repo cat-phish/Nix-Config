@@ -7,8 +7,8 @@
   environment.systemPackages = with pkgs; [cudatoolkit];
 
   hardware.graphics.enable = true;
-  # boot.kernelPackages = pkgs.linuxPackages_latest;
-  boot.kernelPackages = pkgs.linuxPackages_6_12;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
+  # boot.kernelPackages = pkgs.linuxPackages_6_12;
   services.xserver.videoDrivers = ["nvidia"];
 
   boot.kernelParams = [
@@ -29,7 +29,7 @@
       # Enable this if you have graphical corruption issues or application crashes after waking
       # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
       # of just the bare essentials.
-      enable = false;
+      enable = true;
 
       # Fine-grained power management. Turns off GPU when not in use.
       # Experimental and only works on modern Nvidia GPUs (Turing or newer).

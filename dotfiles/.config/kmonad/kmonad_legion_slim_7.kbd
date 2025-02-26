@@ -163,43 +163,49 @@
    lalt (around lalt (layer-toggle main-shift))  ;; toggles on main-shift layer that contains longer delays for shortcuts layer
 
    ;; main layer letter shortcuts, these should each have corresponding delay layer shortcuts
-   d (tap-hold 200 d (layer-toggle shortcuts)) ;; s on short press, toggle shortcuts layer on hold
-   k (tap-hold 200 k (layer-toggle shortcuts)) ;; k on short press, toggle shortcuts layer on hold
+   d (tap-hold 200 d (layer-toggle d-cuts)) ;; s on short press, toggle shortcuts layer on hold
+   s (tap-hold 200 s (layer-toggle s-cuts))  ;; f on short press, alt on hold
+   ;; k (tap-hold 200 k (layer-toggle d-cuts)) ;; k on short press, toggle shortcuts layer on hold
    a (tap-hold 200 a (layer-toggle altcuts))  ;; a on short press, toggle altcuts layer on hold
 
    ;; ctrl layer mappings
-   c-a (tap-hold 200 C-a (layer-toggle shortcuts))
+   ;; c-a (tap-hold 200 C-a (layer-toggle d-cuts))
  
-   ;; shortcuts layer aliases
+   ;; d-cuts layer aliases
    acr A-ret  ;; tap alt-ret
    atab (tap-hold 250 A-tab M-A-right)  ;; tap switch app, cycle screens/windows
    aspc A-spc  ;; ulauncher
    tmx (tap-hold 200 C-q (tap-macro C-q F))  ;; tap tmux prefix, hold tmux fzf session finder
    sfcp C-a  ;; nvim/vim softcaps
-   rmx C-x  ;; tmux remote prefix
+   rmx C-b  ;; tmux remote prefix
    dkl C-M-left  ;; switch desktop left
    dkr C-M-right ;; switch desktop right
-   tabp C-g   ;; previous chrome tab/tmux window
-   tabn C-y   ;; next chrome tab/tmux window
-   d1 (tap-hold 200 C-M-1 M-A-1)  ;; switch to desktop 1
-   d2 (tap-hold 200 C-M-2 M-A-2)  ;; switch to desktop 2
-   d3 (tap-hold 200 C-M-3 M-A-3)  ;; hold for 4th desktop
-   lsd (tap-hold 200 C-M-0 C-M-4)  ;; hold for 4th desktop
-   comp (tap-hold 150 C-ret C-S-ret)  ;; auto complete (hold for copilot complete)
-   tild (tap-hold 200 ~ (tap-macro ~ /))
-   swbf (tap-macro esc spc b b)  ;; switch buffer in nvim
-   cmt (tap-macro esc c c)  ;; clear line and insert in nvim/vim
-   cpy (tap-hold 250 C-c C-S-c)  ;; tap copy, hold raw copy
-   pst (tap-hold 250 C-V C-S-v)  ;; tap paste, hold raw paste, also acts as Ctrl-v for Vim
-   min C-M-bspc  ;; minimize window, corresponds to kwin keymap
+   tabp C-g   ;; previous browser tab/tmux window
+   tabn C-y   ;; next browser tab/tmux window
+   d1 (tap-hold 200 C-M-1 M-A-1)  ;; switch to desktop 1, hold to move window to desktop 1
+   d2 (tap-hold 200 C-M-2 M-A-2)  ;; switch to desktop 2, hold to move window to desktop 2
+   d3 (tap-hold 200 C-M-3 M-A-3)  ;; switch to desktop 3, hold to move window to desktop 3
+   lsd (tap-hold 200 C-M-0 C-M-4)  ;; last used desktop, hold to switch to 4th desktop
+   tild (tap-hold 200 ~ (tap-macro ~ /))  ;; tap ~, hold ~/
+   cpy (tap-hold 200 C-c C-S-c)  ;; tap copy, hold raw copy
+   pst (tap-hold 200 C-V C-S-v)  ;; tap paste, hold raw paste
+   min M-pgdn  ;; minimize window, corresponds to kwin keymap
    cup C-up  ;; ctrl-up
    cdn C-down ;; ctrl-down
    crt C-right ;; ctrl-right
    clf C-left ;; ctrl-left
-   nxt (tap-hold 250 C-n A-n) ;; tap next cmp suggestion, hold next copilot suggestion
-   prv (tap-hold 250 C-p A-p) ;; tap prev cmp suggestion, hold prev copilot suggestion
-   fw C-right  ;; forward by word
-   bw C-left  ;; backward by word
+   nxt (tap-hold 200 C-n A-n) ;; tap next cmp suggestion, hold next copilot suggestion
+   prv (tap-hold 200 C-p A-p) ;; tap prev cmp suggestion, hold prev copilot suggestion
+   fw C-right
+   bw C-left
+
+   ;; f-cuts
+   alf A-h
+   wlf (tap-hold 200 C-A-left C-M-A-left) ;; switch left screen, move window to left screen
+   wrt (tap-hold 200 C-A-right C-M-A-right) ;; switch right screen, move window to right screen
+   w1 (tap-hold 200 C-A-1 C-M-A-1) ;; switch to screen 1, move window to screen 1
+   w2 (tap-hold 200 C-A-2 C-M-A-2) ;; switch to screen 2, move window to screen 2
+   w3 (tap-hold 200 C-A-3 C-M-A-3) ;; switch to screen 3, move window to screen 3
 
 
 
@@ -233,7 +239,7 @@
   caps f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  ins ssrq del home  end  pgup pgdn
   grv  1    2    3    4    5    6    7    8    9    0    -    =   bspc         @nlck @ksp @kap kp-
   tab   q    w    e    r    t    y    u    i    o    p    [    ]  \             kp7   kp8  kp9  kp+
-  @ectl @a    s    @d    f    g    h    j  @k    l    ;    '      ret            kp4   kp5  kp6
+  @ectl @a   @s   @d    f    g    h    j    k    l    ;    '      ret            kp4   kp5  kp6
   @lsft     z    x    c    v    b    n    m    ,    .    /      rsft            kp1   kp2  kp3  kprt
   lctl lmet lalt          spc                   @ralt  rctl       up         kp0        @dotcom
                                                                left down rght
@@ -253,7 +259,7 @@
 )
 
 ;; this layer is for commonly used shortcuts and motions when typing or coding
-(deflayer shortcuts
+(deflayer d-cuts
    XX  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  XX  @min    XX   XX   XX   XX
    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   @atab          XX   XX   XX   XX
   @atab  XX  @fw   XX   XX   XX   XX   XX   XX   XX @prv @dkl @dkr  @tild         @eml @msg @dis XX
@@ -261,6 +267,16 @@
   lsft     XX  @cmt  @cpy @pst @bw  @nxt @lsd @d1  @d2  @d3         XX            @web @red @twi XX
   lctl lmet lalt            @aspc                     XX    XX      @cup           XX        XX
                                                                @clf @cdn  @crt
+)
+
+(deflayer s-cuts
+   XX  XX   XX   XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  XX   XX   XX   XX   XX   XX
+   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX           XX   XX   XX   XX
+   XX    XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  @wlf @wrt XX           XX   XX   XX   XX
+   XX     XX   XX   XX   XX   XX   A-h  A-j  A-k  A-l  XX   XX      XX           XX   XX   XX
+   XX      XX   XX   XX   XX   XX   XX   XX   @w1  @w2  @w3         XX           XX   XX   XX   XX
+   XX   XX   XX             XX                       XX    XX        XX          XX        XX
+                                                                XX   XX   XX
 )
 
 ;; this layer is for lesser used shortcuts and app/script launching

@@ -102,8 +102,8 @@
       "kwin"."Switch to Screen 7" = [ ];
       "kwin"."Switch to Screen Above" = [ ];
       "kwin"."Switch to Screen Below" = [ ];
-      "kwin"."Switch to Screen to the Left" = "Ctrl+Alt+Left";
-      "kwin"."Switch to Screen to the Right" = "Ctrl+Alt+Right";
+      "kwin"."Switch to Screen to the Left" = [ ];
+      "kwin"."Switch to Screen to the Right" = [ ];
       "kwin"."Toggle Night Color" = [ ];
       "kwin"."Toggle Window Raise/Lower" = [ ];
       "kwin"."Walk Through Windows" = "Alt+Tab";
@@ -139,8 +139,8 @@
       "kwin"."Window One Desktop to the Right" = "Meta+Ctrl+Shift+Right";
       "kwin"."Window One Screen Down" = [ ];
       "kwin"."Window One Screen Up" = [ ];
-      "kwin"."Window One Screen to the Left" = "Meta+Ctrl+Alt+Left";
-      "kwin"."Window One Screen to the Right" = "Meta+Ctrl+Alt+Right";
+      "kwin"."Window One Screen to the Left" = [ ];
+      "kwin"."Window One Screen to the Right" = [ ];
       "kwin"."Window Operations Menu" = "Alt+F3";
       "kwin"."Window Pack Down" = [ ];
       "kwin"."Window Pack Left" = [ ];

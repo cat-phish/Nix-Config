@@ -53,6 +53,8 @@
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
   };
 
+  services.emacs.enable = true;
+
   home.file = {
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;

@@ -62,6 +62,18 @@ delete_empty_dirs_bulk() {
 
 alias refresh-bash="source ~/.bashrc"
 
+run() {
+  "$HOME/.scripts/$1"
+}
+
+_run_completion() {
+  local scripts
+  scripts=$(ls "$HOME/.scripts/")
+  COMPREPLY=($(compgen -W "$scripts" -- "${COMP_WORDS[1]}"))
+}
+
+complete -F _run_completion run
+
 # Neovim
 alias v="nvim"
 alias vv="nvim ."
@@ -79,14 +91,6 @@ search-bash-history() {
     grep -a "$1" ~/.bash_history
 }
 
-start() {
-    tmux new -d -s tmp
-    sleep 1
-    tmux send-keys -t tmp ./.config/tmux/plugins/tmux-resurrect/scripts/restore.sh Enter
-    sleep 2
-    tmux kill-session -t tmp
-    tmux a -t main
-}
 
 # Kmonad
 if [[ "$(hostname)" = "jordans-desktop" ]]; then

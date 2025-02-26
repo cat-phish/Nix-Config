@@ -152,6 +152,7 @@
         age
         clang
         coreutils
+        exfat
         filezilla
         firefox
         fzf

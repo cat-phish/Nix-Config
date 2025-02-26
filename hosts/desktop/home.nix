@@ -22,6 +22,7 @@
   home.packages =
     (with pkgs; [
       chromaprint
+      electrum
       python312Packages.pyacoustid
       python312Packages.discogs-client
       python312Packages.flask
