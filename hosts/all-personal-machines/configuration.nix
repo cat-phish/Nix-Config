@@ -132,9 +132,15 @@
         #   origin = "flathub";
         # }
         "com.usebottles.bottles"
+        "dev.deedles.Trayscale"
       ];
       update.auto.enable = false;
       uninstallUnmanaged = false;
+    };
+
+    services.tailscale = {
+      enable = true;
+      useRoutingFeatures = "client";
     };
 
     # Enable numlock on boot

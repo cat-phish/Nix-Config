@@ -33,7 +33,6 @@
       pocket-casts
       python39
       redshift
-      restic
       syncthing
       thefuck # correct messed up commands
       tlrc # abbreviated man pages
@@ -47,7 +46,8 @@
       zoxide
     ])
     ++ (with pkgs-stable; [
-      ]);
+      restic
+    ]);
   programs.emacs = {
     enable = true;
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired

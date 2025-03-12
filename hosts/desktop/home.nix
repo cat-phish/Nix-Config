@@ -36,11 +36,11 @@
 
   programs.beets = {
     enable = true;
-    package = pkgs.beets.override {
+    package = pkgs-stable.beets.override {
       pluginOverrides = {
         copyartifacts = {
           enable = true;
-          propagatedBuildInputs = [pkgs.beetsPackages.copyartifacts];
+          propagatedBuildInputs = [pkgs-stable.beetsPackages.copyartifacts];
         };
       };
     };
