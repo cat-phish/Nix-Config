@@ -21,8 +21,10 @@
 
   home.packages =
     (with pkgs; [
+      calibre
       chromaprint
       electrum
+      kid3-kde
       python312Packages.pyacoustid
       python312Packages.discogs-client
       python312Packages.flask
@@ -30,6 +32,7 @@
       python312Packages.pyacoustid
       python312Packages.pylast
       python312Packages.requests
+      qbittorrent
     ])
     ++ (with pkgs-stable; [
       ]);

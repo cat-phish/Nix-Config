@@ -18,11 +18,6 @@
 
     services.libinput.touchpad.disableWhileTyping = true;
 
-    services.tailscale = {
-      enable = true;
-      useRoutingFeatures = "client";
-    };
-
     environment.systemPackages =
       (with pkgs; [
         openrgb-with-all-plugins

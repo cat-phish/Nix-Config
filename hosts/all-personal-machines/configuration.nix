@@ -105,6 +105,8 @@
         ripgrep
         sqlite
         traceroute
+      ])
+      ++ (with pkgs-stable; [
         wine
         wineasio
         winetricks
@@ -115,9 +117,7 @@
         # wineWowPackages.unstable
         # wineWowPackages.waylandFull
         # erosanix.packages.i686-linux.foobar2000
-      ])
-      ++ (with pkgs-stable; [
-        ]);
+      ]);
 
     services.flatpak = {
       remotes = lib.mkOptionDefault [

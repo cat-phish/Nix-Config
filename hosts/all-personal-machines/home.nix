@@ -18,11 +18,13 @@
       eza # ls replacement
       flameshot
       ghostty
+      gimp
       google-chrome
       hypnotix
       kdePackages.konversation
       kvirc
       libreoffice-fresh
+      mouseless
       mpv
       multiviewer-for-f1
       navi
@@ -31,10 +33,11 @@
       nurl # fetching nix package options from git, maybe others
       pinta
       pocket-casts
-      python39
+      # python39
+      puddletag
       redshift
       syncthing
-      thefuck # correct messed up commands
+      # thefuck # correct messed up commands
       tlrc # abbreviated man pages
       wavebox
       # wineasio
