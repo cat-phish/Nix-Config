@@ -39,7 +39,6 @@
       syncthing
       # thefuck # correct messed up commands
       tlrc # abbreviated man pages
-      wavebox
       # wineasio
       # winetricks
       vlc
@@ -50,6 +49,7 @@
     ])
     ++ (with pkgs-stable; [
       restic
+      wavebox
     ]);
   programs.emacs = {
     enable = true;

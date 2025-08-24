@@ -138,6 +138,10 @@
     # Allow unfree packages
     nixpkgs.config.allowUnfree = true;
 
+    nixpkgs.config.permittedInsecurePackages = [
+      "wavebox-10.133.4-2"
+    ];
+
     # Enable the Flakes feature and the accompanying new nix command-line tool
     nix.settings.experimental-features = ["nix-command" "flakes"];
 
