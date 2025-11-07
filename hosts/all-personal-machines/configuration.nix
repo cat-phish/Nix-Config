@@ -3,10 +3,13 @@
   lib,
   pkgs,
   pkgs-stable,
+  talon-nix,
+  # winboat,
   # erosanix,
   ...
 }: {
   imports = [
+    # ../../modules/winboat.nix
   ];
   options = {
     # Enable numlock on boot
@@ -90,12 +93,20 @@
         configurationLimit = 20;
       };
     };
+
+    nixpkgs.config.permittedInsecurePackages = [
+      "wavebox-10.133.4-2"
+      "electron-35.7.5"
+      "ventoy-1.1.07"
+    ];
+
     environment.systemPackages =
       (with pkgs; [
         aspell
         efibootmgr
         fd
         fuse
+        gparted
         gutenprint # generic printer drivers
         jq
         kmonad
@@ -107,6 +118,7 @@
         traceroute
       ])
       ++ (with pkgs-stable; [
+        # wavebox
         wine
         wineasio
         winetricks
@@ -117,6 +129,7 @@
         # wineWowPackages.unstable
         # wineWowPackages.waylandFull
         # erosanix.packages.i686-linux.foobar2000
+        ventoy
       ]);
 
     services.flatpak = {
@@ -142,6 +155,9 @@
       enable = true;
       useRoutingFeatures = "client";
     };
+
+    #Enable Talon Voice Control
+    programs.talon.enable = true;
 
     # Enable numlock on boot
     systemd.services.numLockOnTty = {

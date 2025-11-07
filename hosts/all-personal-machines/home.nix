@@ -2,6 +2,10 @@
   config,
   pkgs,
   pkgs-stable,
+  # isNixos will be passed via extraSpecialArgs from the flake.
+  # Default to true to preserve current behaviour for your NixOS hosts.
+  isNixos ? true,
+  lib,
   ...
 }: {
   home.packages =
@@ -30,18 +34,23 @@
       navi
       neofetch
       neovide
+      noisetorch
       nurl # fetching nix package options from git, maybe others
       pinta
       pocket-casts
       # python39
       puddletag
+      pulseaudio
       redshift
       syncthing
+      # talon-nix.packages.${builtins.currentSystem}.default
       # thefuck # correct messed up commands
       tlrc # abbreviated man pages
       # wineasio
       # winetricks
       vlc
+      vscode
+      winboat
       youtube-music
       yt-dlp
       zoom
@@ -49,8 +58,13 @@
     ])
     ++ (with pkgs-stable; [
       restic
-      wavebox
+      # wavebox
     ]);
+
+  # Example: if you later need to add home items that should only be applied
+  # on NixOS hosts (for example, user config that relies on system-level units),
+  # use `lib.mkIf isNixos [ ... ]` to guard them. On Fedora (isNixos=false)
+  # those blocks will be skipped.
   programs.emacs = {
     enable = true;
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired

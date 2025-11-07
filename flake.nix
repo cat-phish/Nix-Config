@@ -22,10 +22,15 @@
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     nix-snapd.url = "github:nix-community/nix-snapd";
     nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
-    erosanix = {
-      url = "github:emmanuelrosa/erosanix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    talon-nix.url = "github:nix-community/talon-nix";
+    # winboat= {
+    #   url = "github:TibixDev/winboat";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
+    # erosanix = {
+    #   url = "github:emmanuelrosa/erosanix";
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
   };
 
   outputs = {
@@ -40,6 +45,8 @@
     darkmatter-grub-theme,
     nix-snapd,
     nix-flatpak,
+    talon-nix,
+    # winboat,
     ...
   } @ inputs: let
     lib = nixpkgs.lib;
@@ -106,6 +113,10 @@
           inherit pkgs-stable;
           inherit mynvim;
           inherit plasma-manager;
+          inherit talon-nix;
+          # host is NixOS
+          isNixos = true;
+          # inherit winboat;
           # inherit erosanix;
         };
       };
@@ -121,6 +132,29 @@
           inherit pkgs-stable;
           inherit mynvim;
           inherit plasma-manager;
+          inherit talon-nix;
+          # host is NixOS
+          isNixos = true;
+          # inherit winboat;
+          # inherit erosanix;
+        };
+      };
+      "jordan@fedora-live" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./home.nix
+          ./hosts/all-personal-machines/home.nix
+          ./hosts/fedora-live/home.nix
+        ];
+        extraSpecialArgs = {
+          inherit inputs;
+          inherit pkgs-stable;
+          inherit mynvim;
+          inherit plasma-manager;
+          inherit talon-nix;
+          # host is not NixOS (Fedora)
+          isNixos = false;
+          # inherit winboat;
           # inherit erosanix;
         };
       };

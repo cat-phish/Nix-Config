@@ -52,7 +52,7 @@ device_queue_location="/Podcasts"
 max_age=180
 
 # Define the array of podcasts to auto queue (this should match case-sensitive to the folder names of each podcast)
-auto_queue_shows=("Grey Wolf Feed" "TRUE ANON TRUTH FEED" "Box of Neutrals F1 Podcast" "Pendejo Time" "The Late-Round Fantasy Football Podcast" "WFYM PREMIUM")
+auto_queue_shows=("Chapo Trap House" "Grey Wolf Feed" "TRUE ANON TRUTH FEED" "Box of Neutrals F1 Podcast" "Pendejo Time" "The Late-Round Fantasy Football Podcast" "WFYM PREMIUM")
 
 # Auto clean the Queue.m3u8 file based on the most recent bookmark from Queue.m3u8.bmark
 auto_clean_queue="yes"
@@ -87,7 +87,7 @@ ssh_port="$MEDIASERVER_SSH_PORT"
 
 # Mount the drive
 mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
-
+# mount | grep "$mount_point" | grep 'ro,' && echo "Device mounted read-only!" && exit 1
 # Wait for a specified period of time (e.g., 5 seconds)
 sleep $sleep_time
 

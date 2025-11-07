@@ -4,7 +4,7 @@
   pkgs-stable,
   ...
 }: {
-  environment.systemPackages = with pkgs; [cudatoolkit];
+  environment.systemPackages = with pkgs-stable; [cudatoolkit];
 
   hardware.graphics.enable = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;

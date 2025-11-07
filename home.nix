@@ -4,10 +4,12 @@
   pkgs,
   pkgs-stable,
   mynvim,
+  # talon-nix,
   ...
 }: {
   imports = [
     inputs.sops-nix.homeManagerModules.sops
+    # inputs.talon-nix.nixosModules.talon
   ];
 
   # Home Manager needs a bit of information about you and the paths it should
@@ -25,6 +27,10 @@
   home.stateVersion = "24.11"; # Please read the comment before changing.
 
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "wavebox-10.133.4-2"
+    "electron-35.7.5"
+  ];
 
   sops = {
     defaultSopsFile = ./secrets.yaml;
@@ -48,9 +54,9 @@
 
   programs.git = {
     enable = true;
-    userName = "cat-phish";
-    userEmail = "134035929+cat-phish@users.noreply.github.com";
-    extraConfig = {
+    settings = {
+      user.name = "cat-phish";
+      user.email = "134035929+cat-phish@users.noreply.github.com";
       init.defaultBranch = "main";
     };
   };
@@ -96,6 +102,9 @@
     ++ (with mynvim; [
       packages.${pkgs.system}.nvim
     ])
+    # ++ (with talon-nix; [
+    #   packages.${builtins.currentSystem}.default
+    # ])
     # ++ (with inputs.erosanix; [
     #   packages.i686-linux.foobar2000
     # ])

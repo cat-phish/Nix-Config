@@ -3,6 +3,9 @@
   inputs,
   pkgs,
   pkgs-stable,
+  # ensure we know this is not NixOS when invoked via the flake
+  isNixos ? false,
+  lib,
   ...
 }: {
   # Plasma Manager KDE Configuration

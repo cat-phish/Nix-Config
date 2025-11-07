@@ -469,7 +469,7 @@ export BAT_THEME="1337"
 alias lss="eza --color=always --long --no-filesize --icons=always --no-time --no-user --no-permissions"
 
 # thefuck alias for commmand correction
-eval "$(thefuck --alias)"
+# eval "$(thefuck --alias)"
 
 # Zoxide
 eval "$(zoxide init --cmd cd zsh)"
