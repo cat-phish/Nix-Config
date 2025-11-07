@@ -142,8 +142,6 @@
       "jordan@fedora-live" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
-          ./home.nix
-          ./hosts/all-personal-machines/home.nix
           ./hosts/fedora-live/home.nix
         ];
         extraSpecialArgs = {

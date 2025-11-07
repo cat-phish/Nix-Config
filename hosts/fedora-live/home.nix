@@ -3,6 +3,7 @@
   inputs,
   pkgs,
   pkgs-stable,
+  mynvim,
   # ensure we know this is not NixOS when invoked via the flake
   isNixos ? false,
   lib,
@@ -15,6 +16,7 @@
     ../../modules/rclone/rclone-mediaserversmb.nix
     ../../modules/rclone/rclone-hetzner.nix
     inputs.sops-nix.homeManagerModules.sops
+    # inputs.talon-nix.nixosModules.talon
   ];
 
   sops.secrets = {
@@ -35,9 +37,89 @@
       python312Packages.pylast
       python312Packages.requests
       qbittorrent
+      noto-fonts-color-emoji
+      oh-my-zsh
+      wezterm
+      activate-linux
+      appimage-run
+      asciiquarium-transparent # an aquarium, duh
+      audacity
+      bat # cat replacement with syntax highlighting
+      chirp
+      cmatrix # just take the blue pill
+      deskreen
+      dropbox
+      eza # ls replacement
+      flameshot
+      ghostty
+      gimp
+      google-chrome
+      hypnotix
+      kdePackages.konversation
+      kvirc
+      libreoffice-fresh
+      mouseless
+      mpv
+      multiviewer-for-f1
+      navi
+      neofetch
+      neovide
+      noisetorch
+      nurl # fetching nix package options from git, maybe others
+      pinta
+      pocket-casts
+      # python39
+      puddletag
+      pulseaudio
+      redshift
+      syncthing
+      # talon-nix.packages.${builtins.currentSystem}.default
+      # thefuck # correct messed up commands
+      tlrc # abbreviated man pages
+      # wineasio
+      # winetricks
+      vlc
+      vscode
+      winboat
+      youtube-music
+      yt-dlp
+      zoom
+      zoxide
     ])
     ++ (with pkgs-stable; [
-      ]);
+      nerdfonts # moved to stable because the unstable requires individual fonts to be specified
+      keepassxc
+      restic
+      # wavebox
+    ])
+    # Personal nixCats Nvim Flake
+    ++ (with mynvim; [
+      packages.${pkgs.system}.nvim
+    ])
+    # ++ (with talon-nix; [
+    #   packages.${builtins.currentSystem}.default
+    # ])
+    # ++ (with inputs.erosanix; [
+    #   packages.i686-linux.foobar2000
+    # ])
+    # Overrides
+    ++ [
+      # # It is sometimes useful to fine-tune packages, for example, by applying
+      # # overrides. You can do that directly here, just don't forget the
+      # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
+      # # fonts?
+      # (pkgs.nerdfonts.override {fonts = ["Monaspace"];})
+    ]
+    # Scripts
+    ++ [
+      # # You can also create simple shell scripts directly inside your
+      # # configuration. For example, this adds a command 'my-hello' to your
+      # # environment:
+      # ++
+      # (pkgs.writeShellScriptBin "my-hello" ''
+      #   echo "Hello, ${config.home.username}!"
+      # '')
+    ];
 
   programs.beets = {
     enable = true;
@@ -101,8 +183,92 @@
       };
     };
   };
+  # Example: if you later need to add home items that should only be applied
+  # on NixOS hosts (for example, user config that relies on system-level units),
+  # use `lib.mkIf isNixos [ ... ]` to guard them. On Fedora (isNixos=false)
+  # those blocks will be skipped.
+  programs.emacs = {
+    enable = true;
+    extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
+  };
+
+  services.emacs.enable = true;
 
   home.file = {
-    # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
+  # # Building this configuration will create a copy of 'dotfiles/screenrc' in
+  # # the Nix store. Activating the configuration will then make '~/.screenrc' a
+  # # symlink to the Nix store copy.
+  # ".screenrc".source = dotfiles/screenrc;
+
+  # # You can also set the file content immediately.
+  # ".gradle/gradle.properties".text = ''
+  #   org.gradle.console=verbose
+  #   org.gradle.daemon.idletimeout=3600000
+  # '';
+
+  # Add ~/.nix/dotfiles/ dotfiles individually here
+  ".bashrc".source = ./dotfiles/.bashrc;
+  ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
+  "${config.xdg.configHome}/tmux/scripts" = {
+    source = ./dotfiles/.config/tmux/scripts;
+    recursive = true;
   };
+  ".vim" = {
+    source = ./dotfiles/.vim;
+    recursive = true;
+  };
+  ".zshrc".source = ./dotfiles/.zshrc;
+    # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
+    ".clang-format" = {
+      source = ../../dotfiles/.clang-format;
+    };
+    ".prettierrc" = {
+      source = ../../dotfiles/.prettierrc;
+    };
+    ".scripts" = {
+      source = ../../dotfiles/.scripts;
+      recursive = true;
+    };
+    ".wezterm.lua" = {
+      source = ../../dotfiles/.wezterm.lua;
+    };
+    "${config.xdg.configHome}/kmonad" = {
+      source = ../../dotfiles/.config/kmonad;
+      recursive = true;
+    };
+    "${config.xdg.dataHome}/applications/foobar2000.desktop".text = ''
+      [Desktop Entry]
+      Name=foobar2000
+      Exec=env WINEPREFIX="$HOME/.wine-foobar2000" WINEARCH=win32 wine "$HOME/wineapps/foobar2000_2.0/foobar2000.exe"
+      Type=Application
+      Icon="$HOME/.nix/dotfiles/.img/foobar.jpg"
+      Categories=AudioVideo;Player;
+    '';
+  };
+  # programs.bash.enable = true; # deprecated in favor of exist existing bashrc
+
+  # Home Manager can also manage your environment variables through
+  # 'home.sessionVariables'. These will be explicitly sourced when using a
+  # shell provided by Home Manager. If you don't want to manage your shell
+  # through Home Manager then you have to manually source 'hm-session-vars.sh'
+  # located at either
+  #
+  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
+  #
+  # or
+  #
+  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
+  #
+  # or
+  #
+  #  /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+  #
+  home.sessionVariables = {
+    EDITOR = "vim";
+    SHELL = pkgs.zsh;
+  };
+
+  # Let Home Manager install and manage itself.
+  programs.home-manager.enable = true;
+}
 }
