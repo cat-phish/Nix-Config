@@ -195,29 +195,29 @@
   services.emacs.enable = true;
 
   home.file = {
-  # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-  # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-  # # symlink to the Nix store copy.
-  # ".screenrc".source = dotfiles/screenrc;
+    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
+    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
+    # # symlink to the Nix store copy.
+    # ".screenrc".source = dotfiles/screenrc;
 
-  # # You can also set the file content immediately.
-  # ".gradle/gradle.properties".text = ''
-  #   org.gradle.console=verbose
-  #   org.gradle.daemon.idletimeout=3600000
-  # '';
+    # # You can also set the file content immediately.
+    # ".gradle/gradle.properties".text = ''
+    #   org.gradle.console=verbose
+    #   org.gradle.daemon.idletimeout=3600000
+    # '';
 
-  # Add ~/.nix/dotfiles/ dotfiles individually here
-  ".bashrc".source = ./dotfiles/.bashrc;
-  ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
-  "${config.xdg.configHome}/tmux/scripts" = {
-    source = ./dotfiles/.config/tmux/scripts;
-    recursive = true;
-  };
-  ".vim" = {
-    source = ./dotfiles/.vim;
-    recursive = true;
-  };
-  ".zshrc".source = ./dotfiles/.zshrc;
+    # Add ~/.nix/dotfiles/ dotfiles individually here
+    ".bashrc".source = ./dotfiles/.bashrc;
+    ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
+    "${config.xdg.configHome}/tmux/scripts" = {
+      source = ./dotfiles/.config/tmux/scripts;
+      recursive = true;
+    };
+    ".vim" = {
+      source = ./dotfiles/.vim;
+      recursive = true;
+    };
+    ".zshrc".source = ./dotfiles/.zshrc;
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;
@@ -270,5 +270,4 @@
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
-}
 }

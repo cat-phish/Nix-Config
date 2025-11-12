@@ -3,3 +3,7 @@
 BasedOnStyle: LLVM
 IndentWidth: 2
 AccessModifierOffset: -1
+PointerAlignment: Right
+BreakTemplateDeclarations: Yes
+# PenaltyBreakString: 10000
+ColumnLimit: 200
