@@ -142,7 +142,7 @@
       "jordan@fedora-live" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
-          ./hosts/live-usb/fedora/home.nix
+          ./hosts/fedora-live/home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -152,27 +152,33 @@
           inherit talon-nix;
           # host is not NixOS (Fedora)
           isNixos = false;
+          # expose home-manager lib as `hm` for modules that expect lib.hm
+          hm = home-manager.lib;
           # inherit winboat;
           # inherit erosanix;
         };
       };
-      "ubuntu@ubuntu" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./hosts/live-usb/ubuntu/home.nix
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-          inherit mynvim;
-          inherit plasma-manager;
-          inherit talon-nix;
-          # host is not NixOS (Fedora)
-          isNixos = false;
-          # inherit winboat;
-          # inherit erosanix;
+        "ubuntu@ubuntu" = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          modules = [
+            ./home.nix
+            ./hosts/all-personal-machines/home.nix
+            ./hosts/live-usb/ubuntu/home.nix
+          ];
+          extraSpecialArgs = {
+            inherit inputs;
+            inherit pkgs-stable;
+            inherit mynvim;
+            inherit plasma-manager;
+            inherit talon-nix;
+            # host is not NixOS (Ubuntu)
+            isNixos = false;
+            lib = lib;
+            hm = home-manager.lib;
+            # inherit winboat;
+            # inherit erosanix;
+          };
         };
-      };
     };
   };
 }
