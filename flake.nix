@@ -142,7 +142,24 @@
       "jordan@fedora-live" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
-          ./hosts/fedora-live/home.nix
+          ./hosts/live-usb/fedora/home.nix
+        ];
+        extraSpecialArgs = {
+          inherit inputs;
+          inherit pkgs-stable;
+          inherit mynvim;
+          inherit plasma-manager;
+          inherit talon-nix;
+          # host is not NixOS (Fedora)
+          isNixos = false;
+          # inherit winboat;
+          # inherit erosanix;
+        };
+      };
+      "ubuntu@ubuntu" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./hosts/live-usb/ubuntu/home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
