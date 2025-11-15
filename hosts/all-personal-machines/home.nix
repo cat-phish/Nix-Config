@@ -41,6 +41,7 @@
       # python39
       puddletag
       pulseaudio
+      qdirstat
       redshift
       syncthing
       # talon-nix.packages.${builtins.currentSystem}.default
