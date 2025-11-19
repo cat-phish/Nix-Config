@@ -51,7 +51,7 @@
       # winetricks
       vlc
       vscode
-      winboat
+      # winboat
       youtube-music
       yt-dlp
       zoom

@@ -6,4 +6,4 @@ AccessModifierOffset: -1
 PointerAlignment: Right
 BreakTemplateDeclarations: Yes
 # PenaltyBreakString: 10000
-ColumnLimit: 200
+# ColumnLimit: 80
