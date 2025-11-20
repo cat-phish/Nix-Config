@@ -144,13 +144,13 @@
         modules = [
           ./home.nix
           ./hosts/all-personal-machines/home.nix
-          ./hosts/fedora-live/home.nix
+          ./hosts/fedora-desktop/home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
-          inherit plasma-manager;
+          # inherit plasma-manager;
           inherit talon-nix;
           # host is not NixOS (Fedora)
           isNixos = false;
@@ -169,7 +169,7 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
-          inherit plasma-manager;
+          # inherit plasma-manager;
           inherit talon-nix;
           # host is not NixOS (Ubuntu)
           isNixos = false;

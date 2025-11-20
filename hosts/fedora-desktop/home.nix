@@ -8,17 +8,17 @@
 }: {
   # Plasma Manager KDE Configuration
   imports = [
-    ../../modules/plasma-config/desktop/plasma-config.nix
+    # ../../modules/plasma-config/desktop/plasma-config.nix
     ../../modules/rclone/rclone-gdrivedesk.nix
     ../../modules/rclone/rclone-mediaserversmb.nix
     ../../modules/rclone/rclone-hetzner.nix
-    inputs.sops-nix.homeManagerModules.sops
+    # inputs.sops-nix.homeManagerModules.sops
   ];
 
-  #sops.secrets = {
-  #  beets_acoustid_api = {};
-  #  env_file = {};
-  #};
+  # sops.secrets = {
+  # beets_acoustid_api = {};
+  # env_file = {};
+  # };
 
   home.packages =
     (with pkgs; [
@@ -83,7 +83,7 @@
         fallback = "No lyrics found";
       };
 
-      #acoustid.apikey = "$(cat ${config.sops.secrets."beets_acoustid_api".path})";
+      # acoustid.apikey = "$(cat ${config.sops.secrets."beets_acoustid_api".path})";
 
       lastgenre = {
         canonical = "";
@@ -101,32 +101,32 @@
     };
   };
 
-  services.flatpak = {
-    remotes = lib.mkOptionDefault [
-      {
-        name = "flathub";
-        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
-      }
-    ];
-    packages = [
-      # {
-      #   appId = "com.brave.Browser";
-      #   origin = "flathub";
-      # }
-      "com.usebottles.bottles"
-      "dev.deedles.Trayscale"
-    ];
-    update.auto.enable = false;
-    uninstallUnmanaged = false;
-  };
-
-  services.tailscale = {
-    enable = true;
-    useRoutingFeatures = "client";
-  };
-
-  #Enable Talon Voice Control
-  programs.talon.enable = true;
+  # services.flatpak = {
+  #   remotes = lib.mkOptionDefault [
+  #     {
+  #       name = "flathub";
+  #       location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+  #     }
+  #   ];
+  #   packages = [
+  #     # {
+  #     #   appId = "com.brave.Browser";
+  #     #   origin = "flathub";
+  #     # }
+  #     "com.usebottles.bottles"
+  #     "dev.deedles.Trayscale"
+  #   ];
+  #   update.auto.enable = false;
+  #   uninstallUnmanaged = false;
+  # };
+  #
+  # services.tailscale = {
+  #   enable = true;
+  #   useRoutingFeatures = "client";
+  # };
+  #
+  # #Enable Talon Voice Control
+  # programs.talon.enable = true;
 
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
