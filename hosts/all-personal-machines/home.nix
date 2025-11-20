@@ -20,14 +20,17 @@
       deskreen
       dropbox
       eza # ls replacement
+      fd
       flameshot
       ghostty
       gimp
+      gparted
       google-chrome
       hypnotix
       kdePackages.konversation
       kvirc
       libreoffice-fresh
+      lsp-plugins
       mouseless
       mpv
       multiviewer-for-f1
@@ -43,10 +46,12 @@
       pulseaudio
       qdirstat
       redshift
+      ripgrep
       syncthing
       # talon-nix.packages.${builtins.currentSystem}.default
       # thefuck # correct messed up commands
       tlrc # abbreviated man pages
+      traceroute
       # wineasio
       # winetricks
       vlc

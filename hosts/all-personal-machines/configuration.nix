@@ -104,18 +104,13 @@
       (with pkgs; [
         aspell
         efibootmgr
-        fd
         fuse
-        gparted
         gutenprint # generic printer drivers
         jq
         kmonad
         lshw
-        lsp-plugins
         ntfs3g
-        ripgrep
         sqlite
-        traceroute
       ])
       ++ (with pkgs-stable; [
         # wavebox
