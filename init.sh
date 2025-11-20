@@ -30,16 +30,16 @@ esac
 
 if [ "$choice" = 1 ] || [ "$choice" = 2 ]; then
   cp /etc/nixos/hardware-configuration.nix ~/.nix/hosts/$host_type/hardware-configuration.nix
+  mkdir -p ~/.local/share
+  cp -r ./dotfiles/.local/share/* ~/.local/share/
 fi
 
-mkdir -p ~/.local/share
-cp -r ~/.nix/dotfiles/.local/share/* ~/.local/share/
 
 mkdir -p ~/.icons
-cp -r ~/.nix/dotfiles/.icons/* ~/.icons/
+cp -r ./dotfiles/.icons/* ~/.icons/
 
 mkdir -p ~/.themes
-cp -r ~/.nix/dotfiles/.themes/* ~/.themes/
+cp -r ./dotfiles/.themes/* ~/.themes/
 
 if [ "$choice" = 1 ] || [ "$choice" = 2 ]; then
   sudo nixos-rebuild switch --flake .#$nixos_flake
@@ -48,7 +48,7 @@ fi
 # TODO: make i this check if nix is installed already
 if [ "$choice" = 1 ] || [ "$choice" = 2 ]; then
   home-manager switch --flake .#$home_manager_flake
-elif [ "$choice" = 3]; then
+elif [ "$choice" = 3 ]; then
   sudo dnf copr enable petersen/nix
   sudo dnf install nix
   sudo systemctl enable --now nix-daemon
