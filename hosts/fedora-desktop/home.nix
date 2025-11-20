@@ -14,10 +14,10 @@
     inputs.sops-nix.homeManagerModules.sops
   ];
 
-  sops.secrets = {
-    beets_acoustid_api = {};
-    env_file = {};
-  };
+  #sops.secrets = {
+  #  beets_acoustid_api = {};
+  #  env_file = {};
+  #};
 
   home.packages =
     (with pkgs; [
@@ -82,7 +82,7 @@
         fallback = "No lyrics found";
       };
 
-      acoustid.apikey = "$(cat ${config.sops.secrets."beets_acoustid_api".path})";
+      #acoustid.apikey = "$(cat ${config.sops.secrets."beets_acoustid_api".path})";
 
       lastgenre = {
         canonical = "";
