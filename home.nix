@@ -32,25 +32,25 @@
     "electron-35.7.5"
   ];
 
-  sops = {
-    defaultSopsFile = ./secrets.yaml;
-    defaultSopsFormat = "yaml";
-    age = {
+  #sops = {
+    #defaultSopsFile = ./secrets.yaml;
+    #defaultSopsFormat = "yaml";
+    #age = {
       # uses age key that is expected to already be in filesystem
-      keyFile = "$HOME/.config/sops/age";
+     # keyFile = "$HOME/.config/sops/age";
       # automatically import host SSH keys as age keys
-      sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+      #sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
       # generate key if the key above does not exist
-      generateKey = true;
-    };
+      #generateKey = true;
+    #};
 
     # secrets will be output to /run/secrets
     # e.g. /run/secrets/msmtp-password
     # secrets required for user creation are handled in respective /users/<username>.nix files
     # because they will be output to /run/secrets-for-users and only when a user is assigned to a host
-    secrets = {
-    };
-  };
+    #secrets = {
+    #};
+  #};
 
   programs.git = {
     enable = true;
