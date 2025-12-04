@@ -6,4 +6,4 @@ sudo nixos-rebuild switch --flake ~/.nix
 
 home-manager switch --flake ~/.nix
 
-sudo nix-collect-garbage --delete-older-than 14
+sudo nix-collect-garbage --delete-older-than 14d

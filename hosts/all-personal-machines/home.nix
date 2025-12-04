@@ -16,6 +16,7 @@
       audacity
       bat # cat replacement with syntax highlighting
       chirp
+      chromium
       cmatrix # just take the blue pill
       deskreen
       dropbox

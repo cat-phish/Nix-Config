@@ -28,8 +28,6 @@
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.permittedInsecurePackages = [
-    "wavebox-10.133.4-2"
-    "electron-35.7.5"
   ];
 
   # sops = {

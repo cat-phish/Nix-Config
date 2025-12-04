@@ -158,6 +158,25 @@
           # inherit erosanix;
         };
       };
+      "jordan@fedora-laptop" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./home.nix
+          # ./hosts/all-personal-machines/home.nix
+          ./hosts/fedora-laptop/home.nix
+        ];
+        extraSpecialArgs = {
+          inherit inputs;
+          inherit pkgs-stable;
+          inherit mynvim;
+          # inherit plasma-manager;
+          inherit talon-nix;
+          # host is not NixOS (Fedora)
+          isNixos = false;
+          # inherit winboat;
+          # inherit erosanix;
+        };
+      };
       "ubuntu@ubuntu" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [

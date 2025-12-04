@@ -1,13 +1,14 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   pkgs-stable,
   ...
 }: {
   # Plasma Manager KDE Configuration
   imports = [
-    ../../modules/plasma-config/desktop/plasma-config.nix
+    # ../../modules/plasma-config/desktop/plasma-config.nix
     ../../modules/rclone/rclone-gdrivedesk.nix
     ../../modules/rclone/rclone-mediaserversmb.nix
     ../../modules/rclone/rclone-hetzner.nix
@@ -15,8 +16,8 @@
   ];
 
   # sops.secrets = {
-  #   beets_acoustid_api = {};
-  #   env_file = {};
+  # beets_acoustid_api = {};
+  # env_file = {};
   # };
 
   home.packages =
@@ -32,6 +33,7 @@
       python312Packages.pylast
       python312Packages.requests
       qbittorrent
+      zsh
     ])
     ++ (with pkgs-stable; [
       ]);
@@ -98,6 +100,33 @@
       };
     };
   };
+
+  # services.flatpak = {
+  #   remotes = lib.mkOptionDefault [
+  #     {
+  #       name = "flathub";
+  #       location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+  #     }
+  #   ];
+  #   packages = [
+  #     # {
+  #     #   appId = "com.brave.Browser";
+  #     #   origin = "flathub";
+  #     # }
+  #     "com.usebottles.bottles"
+  #     "dev.deedles.Trayscale"
+  #   ];
+  #   update.auto.enable = false;
+  #   uninstallUnmanaged = false;
+  # };
+  #
+  # services.tailscale = {
+  #   enable = true;
+  #   useRoutingFeatures = "client";
+  # };
+  #
+  # #Enable Talon Voice Control
+  # programs.talon.enable = true;
 
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
