@@ -106,7 +106,7 @@
         modules = [
           ./home.nix
           ./hosts/all-personal-machines/home.nix
-          ./hosts/desktop/home.nix
+          ./hosts/nixox-desktop/home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -125,7 +125,7 @@
         modules = [
           ./home.nix
           ./hosts/all-personal-machines/home.nix
-          ./hosts/laptop/home.nix
+          ./hosts/nixos-laptop/home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -160,7 +160,7 @@
         modules = [
           ./home.nix
           # ./hosts/all-personal-machines/home.nix
-          ./hosts/fedora-laptop/home.nix
+          ./hosts/fedora-laptop-home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
