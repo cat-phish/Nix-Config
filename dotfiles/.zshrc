@@ -22,6 +22,10 @@ elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
   source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
 fi
 
+# Load compdef completion
+autoload -U compinit
+compinit
+
 # Source the .env file if it exists
 if [ -f "$HOME/.ssh/.env" ]; then
   set -a  # Automatically export all variables
@@ -71,7 +75,7 @@ alias refresh-zsh="source ~/.zshrc"
 alias v="nvim"
 alias vv="nvim ."
 alias nvim-ssh="~/.scripts/nvim-ssh.sh"
-alias nixcats="$HOME/coding/nixCats/result/bin/nvim"
+alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 
 # Emacs
 alias org="emacs --init-directory=~/.config/emacs"

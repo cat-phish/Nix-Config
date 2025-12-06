@@ -150,12 +150,9 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
-          # inherit plasma-manager;
           inherit talon-nix;
           # host is not NixOS (Fedora)
           isNixos = false;
-          # inherit winboat;
-          # inherit erosanix;
         };
       };
       "jordan@fedora-laptop" = home-manager.lib.homeManagerConfiguration {

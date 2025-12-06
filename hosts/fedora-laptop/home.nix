@@ -22,9 +22,27 @@
 
   home.packages =
     (with pkgs; [
+      activate-linux
+      appimage-run
+      asciiquarium-transparent # an aquarium, duh
+      bat # cat replacement with syntax highlighting
       calibre
       chromaprint
+      discord
+      # docker
+      eza # ls replacement
+      firefox
+      fd
+      fzf
+      gparted
+      # htop
+      htop-vim
       kid3-kde
+      kdePackages.konversation
+      kmonad
+      mpv
+      neofetch
+      onlyoffice-desktopeditors
       python312Packages.pyacoustid
       python312Packages.discogs-client
       python312Packages.flask
@@ -33,7 +51,17 @@
       python312Packages.pylast
       python312Packages.requests
       qbittorrent
+      qdirstat
+      ripgrep
+      tlrc
+      vlc
+      vscode
+      winboat
+      yazi
+      yt-dlp
+      zoom
       zsh
+      zoxide
     ])
     ++ (with pkgs-stable; [
       ]);
@@ -130,5 +158,30 @@
 
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
+    ".clang-format" = {
+      source = ../../dotfiles/.clang-format;
+    };
+    ".prettierrc" = {
+      source = ../../dotfiles/.prettierrc;
+    };
+    ".scripts" = {
+      source = ../../dotfiles/.scripts;
+      recursive = true;
+    };
+    ".wezterm.lua" = {
+      source = ../../dotfiles/.wezterm.lua;
+    };
+    "${config.xdg.configHome}/kmonad" = {
+      source = ../../dotfiles/.config/kmonad;
+      recursive = true;
+    };
+    "${config.xdg.dataHome}/applications/foobar2000.desktop".text = ''
+      [Desktop Entry]
+      Name=foobar2000
+      Exec=env WINEPREFIX="$HOME/.wine-foobar2000" WINEARCH=win32 wine "$HOME/wineapps/foobar2000_2.0/foobar2000.exe"
+      Type=Application
+      Icon="$HOME/.nix/dotfiles/.img/foobar.jpg"
+      Categories=AudioVideo;Player;
+    '';
   };
 }
