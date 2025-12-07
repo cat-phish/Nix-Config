@@ -17,7 +17,7 @@
     (with pkgs; [
       ])
     ++ (with pkgs-stable; [
-      wine
+      # wine
       wineasio
       winetricks
       wineWowPackages.full

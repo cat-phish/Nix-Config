@@ -72,8 +72,9 @@
   in {
     nixosConfigurations = {
       nixos-desktop = lib.nixosSystem {
-        inherit system;
+        # inherit system; # TODO: remove? replaced with hostPlatform... below
         modules = [
+          {nixpkgs.hostPlatform = system;}
           ./configuration.nix
           # ./hosts/all-personal-machines/configuration.nix
           ./hosts/nixos-desktop-configuration.nix
@@ -93,8 +94,9 @@
         };
       };
       nixos-laptop = lib.nixosSystem {
-        inherit system;
+        # inherit system; # TODO: remove? replaced with hostPlatform... below
         modules = [
+          {nixpkgs.hostPlatform = system;}
           ./configuration.nix
           # ./hosts/all-personal-machines/configuration.nix
           ./hosts/nixos-laptop-configuration.nix
