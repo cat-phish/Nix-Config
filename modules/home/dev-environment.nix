@@ -46,7 +46,7 @@
     settings = {
       user.name = "cat-phish";
       user.email = "134035929+cat-phish@users.noreply.github.com";
-      init.defaultBranch = "main";
+      init.defaultBranch = "master";
     };
   };
 

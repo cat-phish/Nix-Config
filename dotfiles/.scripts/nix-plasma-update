@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+
+# Check if hostname was passed as an argument
+if [ -n "$1" ]; then
+    current_hostname="$1"
+    echo "Using manually specified hostname: $current_hostname"
+else
+    # Auto-detect hostname
+    detected_hostname=$(hostname)
+    echo "Detected hostname: $detected_hostname"
+    read -p "Use this hostname?  (y/n): " hostname_confirm
+    
+    if [[ "$hostname_confirm" =~ ^[Yy]$ ]]; then
+        current_hostname="$detected_hostname"
+    else
+        read -p "Enter hostname manually: " manual_hostname
+        if [ -z "$manual_hostname" ]; then
+            echo "Hostname cannot be empty. Exiting."
+            exit 1
+        fi
+        current_hostname="$manual_hostname"
+    fi
+fi
+
+echo ""
+echo "Using hostname: $current_hostname"
+echo ""
+
+# Determine target file based on hostname
+case $current_hostname in
+    nixos-desktop)
+        target_file="$HOME/.nix/modules/plasma-config/nixos-desktop/plasma-config.nix"
+        ;;
+    nixos-laptop)
+        target_file="$HOME/.nix/modules/plasma-config/nixos-laptop/plasma-config.nix"
+        ;;
+    fedora-desktop)
+        target_file="$HOME/.nix/modules/plasma-config/fedora-desktop/plasma-config.nix"
+        ;;
+    fedora-laptop)
+        target_file="$HOME/.nix/modules/plasma-config/fedora-laptop/plasma-config.nix"
+        ;;
+    *)
+        # For custom hostnames, prompt for custom directory name
+        echo "⚠️  Hostname '$current_hostname' is not a standard configuration."
+        echo ""
+        
+        custom_confirmed=false
+        while [ "$custom_confirmed" = false ]; do
+            read -p "Enter custom hostname for plasma config directory: " custom_target
+            
+            if [ -z "$custom_target" ]; then
+                echo "⚠️  Hostname cannot be empty."
+                continue
+            fi
+            
+            echo ""
+            echo "Target directory: $HOME/.nix/modules/plasma-config/$custom_target/"
+            echo "Target file: plasma-config.nix"
+            read -p "Is this correct?  (y/n): " custom_check
+            
+            if [[ "$custom_check" =~ ^[Yy]$ ]]; then
+                target_file="$HOME/.nix/modules/plasma-config/$custom_target/plasma-config.nix"
+                custom_confirmed=true
+            else
+                echo "Let's try again."
+                echo ""
+            fi
+        done
+        ;;
+esac
+
+echo ""
+echo "Target file: $target_file"
+
+# Ensure target directory exists
+target_dir="$(dirname "$target_file")"
+if [ !  -d "$target_dir" ]; then
+    echo ""
+    echo "Directory does not exist: $target_dir"
+    read -p "Create this directory? (y/n): " create_dir
+    
+    if [[ "$create_dir" =~ ^[Yy]$ ]]; then
+        mkdir -p "$target_dir"
+        echo "[✓] Created directory: $target_dir"
+    else
+        echo "Cannot continue without target directory. Exiting."
+        exit 1
+    fi
+fi
+
+echo ""
+
+# Rename the old file with the date appended
+if [ -f "$target_file" ]; then
+    backup_file="${target_file%.nix}-$(date +%Y-%m-%d-%H%M%S).nix"
+    mv "$target_file" "$backup_file"
+    echo "[✓] Backed up existing config to: $backup_file"
+    echo ""
+fi
+
+# Write base config
+cat <<EOF > "$target_file"
+{
+  pkgs,
+  plasma-manager,
+  ...
+}: {
+  imports = [
+    plasma-manager.homeManagerModules.plasma-manager
+  ];
+  # To update this with your current kde configuration run
+  # $HOME/.nix/dotfiles/.scripts/nix-plasma-update
+EOF
+
+echo "Exporting KDE Plasma configuration..."
+echo ""
+
+# Append all output except the first line
+nix run github:mcdonc/plasma-manager/enable-look-and-feel-settings | tail -n +2 >> "$target_file"
+
+echo ""
+echo "[✓] Configuration written to: $target_file"
+echo ""
+echo "Next steps:"
+echo "1. Review the generated configuration"
+echo "2. Run: home-manager switch --flake ~/.nix#<your-config>"
+echo ""
+
+
+

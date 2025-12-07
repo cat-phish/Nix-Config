@@ -15,9 +15,8 @@
 
   home.packages =
     (with pkgs; [
-      lsp-plugins # a collection of open source audio plugins
-      mpv
-      vlc
+      libreoffice-fresh
+      onlyoffice-desktopeditors
     ])
     ++ (with pkgs-stable; [
       ]);

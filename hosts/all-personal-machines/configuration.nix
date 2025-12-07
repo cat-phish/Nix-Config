@@ -95,8 +95,6 @@
     };
 
     nixpkgs.config.permittedInsecurePackages = [
-      "wavebox-10.133.4-2"
-      "electron-35.7.5"
       "ventoy-1.1.07"
     ];
 

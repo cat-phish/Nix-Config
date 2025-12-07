@@ -93,4 +93,5 @@
         ignore_subdirectories = ["NonMusic" "data" "temp"];
       };
     };
+  };
 }

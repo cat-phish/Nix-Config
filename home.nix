@@ -29,6 +29,7 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.permittedInsecurePackages = [
   ];
+  nixpkgs.config.home-manager.useGlobalPkgs = true;
 
   # sops = {
   #   defaultSopsFile = ./secrets.yaml;
@@ -49,19 +50,6 @@
   #   secrets = {
   #   };
   # };
-
-  programs.git = {
-    enable = true;
-    settings = {
-      user.name = "cat-phish";
-      user.email = "134035929+cat-phish@users.noreply.github.com";
-      init.defaultBranch = "main";
-    };
-  };
-
-  programs.lazygit = {
-    enable = true;
-  };
 
   # programs.zsh = {
   #   enable = true;
@@ -87,19 +75,13 @@
   home.packages =
     # Unstable Packages
     (with pkgs; [
-      noto-fonts-color-emoji
-      oh-my-zsh
-      wezterm
-    ])
+      ])
     # Stable Packages
     ++ (with pkgs-stable; [
-      nerdfonts # moved to stable because the unstable requires individual fonts to be specified
-      keepassxc
-    ])
+      ])
     # Personal nixCats Nvim Flake
     ++ (with mynvim; [
-      packages.${pkgs.system}.nvim
-    ])
+      ])
     # ++ (with talon-nix; [
     #   packages.${builtins.currentSystem}.default
     # ])

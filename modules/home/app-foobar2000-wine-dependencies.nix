@@ -15,12 +15,12 @@
 
   home.packages =
     (with pkgs; [
-      lsp-plugins # a collection of open source audio plugins
-      mpv
-      vlc
-    ])
+      ])
     ++ (with pkgs-stable; [
-      ]);
+      pkgs.pkgsi686Linux.alsa-plugins
+      pkgs.pkgsi686Linux.libpulseaudio
+      pkgs.pkgsi686Linux.openal
+    ]);
 
   home.file = {
   };

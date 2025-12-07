@@ -22,6 +22,8 @@ detect_machine_type() {
 
 confirmed_os=""
 confirmed_machine=""
+confirmed_hostname=""
+confirmed_username=""
 
 os_id=$(detect_os)
 machine_type=$(detect_machine_type)
@@ -31,17 +33,70 @@ echo "Detected OS: $os_id"
 echo "Detected Machine Type: $machine_type"
 echo ""
 
-if [ "$os_id" = "nixos" ]; then
-    read -p "Is this a NixOS $machine_type?  (y/n): " confirm
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
-        confirmed_os="nixos"
-        confirmed_machine="$machine_type"
+# Prompt for username with confirmation loop
+username_confirmed=false
+while [ "$username_confirmed" = false ]; do
+    read -p "Enter username for home-manager flake: " input_username
+    
+    if [ -z "$input_username" ]; then
+        echo "⚠️  Username cannot be empty."
+        continue
     fi
-elif [ "$os_id" = "fedora" ]; then
-    read -p "Is this a Fedora $machine_type? (y/n): " confirm
+    
+    echo ""
+    echo "Username: $input_username"
+    read -p "Is this correct? (y/n): " username_check
+    
+    if [[ "$username_check" =~ ^[Yy]$ ]]; then
+        confirmed_username="$input_username"
+        username_confirmed=true
+    else
+        echo "Let's try again."
+        echo ""
+    fi
+done
+
+echo ""
+
+# Ask for confirmation if OS was detected
+if [ "$os_id" = "nixos" ] || [ "$os_id" = "fedora" ]; then
+    read -p "Is this a $os_id $machine_type?  (y/n): " confirm
+    
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
-        confirmed_os="fedora"
+        confirmed_os="$os_id"
         confirmed_machine="$machine_type"
+        
+        # Present default hostname
+        default_hostname="$confirmed_os-$confirmed_machine"
+        echo ""
+        echo "Default hostname for flake: $default_hostname"
+        read -p "Use this hostname?  (y/n): " hostname_confirm
+        
+        if [[ "$hostname_confirm" =~ ^[Yy]$ ]]; then
+            confirmed_hostname="$default_hostname"
+        else
+            read -p "Enter alternate hostname: " alt_hostname
+            
+            if [ -n "$alt_hostname" ]; then
+                confirmed_hostname="$alt_hostname"
+                echo ""
+                echo "⚠️  IMPORTANT: This hostname must already be configured in your Nix config."
+                echo "   Flake configuration: $confirmed_hostname"
+                read -p "Do you understand and confirm this hostname exists in your config? (y/n): " hostname_exists_confirm
+                
+                if [[ !  "$hostname_exists_confirm" =~ ^[Yy]$ ]]; then
+                    echo "Cannot continue without valid hostname configuration. Exiting."
+                    exit 1
+                fi
+            else
+                echo "Hostname cannot be empty. Exiting."
+                exit 1
+            fi
+        fi
+    else
+        # User disagreed with detection
+        confirmed_os=""
+        confirmed_machine=""
     fi
 fi
 
@@ -49,31 +104,117 @@ fi
 if [ -z "$confirmed_os" ]; then
     echo ""
     echo "Please choose your system manually:"
-    echo "1) Desktop NixOS"
-    echo "2) Laptop NixOS"
+    echo "1) NixOS Desktop"
+    echo "2) NixOS Laptop"
     echo "3) Fedora Desktop"
     echo "4) Fedora Laptop"
+    echo "5) Custom configuration"
     read -p "Enter the number of your choice: " choice
 
     case $choice in
         1)
             confirmed_os="nixos"
             confirmed_machine="desktop"
+            confirmed_hostname="nixos-desktop"
             ;;
         2)
             confirmed_os="nixos"
             confirmed_machine="laptop"
+            confirmed_hostname="nixos-laptop"
             ;;
         3)
             confirmed_os="fedora"
             confirmed_machine="desktop"
+            confirmed_hostname="fedora-desktop"
             ;;
         4)
             confirmed_os="fedora"
             confirmed_machine="laptop"
+            confirmed_hostname="fedora-laptop"
+            ;;
+        5)
+            echo ""
+            echo "=== Custom Configuration ==="
+            echo ""
+            
+            # OS Selection
+            echo "Select OS:"
+            echo "1) NixOS"
+            echo "2) Fedora"
+            echo "3) Other (exit)"
+            read -p "Enter choice (1-3): " os_choice
+            
+            case $os_choice in
+                1)
+                    confirmed_os="nixos"
+                    ;;
+                2)
+                    confirmed_os="fedora"
+                    ;;
+                3)
+                    echo ""
+                    echo "⚠️  This script is not configured to setup other system types."
+                    echo "Currently supported: NixOS and Fedora only."
+                    exit 1
+                    ;;
+                *)
+                    echo "Invalid choice. Exiting."
+                    exit 1
+                    ;;
+            esac
+            
+            # Machine Type Selection
+            echo ""
+            echo "Select machine type:"
+            echo "1) Desktop"
+            echo "2) Laptop"
+            echo "3) Other (exit)"
+            read -p "Enter choice (1-3): " machine_choice
+            
+            case $machine_choice in
+                1)
+                    confirmed_machine="desktop"
+                    ;;
+                2)
+                    confirmed_machine="laptop"
+                    ;;
+                3)
+                    echo ""
+                    echo "⚠️  This script is not configured to setup other machine types."
+                    echo "Currently supported: Desktop and Laptop only."
+                    exit 1
+                    ;;
+                *)
+                    echo "Invalid choice. Exiting."
+                    exit 1
+                    ;;
+            esac
+            
+            # Hostname Entry
+            echo ""
+            read -p "Enter hostname for flake: " custom_hostname
+            
+            if [ -z "$custom_hostname" ]; then
+                echo "Hostname cannot be empty. Exiting."
+                exit 1
+            fi
+            
+            confirmed_hostname="$custom_hostname"
+            
+            echo ""
+            echo "⚠️  IMPORTANT: This hostname must already be configured in your Nix config."
+            echo "   Flake configuration: $confirmed_hostname"
+            echo "   Expected OS: $confirmed_os"
+            echo "   Expected Machine: $confirmed_machine"
+            read -p "Do you understand and confirm this hostname exists in your config? (y/n): " hostname_exists_confirm
+            
+            if [[ !  "$hostname_exists_confirm" =~ ^[Yy]$ ]]; then
+                echo "Cannot continue without valid hostname configuration. Exiting."
+                exit 1
+            fi
             ;;
         *)
-            echo "Invalid choice. Exiting."
+            echo "Invalid choice.Exiting."
             exit 1
             ;;
     esac
@@ -81,28 +222,22 @@ fi
 
 echo ""
 echo "==== Configuration ===="
+echo "Username: $confirmed_username"
 echo "OS: $confirmed_os"
 echo "Machine: $confirmed_machine"
+echo "Hostname: $confirmed_hostname"
 echo ""
 
 # ==== SETUP CONFIGURATION ===========================================
 
+# Build flake references using the confirmed hostname and username
 if [ "$confirmed_os" = "nixos" ]; then
-    if [ "$confirmed_machine" = "desktop" ]; then
-        nixos_flake="jordans-desktop"
-        home_manager_flake="jordan@jordans-desktop"
-    else
-        nixos_flake="jordans-laptop"
-        home_manager_flake="jordan@jordans-laptop"
-    fi
+    nixos_flake="$confirmed_hostname"
+    home_manager_flake="$confirmed_username@$confirmed_hostname"
 elif [ "$confirmed_os" = "fedora" ]; then
-    if [ "$confirmed_machine" = "desktop" ]; then
-        home_manager_flake="jordan@fedora-desktop"
-        hostname="fedora-desktop"
-    else
-        home_manager_flake="jordan@fedora-laptop"
-        hostname="fedora-laptop"
-    fi
+    home_manager_flake="$confirmed_username@$confirmed_hostname"
+    # Set system hostname to match flake hostname
+    hostname="$confirmed_hostname"
 fi
 
 # ==== CHECK IF ALREADY RUN ==========================================
@@ -120,53 +255,91 @@ fi
 # ==== FEDORA SETUP ==================================================
 
 setup_fedora() {
+    ## UPDATE THIS WHEN ADDING/REMOVING STEPS ##
+    local TOTAL_STEPS=12
+    local STEP=0
+
     echo "==== Starting Fedora Setup ===="
     echo ""
 
-    # Install Niri
-    echo "[1/12] Installing Niri..."
-    sudo dnf copr enable -y avengemedia/dms
-    sudo dnf install -y niri dms
-    systemctl --user add-wants niri.service dms
+    # Prompt for KDE Plasma management
+    read -p "Would you like to manage KDE Plasma with Nix? (y/n): " manage_plasma
+    if [[ "$manage_plasma" =~ ^[Yy]$ ]]; then
+        use_plasma=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] KDE Plasma management will be configured."
+    else
+        use_plasma=false
+        echo "[✓] Skipping KDE Plasma management."
+    fi
     echo ""
 
+    # Prompt for Niri installation
+    read -p "Would you like to install Niri? (y/n): " install_niri
+    if [[ "$install_niri" =~ ^[Yy]$ ]]; then
+        use_niri=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Niri will be installed."
+    else
+        use_niri=false
+        echo "[✓] Skipping Niri installation."
+    fi
+    echo ""
+
+    # Install Niri (conditional)
+    if [ "$use_niri" = true ]; then
+        STEP=$((STEP + 1))
+        echo "[$STEP/$TOTAL_STEPS] Installing Niri..."
+        sudo dnf copr enable -y avengemedia/dms
+        sudo dnf install -y niri dms
+        systemctl --user add-wants niri.service dms
+        echo ""
+    fi
+
     # Install Kitty
-    echo "[2/12] Installing Kitty..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Installing Kitty..."
     sudo dnf copr enable -y gagbo/kitty-latest
     sudo dnf --refresh install -y kitty
     echo ""
 
     # Install Nix
-    echo "[3/12] Installing Nix..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Installing Nix..."
     sudo dnf copr enable -y petersen/nix
     sudo dnf install -y nix
     sudo systemctl enable --now nix-daemon
     echo ""
 
     # Setup Nix channels and home-manager
-    echo "[4/12] Setting up Nix channels and home-manager..."
-    nix-channel --add https://github. com/nix-community/home-manager/archive/master.tar.gz home-manager
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Setting up Nix channels and home-manager..."
+    nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
     nix-channel --update
     echo ""
 
-    echo "[5/12] Installing home-manager..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Installing home-manager..."
     nix-shell '<home-manager>' -A install
     echo ""
 
     # Source home-manager session variables
-    echo "[6/12] Sourcing home-manager session variables..."
-    if [ -f "$HOME/.nix-profile/etc/profile. d/hm-session-vars.sh" ]; then
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Sourcing home-manager session variables..."
+    if [ -f "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
         source "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
     fi
     echo ""
 
     # Set hostname
-    echo "[7/12] Setting hostname to $hostname..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Setting hostname to $hostname..."
     sudo hostnamectl set-hostname "$hostname"
     echo ""
 
     # Clone Nix config if not already present
-    echo "[8/12] Setting up Nix configuration..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Setting up Nix configuration..."
     if [ ! -d "$HOME/.nix" ]; then
         git clone https://github.com/cat-phish/Nix-Config.git "$HOME/.nix"
     else
@@ -176,30 +349,47 @@ setup_fedora() {
     echo ""
 
     # Copy dotfiles
-    echo "[9/12] Copying dotfiles..."
-    mkdir -p ~/. icons
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Copying dotfiles..."
+    mkdir -p ~/.icons
     if [ -d "./dotfiles/.icons" ]; then
-        cp -r ./dotfiles/.icons/* ~/.icons/
+        cp -rf ./dotfiles/.icons/* ~/.icons/
     fi
 
     mkdir -p ~/.themes
-    if [ -d "./dotfiles/. themes" ]; then
-        cp -r ./dotfiles/.themes/* ~/.themes/
+    if [ -d "./dotfiles/.themes" ]; then
+        cp -rf ./dotfiles/.themes/* ~/.themes/
     fi
     echo ""
 
+    # Setup KDE Plasma management (conditional)
+    if [ "$use_plasma" = true ]; then
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Setting up KDE Plasma management..."
+      if [ -f "$HOME/.nix/dotfiles/.scripts/nix-plasma-update" ]; then
+        bash "$HOME/.nix/dotfiles/.scripts/nix-plasma-update"
+        echo "[✓] KDE Plasma management configured."
+      else
+        echo "⚠️  nix-plasma-update script not found at ~/.nix/dotfiles/.scripts/nix-plasma-update"
+        echo "[!] Skipping KDE Plasma setup."
+      fi
+      echo ""
+    fi
+
     # Apply home-manager configuration
-    echo "[10/12] Applying home-manager configuration..."
-    home-manager switch --flake ". #$home_manager_flake" || \
-        home-manager switch -b backup --flake ". #$home_manager_flake"
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Applying home-manager configuration..."
+    home-manager switch --flake ".#$home_manager_flake" || \
+        home-manager switch -b backup --flake ".#$home_manager_flake"
     echo ""
 
     # Setup kmonad
-    echo "[11/12] Setting up kmonad..."
-    if [ -f "$HOME/.nix/scripts/kmonad-setup.sh" ]; then
-        bash "$HOME/.nix/scripts/kmonad-setup.sh" setup
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Setting up kmonad..."
+    if [ -f "$HOME/.nix/setup/kmonad-fedora-setup.sh" ]; then
+        bash "$HOME/.nix/setup/kmonad-fedora-setup.sh" setup
     else
-        echo "⚠️  kmonad-setup.sh not found at ~/. nix/scripts/kmonad-setup.sh"
+        echo "⚠️  kmonad-fedora-setup.sh not found at ~/.nix/setup/kmonad-fedora-setup.sh"
         read -p "Skip kmonad setup? (y/n): " skip_kmonad
         if [[ !  "$skip_kmonad" =~ ^[Yy]$ ]]; then
             echo "Please run kmonad setup manually later."
@@ -208,7 +398,8 @@ setup_fedora() {
     echo ""
 
     # Change git remote to SSH
-    echo "[12/12] Changing git remote to SSH..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Changing git remote to SSH..."
     cd "$HOME/.nix" || exit 1
     git remote set-url origin git@github.com:cat-phish/NixOS-Config.git
     echo "[✓] Git remote set to: git@github.com:cat-phish/NixOS-Config.git"
@@ -218,7 +409,7 @@ setup_fedora() {
     echo "==== Manual Steps Required ===="
     echo "Please add the following to your shell configuration (~/.bashrc or ~/.zshrc):"
     echo ""
-    echo "  source \$HOME/. nix-profile/etc/profile.d/hm-session-vars.sh"
+    echo "  source \$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
     echo ""
     read -p "Have you added this line? (y/n): " session_vars_confirm
     if [[ ! "$session_vars_confirm" =~ ^[Yy]$ ]]; then
@@ -242,17 +433,21 @@ setup_fedora() {
 # ==== NIXOS SETUP ===================================================
 
 setup_nixos() {
+    ## UPDATE THIS WHEN ADDING/REMOVING STEPS ##
+    local TOTAL_STEPS=5
+    local STEP=0
+
     echo "==== Starting NixOS Setup ===="
     echo ""
 
-    # Change to . nix directory
+    # Change to .nix directory
     if [ !  -d "$HOME/.nix" ]; then
         echo "~/.nix does not exist."
-        read -p "Would you like to clone the Nix config?  (y/n): " clone_choice
+        read -p "Would you like to clone the Nix config?   (y/n): " clone_choice
         if [[ "$clone_choice" =~ ^[Yy]$ ]]; then
-            git clone https://github. com/cat-phish/Nix-Config.git "$HOME/.nix"
+            git clone https://github.com/cat-phish/Nix-Config.git "$HOME/.nix"
         else
-            echo "Cannot continue without Nix config.  Exiting."
+            echo "Cannot continue without Nix config. Exiting."
             exit 1
         fi
     fi
@@ -260,33 +455,92 @@ setup_nixos() {
     cd "$HOME/.nix" || exit 1
 
     # Copy hardware configuration
-    echo "[1/5] Copying hardware configuration..."
-    cp /etc/nixos/hardware-configuration.nix "$HOME/. nix/hosts/$confirmed_machine/hardware-configuration.nix"
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Copying hardware configuration..."
+
+    HW_CONFIG_SOURCE="/etc/nixos/hardware-configuration.nix"
+    HW_CONFIG_DEST="$HOME/.nix/modules/hardware-config/$confirmed_hostname-hardware.nix"
+
+    # Ensure destination directory exists
+    mkdir -p "$(dirname "$HW_CONFIG_DEST")"
+
+    # Check if destination exists and ask for confirmation
+    if [ -f "$HW_CONFIG_DEST" ]; then
+        echo "⚠️  Hardware configuration already exists at:"
+        echo "   $HW_CONFIG_DEST"
+        read -p "Overwrite?  (y/n): " overwrite_choice
+        
+        if [[ "$overwrite_choice" =~ ^[Yy]$ ]]; then
+            cp -f "$HW_CONFIG_SOURCE" "$HW_CONFIG_DEST"
+            echo "[✓] Hardware configuration copied."
+        else
+            read -p "Enter an alternate filename (or press Enter to skip): " alt_name
+            
+            if [ -n "$alt_name" ]; then
+                # Use alternate name in the same directory
+                ALT_DEST="$(dirname "$HW_CONFIG_DEST")/$alt_name"
+                
+                if cp "$HW_CONFIG_SOURCE" "$ALT_DEST"; then
+                    echo "[✓] Hardware configuration saved as: $alt_name"
+                else
+                    echo "[! ] Failed to copy to alternate location. Skipping."
+                fi
+            else
+                echo "[! ] Skipping hardware configuration copy."
+            fi
+        fi
+    else
+        # File doesn't exist, just copy
+        if cp "$HW_CONFIG_SOURCE" "$HW_CONFIG_DEST"; then
+            echo "[✓] Hardware configuration copied."
+        else
+            echo "[!] Failed to copy hardware configuration."
+            read -p "Would you like to enter an alternate name?  (y/n): " alt_choice
+            
+            if [[ "$alt_choice" =~ ^[Yy]$ ]]; then
+                read -p "Enter alternate filename: " alt_name
+                
+                if [ -n "$alt_name" ]; then
+                    ALT_DEST="$(dirname "$HW_CONFIG_DEST")/$alt_name"
+                    
+                    if cp "$HW_CONFIG_SOURCE" "$ALT_DEST"; then
+                        echo "[✓] Hardware configuration saved as: $alt_name"
+                    else
+                        echo "[!] Failed to copy. Continuing anyway..."
+                    fi
+                fi
+            fi
+        fi
+    fi
+
     echo ""
 
     # Copy local share files
-    echo "[2/5] Copying local share files..."
-    mkdir -p ~/. local/share
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Copying local share files..."
+    mkdir -p ~/.local/share
     if [ -d "./dotfiles/.local/share" ]; then
-        cp -r ./dotfiles/.local/share/* ~/.local/share/
+        cp -rf ./dotfiles/.local/share/* ~/.local/share/
     fi
     echo ""
 
     # Copy icons and themes
-    echo "[3/5] Copying icons and themes..."
-    mkdir -p ~/. icons
-    if [ -d "./dotfiles/. icons" ]; then
-        cp -r ./dotfiles/.icons/* ~/.icons/
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Copying icons and themes..."
+    mkdir -p ~/.icons
+    if [ -d "./dotfiles/.icons" ]; then
+        cp -rf ./dotfiles/.icons/* ~/.icons/
     fi
 
     mkdir -p ~/.themes
     if [ -d "./dotfiles/.themes" ]; then
-        cp -r ./dotfiles/.themes/* ~/. themes/
+        cp -rf ./dotfiles/.themes/* ~/.themes/
     fi
     echo ""
 
     # Rebuild NixOS
-    echo "[4/5] Rebuilding NixOS..."
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Rebuilding NixOS..."
     sudo nixos-rebuild switch --flake ".#$nixos_flake"
     echo ""
 
@@ -296,9 +550,10 @@ setup_nixos() {
     echo ""
 
     # Change git remote to SSH
-    echo "[5/5] Changing git remote to SSH..."
-    cd "$HOME/. nix" || exit 1
-    git remote set-url origin git@github.com:cat-phish/NixOS-Config. git
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Changing git remote to SSH..."
+    cd "$HOME/.nix" || exit 1
+    git remote set-url origin git@github.com:cat-phish/NixOS-Config.git
     echo "[✓] Git remote set to: git@github.com:cat-phish/NixOS-Config.git"
     echo ""
 

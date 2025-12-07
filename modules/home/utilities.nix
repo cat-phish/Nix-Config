@@ -17,19 +17,26 @@
     (with pkgs; [
       appimage-run
       audacity
-      fuse
+      chirp # ham radio programmer
+      deskreen # screen mirroring
+      efibootmgr # show boot manager info
       gparted
       # htop
       htop-vim
+      keepassxc
+      lshw # list detailed hardware information
       neofetch
       noto-fonts-color-emoji
+      nurl # fetching nix package options from git, maybe others
       pinta
       qdirstat
       rclone
+      sqlite
       syncthing
-      tlrc
-      traceroute
-      winboat
+      tlrc # man page summaries, command is tldr
+      traceroute # trace packets over network
+      winboat # run windows apps
+      # ventoy
     ])
     ++ (with pkgs-stable; [
       ]);

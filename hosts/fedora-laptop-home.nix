@@ -17,7 +17,10 @@
     ../modules/home/fun-apps.nix
     ../modules/home/media-playback.nix
     ../modules/home/media-mgmt.nix
+    ../modules/home/office-suite.nix
     ../modules/home/utilities.nix
+    ../modules/home/app-wine.nix
+    ../modules/home/app-foobar2000-wine-dependencies.nix
     # ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops
   ];
@@ -28,15 +31,12 @@
   home.homeDirectory = "/home/jordan";
 
   nixpkgs.config.allowUnfree = true;
-  nixpkgs.config.permittedInsecurePackages = [
-  ];
 
   home.packages =
     (with pkgs; [
       # docker
       firefox
       kmonad
-      onlyoffice-desktopeditors
     ])
     ++ (with pkgs-stable; [
       ]);
@@ -110,8 +110,15 @@
       Categories=AudioVideo;Player;
     '';
   };
+
   home.sessionVariables = {
     EDITOR = "vim";
     SHELL = pkgs.zsh;
+  };
+
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
   };
 }

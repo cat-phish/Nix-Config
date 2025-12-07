@@ -53,20 +53,30 @@
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
-      config.allowUnfree = true;
+      config = {
+        allowUnfree = true;
+        permittedInsecurePackages = [
+          "ventoy-1.1.07"
+        ];
+      };
     };
     pkgs-stable = import nixpkgs-stable {
       inherit system;
-      config.allowUnfree = true;
+      config = {
+        allowUnfree = true;
+        permittedInsecurePackages = [
+          "ventoy-1.1.07"
+        ];
+      };
     };
   in {
     nixosConfigurations = {
-      jordans-desktop = lib.nixosSystem {
+      nixos-desktop = lib.nixosSystem {
         inherit system;
         modules = [
           ./configuration.nix
-          ./hosts/all-personal-machines/configuration.nix
-          ./hosts/desktop/configuration.nix
+          # ./hosts/all-personal-machines/configuration.nix
+          ./hosts/nixos-desktop-configuration.nix
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
           nix-flatpak.nixosModules.nix-flatpak
@@ -82,12 +92,12 @@
           # inherit erosanix;
         };
       };
-      jordans-laptop = lib.nixosSystem {
+      nixos-laptop = lib.nixosSystem {
         inherit system;
         modules = [
           ./configuration.nix
-          ./hosts/all-personal-machines/configuration.nix
-          ./hosts/laptop/configuration.nix
+          # ./hosts/all-personal-machines/configuration.nix
+          ./hosts/nixos-laptop-configuration.nix
           # sops-nix.nixosModules.sops
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
@@ -101,12 +111,12 @@
       };
     };
     homeConfigurations = {
-      "jordan@jordans-desktop" = home-manager.lib.homeManagerConfiguration {
+      "jordan@nixos-desktop" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
           ./home.nix
-          ./hosts/all-personal-machines/home.nix
-          ./hosts/nixox-desktop/home.nix
+          # ./hosts/all-personal-machines/home.nix
+          ./hosts/nixos-desktop-home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -120,12 +130,12 @@
           # inherit erosanix;
         };
       };
-      "jordan@jordans-laptop" = home-manager.lib.homeManagerConfiguration {
+      "jordan@nixos-laptop" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
           ./home.nix
-          ./hosts/all-personal-machines/home.nix
-          ./hosts/nixos-laptop/home.nix
+          # ./hosts/all-personal-machines/home.nix
+          ./hosts/nixos-laptop-home.nix
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -143,8 +153,7 @@
         inherit pkgs;
         modules = [
           ./home.nix
-          ./hosts/all-personal-machines/home.nix
-          ./hosts/fedora-desktop/home.nix
+          ./hosts/fedora-desktop-home.nix
           nix-flatpak.homeManagerModules.nix-flatpak
         ];
         extraSpecialArgs = {

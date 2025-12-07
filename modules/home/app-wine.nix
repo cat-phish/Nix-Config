@@ -15,12 +15,16 @@
 
   home.packages =
     (with pkgs; [
-      lsp-plugins # a collection of open source audio plugins
-      mpv
-      vlc
-    ])
+      ])
     ++ (with pkgs-stable; [
-      ]);
+      wine
+      wineasio
+      winetricks
+      wineWowPackages.full
+      # wineWowPackages.unstable
+      # wineWowPackages.waylandFull
+      # erosanix.packages.i686-linux.foobar2000
+    ]);
 
   home.file = {
   };

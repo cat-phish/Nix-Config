@@ -6,17 +6,22 @@
   ...
 }: {
   imports = [
-    ./hardware-configuration.nix
-    ../../modules/nvidiaGPU-laptop.nix
+    ../modules/hardware-config/nixos-laptop-hardware.nix
+    ../modules/nixos/nvidiaGPU-laptop.nix
+    ../modules/nixos/printers.nix
+    ../modules/nixos/utilities.nix
   ];
   config = {
-    networking.hostName = "jordans-laptop";
+    networking.hostName = "nixos-laptop";
 
     services.hardware.openrgb.enable = true;
 
     hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 
     services.libinput.touchpad.disableWhileTyping = true;
+
+    nixpkgs.config.permittedInsecurePackages = [
+    ];
 
     environment.systemPackages =
       (with pkgs; [
@@ -38,7 +43,7 @@
       keyboards = {
         kmonad_legion_slim_7 = {
           device = "/dev/input/by-path/pci-0000:06:00.4-usbv2-0:4:1.0-event-kbd";
-          config = builtins.readFile ../../dotfiles/.config/kmonad/kmonad_legion_slim_7.kbd;
+          config = builtins.readFile ../dotfiles/.config/kmonad/kmonad_legion_slim_7.kbd;
         };
       };
     };
@@ -67,13 +72,49 @@
       };
     };
 
-    ### Bootloader ###
+    #### Bootloader ###
 
+    # Use the systemd-boot EFI boot loader.
+    # boot.loader.systemd-boot.enable = true;
+    # boot.loader.efi.canTouchEfiVariables = true;
+
+    # Use the GRUB 2 boot loader.
     boot.loader = {
+      timeout = 10;
+
+      efi = {
+        efiSysMountPoint = "/boot";
+      };
+
       grub = {
+        enable = true;
+        efiSupport = true;
+        efiInstallAsRemovable = true; # Otherwise /boot/EFI/BOOT/BOOTX64.EFI isn't generated
+        devices = ["nodev"];
+        useOSProber = true;
+        extraEntriesBeforeNixOS = false;
+        extraEntries = ''
+          menuentry "Reboot" {
+            reboot
+          }
+          menuentry "Poweroff" {
+            halt
+          }
+        '';
+        # theme = pkgs.fetchFromGitHub {
+        #   enable = false;
+        #   owner = "harishnkr";
+        #   repo = "bsol";
+        #   rev = "v1.0"; # commit number
+        #   sha256 = "sha256-sUvlue+AXW6VkVYy3WOUuSt548b6LoDpJmQPbgcZDQw="; # attempt build with this value empty to get the hash
+        # };
         darkmatter-theme = {
+          enable = true;
+          style = "nixos";
+          icon = "color";
           resolution = "1080p";
         };
+        configurationLimit = 20;
       };
     };
 

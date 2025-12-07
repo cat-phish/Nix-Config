@@ -104,6 +104,6 @@
       Type=Application
       Icon="$HOME/.nix/dotfiles/.img/foobar.jpg"
       Categories=AudioVideo;Player;
-    '';
+    'r2000';
   };
 }
