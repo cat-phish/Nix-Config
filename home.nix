@@ -140,17 +140,17 @@
     # '';
 
     # Add ~/.nix/dotfiles/ dotfiles individually here
-    ".bashrc".source = ./dotfiles/.bashrc;
-    ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
-    "${config.xdg.configHome}/tmux/scripts" = {
-      source = ./dotfiles/.config/tmux/scripts;
-      recursive = true;
-    };
-    ".vim" = {
-      source = ./dotfiles/.vim;
-      recursive = true;
-    };
-    ".zshrc".source = ./dotfiles/.zshrc;
+    # ".bashrc".source = ./dotfiles/.bashrc;
+    # ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
+    # "${config.xdg.configHome}/tmux/scripts" = {
+    #   source = ./dotfiles/.config/tmux/scripts;
+    #   recursive = true;
+    # };
+    # ".vim" = {
+    #   source = ./dotfiles/.vim;
+    #   recursive = true;
+    # };
+    # ".zshrc".source = ./dotfiles/.zshrc;
   };
   # programs.bash.enable = true; # deprecated in favor of exist existing bashrc
 

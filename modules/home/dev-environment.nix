@@ -61,25 +61,25 @@
 
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
-    ".bashrc".source = ./dotfiles/.bashrc;
+    ".bashrc".source = ../../dotfiles/.bashrc;
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;
     };
     ".prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
-    ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
+    ".config/tmux/tmux.conf".source = ../../dotfiles/.config/tmux/tmux.conf;
     "${config.xdg.configHome}/tmux/scripts" = {
-      source = ./dotfiles/.config/tmux/scripts;
+      source = ../../dotfiles/.config/tmux/scripts;
       recursive = true;
     };
     ".vim" = {
-      source = ./dotfiles/.vim;
+      source = ../../dotfiles/.vim;
       recursive = true;
     };
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
-    ".zshrc".source = ./dotfiles/.zshrc;
+    ".zshrc".source = ../../dotfiles/.zshrc;
   };
 }

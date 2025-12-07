@@ -16,6 +16,25 @@ nix-shell -p git --run '
 '
 ```
 
+## Fedora Installation
+
+Run this command to install git, clone the repo, and start setup:
+
+```bash
+sudo dnf upgrade --refresh -y && \
+  sudo dnf install -y git && \
+  git clone https://github.com/cat-phish/Nix-Config.git ~/. nix && \
+  cd ~/. nix && \
+  bash init.sh
+```
+
+This will:
+
+1. Update system packages
+2. Install git
+3. Clone your Nix config to ~/.nix
+4. Run the interactive setup script
+
 ## Licensing
 
 - The dotfiles and configurations are licensed under the MIT License. See

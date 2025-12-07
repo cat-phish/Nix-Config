@@ -145,6 +145,7 @@
           ./home.nix
           ./hosts/all-personal-machines/home.nix
           ./hosts/fedora-desktop/home.nix
+          nix-flatpak.homeManagerModules.nix-flatpak
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -161,6 +162,7 @@
           ./home.nix
           # ./hosts/all-personal-machines/home.nix
           ./hosts/fedora-laptop-home.nix
+          nix-flatpak.homeManagerModules.nix-flatpak
         ];
         extraSpecialArgs = {
           inherit inputs;

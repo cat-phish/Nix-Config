@@ -1,0 +1,43 @@
+# System upgrade
+sudo dnf upgrade --refresh
+
+# Install git
+sudo dnf install git
+
+# Install Niri
+sudo dnf copr enable avengemedia/dms
+sudo dnf install niri dms
+systemctl --user add-wants niri.service dms
+
+# Install Kitty
+dnf copr enable gagbo/kitty-latest
+sudo dnf copr enable gagbo/kitty-latest
+sudo dnf --refresh install kitty
+
+sudo dnf copr enable petersen/nix
+sudo dnf install nix
+sudo systemctl enable --now nix-daemon
+nix-channel --add https://github.com/nix-community/home-manager/archive/master.tar.gz home-manager
+nix-channel --update
+nix-shell '<home-manager>' -A install
+$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+sudo $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
+
+# Prompt for system type, fedora-desktop for desktop and fedora-laptop for laptop
+sudo hostnamectl set-hostname fedora-laptop
+
+# Prompt to reboot
+
+# Try to detect that the script has been run already
+# and prompt to continue or start from the beginning
+git clone https://github.com/cat-phish/Nix-Config.git $HOME/.nix
+cd .nix
+home-manager switch --flake .
+home-manager switch -b backup --flake .
+
+# Run the Fedora kmonad set up script we just made
+
+# Prompt for user to manually install session variables and confirm
+
+# Prompt for reboot
+

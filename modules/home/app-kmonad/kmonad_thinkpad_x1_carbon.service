@@ -1,0 +1,14 @@
+[Unit]
+Description=KMonad keyboard remapping
+After=graphical.target
+
+[Service]
+Type=simple
+ExecStart=$HOME/.nix-profile/bin/kmonad $HOME/.config/kmonad/kmonad_thinkpad_x1_carbon_gen12.kbd
+Restart=always
+# Make sure KMonad has access to input devices
+# Optional: uncomment if needed
+# AmbientCapabilities=CAP_SYS_ADMIN
+
+[Install]
+WantedBy=default.target
