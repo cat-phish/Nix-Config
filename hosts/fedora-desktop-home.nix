@@ -131,5 +131,8 @@
 
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
+    ".config/niri/config.kdl" = {
+      source = ../dotfiles/.config/niri/config.kdl;
+    };
   };
 }

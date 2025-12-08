@@ -94,6 +94,9 @@
       source = ../dotfiles/.scripts;
       recursive = true;
     };
+    ".config/niri/config.kdl" = {
+      source = ../dotfiles/.config/niri/config.kdl;
+    };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;
       recursive = true;
