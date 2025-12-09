@@ -2,12 +2,12 @@
 
 #!/usr/bin/env bash
 
-nix flake update --flake ~/coding/nixCats
+nix flake update --flake ~/source/nixCats
 
-nix build ~/coding/nixCats
+nix build ~/source/nixCats
 
 # Navigate to the nixCats directory and perform git operations
-cd ~/coding/nixCats
+cd ~/source/nixCats
 git add .
 git commit -m "nvim auto update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push

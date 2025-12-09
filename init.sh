@@ -256,14 +256,12 @@ fi
 
 setup_fedora() {
     ## UPDATE THIS WHEN ADDING/REMOVING STEPS ##
-    local TOTAL_STEPS=12
+    local TOTAL_STEPS=13
     local STEP=0
 
     echo "==== Starting Fedora Setup ===="
     echo ""
 
-    # TODO: setup dankgreet https://danklinux.com/docs/dankgreeter/installation?_highlight=sddm#manual-setup-all-distros
-    # note: had to manually run systemd commands
     # TODO: setup talon
     # TODO: setup tailscale
 
@@ -291,6 +289,146 @@ setup_fedora() {
     fi
     echo ""
 
+    # Prompt for fingerprint setup
+    read -p "Would you like to enable fingerprint authentication for sudo? (y/n): " setup_fingerprint
+    if [[ "$setup_fingerprint" =~ ^[Yy]$ ]]; then
+        use_fingerprint=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Fingerprint management will be configured."
+    else
+        use_fingerprint=false
+        echo "[✓] Skipping fingerprint management."
+    fi
+    echo ""
+
+    # Prompt for Tailscale setup
+    read -p "Would you configure Tailscale? (y/n): " setup_tailscale
+    if [[ "$setup_tailscale" =~ ^[Yy]$ ]]; then
+        use_tailscale=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Tailscale will be configured."
+    else
+        use_tailscale=false
+        echo "[✓] Skipping configuration."
+    fi
+    echo ""
+
+    # TODO: fix the total steps math here, move the confirmation to above
+    # Setup fingerprint authentication
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Configuring fingerprint authentication..."
+
+    read -p "Would you like to enable fingerprint authentication for sudo? (y/n): " setup_fingerprint
+
+    if [ "$use_fingerprint" = true ]; then
+        # Check if fprintd is installed
+        if ! command -v fprintd-enroll &> /dev/null; then
+            echo "Installing fprintd..."
+            sudo dnf install -y fprintd fprintd-pam
+        fi
+
+        PAM_FILE="/etc/pam.d/sudo"
+
+        # Check if already configured
+        if grep -q "pam_fprintd.so" "$PAM_FILE"; then
+            echo "[✓] Fingerprint authentication already configured"
+        else
+            # Backup and configure
+            sudo cp "$PAM_FILE" "${PAM_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
+            sudo sed -i '/#%PAM-1.0/a auth       sufficient   pam_fprintd.so' "$PAM_FILE"
+            echo "[✓] Fingerprint authentication configured"
+        fi
+        
+        # Prompt to enroll fingerprint
+        read -p "Enroll fingerprint now? (y/n): " enroll_now
+        if [[ "$enroll_now" =~ ^[Yy]$ ]]; then
+            fprintd-enroll
+            echo "[✓] Fingerprint enrolled"
+        else
+            echo "You can enroll later with: fprintd-enroll"
+        fi
+    else
+        echo "[✓] Skipping fingerprint authentication setup"
+    fi
+    echo ""
+
+    # Setup Tailscale
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Setting up Tailscale..."
+
+    if [ "$use_tailscale" = true ]; then
+        # Check if Tailscale is already installed
+        if !  command -v tailscale &> /dev/null; then
+            echo "Installing Tailscale..."
+            
+            # Add Tailscale repository
+            sudo dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+            
+            # Install Tailscale
+            sudo dnf install -y tailscale
+            
+            echo "[✓] Tailscale installed"
+        else
+            echo "[✓] Tailscale already installed"
+        fi
+        
+        # Enable and start Tailscale service
+        sudo systemctl enable --now tailscaled
+        echo "[✓] Tailscale service enabled and started"
+        
+        # Check if already authenticated
+        if sudo tailscale status &> /dev/null && sudo tailscale status | grep -q "Logged in"; then
+            echo "[✓] Tailscale already authenticated"
+            echo ""
+            echo "Current Tailscale status:"
+            sudo tailscale status
+        else
+            echo ""
+            echo "Tailscale needs to be authenticated..."
+            read -p "Authenticate Tailscale now? (y/n): " auth_now
+            
+            if [[ "$auth_now" =~ ^[Yy]$ ]]; then
+                # Ask about additional options
+                echo ""
+                echo "Tailscale authentication options:"
+                read -p "Accept routes from other devices? (y/n): " accept_routes
+                read -p "Advertise this machine as an exit node? (y/n): " exit_node
+                read -p "Enable SSH access via Tailscale? (y/n): " tailscale_ssh
+                
+                # Build tailscale up command
+                TAILSCALE_CMD="sudo tailscale up"
+                
+                [[ "$accept_routes" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --accept-routes"
+                [[ "$exit_node" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --advertise-exit-node"
+                [[ "$tailscale_ssh" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --ssh"
+                
+                echo ""
+                echo "Running: $TAILSCALE_CMD"
+                echo "This will open a browser window for authentication..."
+                
+                eval $TAILSCALE_CMD
+                
+                echo ""
+                echo "[✓] Tailscale configured"
+                echo ""
+                echo "Tailscale status:"
+                sudo tailscale status
+            else
+                echo "You can authenticate later with: sudo tailscale up"
+            fi
+        fi
+        
+        echo ""
+        echo "Useful Tailscale commands:"
+        echo "  sudo tailscale status      - Show connection status"
+        echo "  sudo tailscale ip          - Show your Tailscale IP"
+        echo "  sudo tailscale ping <host> - Ping another device"
+        echo "  sudo tailscale down        - Disconnect"
+    else
+        echo "[✓] Skipping Tailscale setup"
+    fi
+    echo ""
+
     # Install Niri (conditional)
     if [ "$use_niri" = true ]; then
         STEP=$((STEP + 1))
@@ -298,6 +436,15 @@ setup_fedora() {
         sudo dnf copr enable -y avengemedia/dms
         sudo dnf install -y niri dms
         systemctl --user add-wants niri.service dms
+        # TODO: add prompt above for dankgreet default
+        # Enable dankgreet
+        sudo dnf copr enable avengemedia/danklinux
+        sudo dnf install -y dms-greeter
+        dms greeter enable
+        dms greeter sync
+        dms greeter status
+        sudo systemctl enable greetd
+        sudo systemctl start greetd
         echo ""
     fi
 
@@ -391,10 +538,10 @@ setup_fedora() {
     # Setup kmonad
     STEP=$((STEP + 1))
     echo "[$STEP/$TOTAL_STEPS] Setting up kmonad..."
-    if [ -f "$HOME/.nix/setup/kmonad-fedora-setup.sh" ]; then
-        bash "$HOME/.nix/setup/kmonad-fedora-setup.sh" setup
+    if [ -f "$HOME/.nix/setup/fedora-kmonad-setup.sh" ]; then
+        bash "$HOME/.nix/setup/fedora-kmonad-setup.sh" setup
     else
-        echo "⚠️  kmonad-fedora-setup.sh not found at ~/.nix/setup/kmonad-fedora-setup.sh"
+        echo "⚠️  fedora-kmonad-setup.sh not found at ~/.nix/setup/fedora-kmonad-setup.sh"
         read -p "Skip kmonad setup? (y/n): " skip_kmonad
         if [[ !  "$skip_kmonad" =~ ^[Yy]$ ]]; then
             echo "Please run kmonad setup manually later."

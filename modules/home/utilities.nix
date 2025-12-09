@@ -42,5 +42,9 @@
       ]);
 
   home.file = {
+    ".scripts" = {
+      source = ../../dotfiles/.scripts;
+      recursive = true;
+    };
   };
 }
