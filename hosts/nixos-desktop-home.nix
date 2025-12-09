@@ -34,7 +34,8 @@
 
   home.packages =
     (with pkgs; [
-      ])
+      kitty
+    ])
     ++ (with pkgs-stable; [
       ]);
 

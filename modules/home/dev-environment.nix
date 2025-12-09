@@ -65,6 +65,10 @@
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;
     };
+    ".config/kitty" = {
+      source = ../../dotfiles/.config/kitty;
+      recursive = true;
+    };
     ".prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
