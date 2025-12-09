@@ -4,6 +4,8 @@
 
 nix flake update --flake ~/source/nixCats
 
+nixcats --headless "+Lazy! update" +qa
+
 nix build ~/source/nixCats
 
 # Navigate to the nixCats directory and perform git operations
@@ -15,4 +17,4 @@ cd -
 
 nix flake update --flake ~/.nix mynvim
 
-home-manager switch --flake ~/.nix
+home-manager switch -b backup --flake ~/.nix

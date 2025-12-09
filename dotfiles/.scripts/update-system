@@ -58,7 +58,7 @@ update_flake() {
 rebuild_home() {
   if cmd_exists home-manager; then
     echo "Running: home-manager switch --flake $FLAKE_PATH"
-    if home-manager switch --flake "$FLAKE_PATH"; then
+    if home-manager switch -b backup --flake "$FLAKE_PATH"; then
       echo "[✓] home-manager switch succeeded"
     else
       echo "[!] home-manager switch failed"
@@ -67,7 +67,7 @@ rebuild_home() {
   else
     echo "home-manager binary not found; trying 'nix run' fallback..."
     if cmd_exists nix; then
-      if nix run nixpkgs#home-manager -- switch --flake "$FLAKE_PATH"; then
+      if nix run nixpkgs#home-manager --switch --flake "$FLAKE_PATH"; then
         echo "[✓] home-manager (nix run) switch succeeded"
       else
         echo "[!] home-manager (nix run) failed"

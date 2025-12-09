@@ -72,6 +72,9 @@
     ".prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
+    ".p10k.zsh" = {
+      source = ../../dotfiles/.p10k.zsh;
+    };
     ".config/tmux/tmux.conf".source = ../../dotfiles/.config/tmux/tmux.conf;
     "${config.xdg.configHome}/tmux/scripts" = {
       source = ../../dotfiles/.config/tmux/scripts;
