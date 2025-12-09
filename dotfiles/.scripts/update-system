@@ -1,9 +1,150 @@
 #!/usr/bin/env bash
 
-sudo nix flake update --flake ~/.nix
+#!/usr/bin/env bash
+set -euo pipefail
 
-sudo nixos-rebuild switch --flake ~/.nix
+# update-system.sh
+# Detect NixOS vs Fedora. On NixOS: update flake, rebuild system, rebuild home, GC.
+# On Fedora: dnf upgrade, update flake, rebuild home, GC if nix available.
+#
+# Run this as your regular user (not as root). The script will use sudo when needed.
 
-home-manager switch --flake ~/.nix
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Please run this script as your regular user (not as root)."
+  exit 1
+fi
 
-sudo nix-collect-garbage --delete-older-than 14d
+# Where your flake lives
+FLAKE_PATH="$HOME/.nix"
+
+# Helper: check command exists
+cmd_exists() { command -v "$1" >/dev/null 2>&1; }
+
+# Load /etc/os-release if present to detect OS
+OS_ID=""
+if [ -f /etc/os-release ]; then
+  # shellcheck source=/dev/null
+  . /etc/os-release
+  OS_ID="${ID:-}"
+fi
+
+echo "Detected OS: ${OS_ID:-unknown}"
+echo ""
+
+# Common: update flake (run as user)
+update_flake() {
+  if ! cmd_exists nix; then
+    echo "nix not found in PATH; skipping flake update."
+    return 1
+  fi
+
+  if [ ! -d "$FLAKE_PATH" ]; then
+    echo "Flake path does not exist: $FLAKE_PATH"
+    echo "Skip flake update or clone your flake to that location first."
+    return 1
+  fi
+
+  echo "Updating flake at $FLAKE_PATH..."
+  if nix flake update --flake "$FLAKE_PATH"; then
+    echo "[✓] Flake updated"
+    return 0
+  else
+    echo "[!] Failed to update flake"
+    return 1
+  fi
+}
+
+# Common: run home-manager switch (as user)
+rebuild_home() {
+  if cmd_exists home-manager; then
+    echo "Running: home-manager switch --flake $FLAKE_PATH"
+    if home-manager switch --flake "$FLAKE_PATH"; then
+      echo "[✓] home-manager switch succeeded"
+    else
+      echo "[!] home-manager switch failed"
+      return 1
+    fi
+  else
+    echo "home-manager binary not found; trying 'nix run' fallback..."
+    if cmd_exists nix; then
+      if nix run nixpkgs#home-manager -- switch --flake "$FLAKE_PATH"; then
+        echo "[✓] home-manager (nix run) switch succeeded"
+      else
+        echo "[!] home-manager (nix run) failed"
+        return 1
+      fi
+    else
+      echo "Neither home-manager nor nix found; skipping home rebuild."
+      return 1
+    fi
+  fi
+}
+
+# Common: garbage collect (requires sudo for multi-user)
+gc_nix() {
+  if ! cmd_exists nix; then
+    echo "nix not found; skipping garbage collection."
+    return 1
+  fi
+
+  echo "Running garbage collection: delete items older than 14 days"
+  sudo nix-collect-garbage --delete-older-than 14d
+  echo "[✓] nix garbage collection complete"
+}
+
+case "$OS_ID" in
+  nixos)
+    echo "Performing NixOS workflow..."
+    update_flake || echo "[!] Flake update failed or skipped; continuing"
+
+    echo ""
+    echo "Rebuilding system with: sudo nixos-rebuild switch --flake $FLAKE_PATH"
+    if sudo nixos-rebuild switch --flake "$FLAKE_PATH"; then
+      echo "[✓] nixos-rebuild succeeded"
+    else
+      echo "[!] nixos-rebuild failed"
+      exit 1
+    fi
+
+    echo ""
+    rebuild_home || echo "[!] home-manager rebuild failed or skipped"
+
+    echo ""
+    gc_nix || true
+    ;;
+
+  fedora)
+    echo "Performing Fedora workflow..."
+    if cmd_exists dnf; then
+      echo "Updating system packages with dnf..."
+      sudo dnf upgrade --refresh -y
+      echo "[✓] dnf upgrade finished"
+    else
+      echo "dnf not found; skipping system package update."
+    fi
+
+    echo ""
+    update_flake || echo "[!] Flake update failed or skipped"
+
+    echo ""
+    rebuild_home || echo "[!] home-manager rebuild failed or skipped"
+
+    echo ""
+    # If Nix is installed as multi-user, we can GC as root; otherwise skip
+    if cmd_exists nix; then
+      gc_nix || true
+    else
+      echo "nix not found; skipping nix garbage collection."
+    fi
+    ;;
+
+  *)
+    echo "Unknown or unsupported OS: ${OS_ID:-unknown}"
+    echo "I'll attempt a safe/default flow: update flake, rebuild home (if available)."
+    update_flake || echo "[!] Flake update failed or skipped"
+    rebuild_home || echo "[!] home-manager rebuild failed or skipped"
+    ;;
+esac
+
+echo ""
+echo "Done."
