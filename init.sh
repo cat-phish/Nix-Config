@@ -262,6 +262,11 @@ setup_fedora() {
     echo "==== Starting Fedora Setup ===="
     echo ""
 
+    # TODO: setup dankgreet https://danklinux.com/docs/dankgreeter/installation?_highlight=sddm#manual-setup-all-distros
+    # note: had to manually run systemd commands
+    # TODO: setup talon
+    # TODO: setup tailscale
+
     # Prompt for KDE Plasma management
     read -p "Would you like to manage KDE Plasma with Nix? (y/n): " manage_plasma
     if [[ "$manage_plasma" =~ ^[Yy]$ ]]; then
