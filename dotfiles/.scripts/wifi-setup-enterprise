@@ -1,0 +1,171 @@
+#!/bin/bash
+
+# Script to add WPA2-Enterprise WiFi connections
+# Passwords are handled securely without storing in shell history
+
+set -e  # Exit on any error
+
+echo "=== Enterprise WiFi Connection Setup ==="
+echo
+
+# Get all WiFi interfaces
+WIFI_INTERFACES=$(nmcli device status | grep wifi | awk '{print $1}')
+INTERFACE_COUNT=$(echo "$WIFI_INTERFACES" | wc -l)
+
+if [ -z "$WIFI_INTERFACES" ]; then
+    echo "Error: No WiFi interface found!"
+    exit 1
+fi
+
+# If only one interface, use it automatically
+if [ "$INTERFACE_COUNT" -eq 1 ]; then
+    INTERFACE="$WIFI_INTERFACES"
+    echo "Detected WiFi interface: $INTERFACE"
+else
+    # Multiple interfaces found, let user choose
+    echo "Multiple WiFi interfaces detected:"
+    echo "$WIFI_INTERFACES" | nl -w2 -s') '
+    echo
+    read -p "Enter the number of the interface to use (or press Enter for first one): " INTERFACE_CHOICE
+    
+    if [ -z "$INTERFACE_CHOICE" ]; then
+        INTERFACE=$(echo "$WIFI_INTERFACES" | head -n 1)
+    else
+        INTERFACE=$(echo "$WIFI_INTERFACES" | sed -n "${INTERFACE_CHOICE}p")
+        if [ -z "$INTERFACE" ]; then
+            echo "Error: Invalid selection!"
+            exit 1
+        fi
+    fi
+    echo "Using interface: $INTERFACE"
+fi
+
+echo
+
+# Scan for WiFi networks
+echo "Scanning for WiFi networks..."
+nmcli device wifi rescan 2>/dev/null || true
+sleep 2  # Give it time to scan
+
+# Get top 10 strongest networks (by signal strength)
+AVAILABLE_SSIDS=$(nmcli -f SSID,SIGNAL device wifi list ifname "$INTERFACE" | \
+    tail -n +2 | \
+    sort -k2 -rn | \
+    awk '{$NF=""; print $0}' | \
+    sed 's/[[:space:]]*$//' | \
+    grep -v '^--$' | \
+    grep -v '^$' | \
+    head -n 10)
+
+if [ -z "$AVAILABLE_SSIDS" ]; then
+    echo "No WiFi networks found.  You'll need to enter the SSID manually."
+    read -p "Enter the network SSID (network name): " SSID
+else
+    echo
+    echo "Available WiFi networks (strongest signals):"
+    echo "$AVAILABLE_SSIDS" | nl -w2 -s') '
+    echo " 0) Enter SSID manually"
+    echo
+    read -p "Select a network [0-10]: " SSID_CHOICE
+    
+    if [ "$SSID_CHOICE" = "0" ]; then
+        read -p "Enter the network SSID (network name): " SSID
+    elif [ -n "$SSID_CHOICE" ] && [ "$SSID_CHOICE" -ge 1 ] && [ "$SSID_CHOICE" -le 10 ]; then
+        SSID=$(echo "$AVAILABLE_SSIDS" | sed -n "${SSID_CHOICE}p" | sed 's/^[[:space: ]]*//' | sed 's/[[:space:]]*$//')
+        if [ -z "$SSID" ]; then
+            echo "Error: Invalid selection!"
+            exit 1
+        fi
+        echo "Selected:  $SSID"
+    else
+        echo "Error: Invalid selection!"
+        exit 1
+    fi
+fi
+
+# Get connection name (with SSID as default)
+echo
+read -p "Enter a name for this connection (or press Enter to use '$SSID'): " CON_NAME
+CON_NAME=${CON_NAME:-$SSID}
+
+# Get username
+read -p "Enter your username: " USERNAME
+
+# Get password securely (won't show on screen or in history)
+read -s -p "Enter your password:  " PASSWORD
+echo  # New line after hidden password input
+
+# Get EAP method (with default)
+echo
+echo "Select EAP method:"
+echo "  1) PEAP (most common)"
+echo "  2) TTLS"
+echo "  3) TLS"
+read -p "Enter choice [1-3] (default:  1): " EAP_CHOICE
+EAP_CHOICE=${EAP_CHOICE:-1}
+
+case $EAP_CHOICE in
+    1) EAP_METHOD="peap" ;;
+    2) EAP_METHOD="ttls" ;;
+    3) EAP_METHOD="tls" ;;
+    *) EAP_METHOD="peap" ;;
+esac
+
+# Get Phase 2 authentication (with default)
+echo
+echo "Select Phase 2 authentication:"
+echo "  1) MSCHAPv2 (most common)"
+echo "  2) MSCHAP"
+echo "  3) PAP"
+echo "  4) CHAP"
+read -p "Enter choice [1-4] (default: 1): " PHASE2_CHOICE
+PHASE2_CHOICE=${PHASE2_CHOICE:-1}
+
+case $PHASE2_CHOICE in
+    1) PHASE2_AUTH="mschapv2" ;;
+    2) PHASE2_AUTH="mschap" ;;
+    3) PHASE2_AUTH="pap" ;;
+    4) PHASE2_AUTH="chap" ;;
+    *) PHASE2_AUTH="mschapv2" ;;
+esac
+
+echo
+echo "Creating connection..."
+
+# Create the connection
+nmcli connection add type wifi con-name "$CON_NAME" \
+  ifname "$INTERFACE" ssid "$SSID" -- \
+  wifi-sec. key-mgmt wpa-eap \
+  802-1x.eap "$EAP_METHOD" \
+  802-1x.phase2-auth "$PHASE2_AUTH" \
+  802-1x.identity "$USERNAME" \
+  802-1x.password "$PASSWORD" \
+  802-1x.password-flags 0
+
+# Optional:  Disable certificate validation (less secure but often needed)
+read -p "Disable certificate validation?  (less secure, but often needed for school networks) [y/N]: " DISABLE_CERT
+if [[ $DISABLE_CERT =~ ^[Yy]$ ]]; then
+    nmcli connection modify "$CON_NAME" 802-1x.phase1-peapver 0
+    echo "Certificate validation disabled."
+fi
+
+echo
+echo "Connection '$CON_NAME' created successfully!"
+echo
+
+# Try to connect
+read -p "Would you like to connect now? [Y/n]:  " CONNECT_NOW
+CONNECT_NOW=${CONNECT_NOW:-Y}
+
+if [[ $CONNECT_NOW =~ ^[Yy]$ ]]; then
+    echo "Connecting to '$CON_NAME'..."
+    if nmcli connection up "$CON_NAME"; then
+        echo "✓ Successfully connected to '$SSID'!"
+    else
+        echo "✗ Connection failed.  Check the logs with: journalctl -u NetworkManager -n 50"
+        exit 1
+    fi
+fi
+
+echo
+echo "Done! You can connect later with:  nmcli connection up '$CON_NAME'"

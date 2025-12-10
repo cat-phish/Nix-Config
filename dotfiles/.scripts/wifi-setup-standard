@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+#!/bin/bash
+
+# Script to add standard WiFi connections (WPA/WPA2)
+# For home networks and simple password-based WiFi
+
+set -e  # Exit on any error
+
+echo "=== Standard WiFi Connection Setup ==="
+echo
+
+# Get all WiFi interfaces
+WIFI_INTERFACES=$(nmcli device status | grep wifi | awk '{print $1}')
+INTERFACE_COUNT=$(echo "$WIFI_INTERFACES" | wc -l)
+
+if [ -z "$WIFI_INTERFACES" ]; then
+    echo "Error: No WiFi interface found!"
+    exit 1
+fi
+
+# If only one interface, use it automatically
+if [ "$INTERFACE_COUNT" -eq 1 ]; then
+    INTERFACE="$WIFI_INTERFACES"
+    echo "Detected WiFi interface: $INTERFACE"
+else
+    # Multiple interfaces found, let user choose
+    echo "Multiple WiFi interfaces detected:"
+    echo "$WIFI_INTERFACES" | nl -w2 -s') '
+    echo
+    read -p "Enter the number of the interface to use (or press Enter for first one): " INTERFACE_CHOICE
+    
+    if [ -z "$INTERFACE_CHOICE" ]; then
+        INTERFACE=$(echo "$WIFI_INTERFACES" | head -n 1)
+    else
+        INTERFACE=$(echo "$WIFI_INTERFACES" | sed -n "${INTERFACE_CHOICE}p")
+        if [ -z "$INTERFACE" ]; then
+            echo "Error: Invalid selection!"
+            exit 1
+        fi
+    fi
+    echo "Using interface: $INTERFACE"
+fi
+
+echo
+
+# Scan for WiFi networks
+echo "Scanning for WiFi networks..."
+nmcli device wifi rescan 2>/dev/null || true
+sleep 2  # Give it time to scan
+
+# Get top 10 strongest networks (by signal strength)
+AVAILABLE_SSIDS=$(nmcli -f SSID,SIGNAL device wifi list ifname "$INTERFACE" | \
+    tail -n +2 | \
+    sort -k2 -rn | \
+    awk '{$NF=""; print $0}' | \
+    sed 's/[[:space:]]*$//' | \
+    grep -v '^--$' | \
+    grep -v '^$' | \
+    head -n 10)
+
+if [ -z "$AVAILABLE_SSIDS" ]; then
+    echo "No WiFi networks found.  You'll need to enter the SSID manually."
+    read -p "Enter the network SSID (network name): " SSID
+else
+    echo
+    echo "Available WiFi networks (strongest signals):"
+    echo "$AVAILABLE_SSIDS" | nl -w2 -s') '
+    echo " 0) Enter SSID manually"
+    echo
+    read -p "Select a network [0-10]: " SSID_CHOICE
+    
+    if [ "$SSID_CHOICE" = "0" ]; then
+        read -p "Enter the network SSID (network name): " SSID
+    elif [ -n "$SSID_CHOICE" ] && [ "$SSID_CHOICE" -ge 1 ] && [ "$SSID_CHOICE" -le 10 ]; then
+        SSID=$(echo "$AVAILABLE_SSIDS" | sed -n "${SSID_CHOICE}p" | sed 's/^[[:space: ]]*//' | sed 's/[[:space:]]*$//')
+        if [ -z "$SSID" ]; then
+            echo "Error: Invalid selection!"
+            exit 1
+        fi
+        echo "Selected:  $SSID"
+    else
+        echo "Error: Invalid selection!"
+        exit 1
+    fi
+fi
+
+# Get connection name (with SSID as default)
+echo
+read -p "Enter a name for this connection (or press Enter to use '$SSID'): " CON_NAME
+CON_NAME=${CON_NAME:-$SSID}
+
+# Get password securely (won't show on screen or in history)
+read -s -p "Enter the WiFi password: " PASSWORD
+echo  # New line after hidden password input
+
+echo
+echo "Creating connection..."
+
+# Create the connection
+nmcli connection add type wifi con-name "$CON_NAME" \
+  ifname "$INTERFACE" ssid "$SSID" -- \
+  wifi-sec. key-mgmt wpa-psk \
+  wifi-sec.psk "$PASSWORD"
+
+echo
+echo "Connection '$CON_NAME' created successfully!"
+echo
+
+# Try to connect
+read -p "Would you like to connect now?  [Y/n]:  " CONNECT_NOW
+CONNECT_NOW=${CONNECT_NOW:-Y}
+
+if [[ $CONNECT_NOW =~ ^[Yy]$ ]]; then
+    echo "Connecting to '$CON_NAME'..."
+    if nmcli connection up "$CON_NAME"; then
+        echo "✓ Successfully connected to '$SSID'!"
+    else
+        echo "✗ Connection failed.  Check the logs with: journalctl -u NetworkManager -n 50"
+        exit 1
+    fi
+fi
+
+echo
+echo "Done! You can connect later with:  nmcli connection up '$CON_NAME'"
