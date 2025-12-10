@@ -100,7 +100,7 @@ echo "Creating connection..."
 # Create the connection
 nmcli connection add type wifi con-name "$CON_NAME" \
   ifname "$INTERFACE" ssid "$SSID" -- \
-  wifi-sec. key-mgmt wpa-psk \
+  wifi-sec.key-mgmt wpa-psk \
   wifi-sec.psk "$PASSWORD"
 
 echo
