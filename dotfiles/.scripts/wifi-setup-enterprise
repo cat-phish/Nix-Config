@@ -135,7 +135,7 @@ echo "Creating connection..."
 # Create the connection
 nmcli connection add type wifi con-name "$CON_NAME" \
   ifname "$INTERFACE" ssid "$SSID" -- \
-  wifi-sec. key-mgmt wpa-eap \
+  wifi-sec.key-mgmt wpa-eap \
   802-1x.eap "$EAP_METHOD" \
   802-1x.phase2-auth "$PHASE2_AUTH" \
   802-1x.identity "$USERNAME" \
