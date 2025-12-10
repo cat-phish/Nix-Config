@@ -3,6 +3,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+ORIGINAL_DIR=$(pwd)
+trap 'cd "$ORIGINAL_DIR"' EXIT
+
 # update-system.sh
 # Detect NixOS vs Fedora. On NixOS: update flake, rebuild system, rebuild home, GC.
 # On Fedora: dnf upgrade, update flake, rebuild home, GC if nix available.
@@ -100,6 +103,7 @@ git_pull_rebase() {
   fi
 
   echo "Running garbage git pull --rebase"
+  cd ~/.nix
   git pull --rebase
   echo "[✓] git pull --rebase complete"
 }
@@ -114,7 +118,7 @@ git_commit_push() {
   git add .
   git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
   git push
-  cd
+  # cd
   echo "[✓] git commit and push complete"
 }
 

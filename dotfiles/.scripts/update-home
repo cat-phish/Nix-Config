@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+ORIGINAL_DIR=$(pwd)
+trap 'cd "$ORIGINAL_DIR"' EXIT
+
+cd ~/.nix
 git pull --rebase
 sudo nix flake update --flake ~/.nix
-cd ~/.nix
 git add .
 git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push
-cd
 
 home-manager switch -b backup --flake ~/.nix
 

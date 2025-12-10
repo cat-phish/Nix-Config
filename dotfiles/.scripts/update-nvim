@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-#!/usr/bin/env bash
+ORIGINAL_DIR=$(pwd)
+trap 'cd "$ORIGINAL_DIR"' EXIT
+
+cd ~/source/nixCats
+git pull --rebase
 
 nix flake update --flake ~/source/nixCats
 
@@ -9,11 +13,9 @@ nixcats --headless "+Lazy! update" +qa
 nix build ~/source/nixCats
 
 # Navigate to the nixCats directory and perform git operations
-cd ~/source/nixCats
 git add .
 git commit -m "nvim auto update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push
-cd
 
 
 git pull --rebase
@@ -22,6 +24,5 @@ cd ~/.nix
 git add .
 git commit -m "Nvim flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push
-cd
 
 home-manager switch -b backup --flake ~/.nix
