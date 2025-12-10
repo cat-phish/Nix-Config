@@ -3,13 +3,17 @@
 // Check the wiki for a full description of the configuration:
 // https://yalter.github.io/niri/Configuration:-Introduction
 
-workspace "passwords"
+// Include DMS keybind overrides
+// include "dms/binds.kdl"
+
+workspace "utilities"
 workspace "browser"
 workspace "terminal"
 
+spawn-at-startup "keepassxc"
+spawn-sh-at-startup "konsole -e dgop"
 spawn-at-startup "firefox"
 spawn-at-startup "kitty"
-spawn-at-startup "keepassxc"
 
 
 // Input device configuration.
@@ -340,7 +344,12 @@ window-rule {
 }
 window-rule {
   match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
-  open-on-workspace "passwords"
+  open-on-workspace "utilities"
+  open-maximized true
+}
+window-rule {
+  match at-startup=true app-id=r#"konsole$"#
+  open-on-workspace "utilities"
   open-maximized true
 }
 
@@ -397,9 +406,32 @@ binds {
     // shows a list of important hotkeys.
     Mod+Shift+Slash { show-hotkey-overlay; }
 
+    // DMS Keybinds
+    Mod+N hotkey-overlay-title="Notification Center" {
+        spawn "dms" "ipc" "call" "notifications" "toggle"; 
+    }
+    Mod+Alt+L hotkey-overlay-title="Lock Screen" { 
+        spawn "dms" "ipc" "call" "lock" "lock"; 
+    }
+    XF86MonBrightnessUp allow-when-locked=true {
+       spawn "dms" "ipc" "call" "brightness" "increment" "5" "";
+    }
+    XF86MonBrightnessDown allow-when-locked=true {
+       spawn "dms" "ipc" "call" "brightness" "decrement" "5" "";
+    }
+    Mod+Y hotkey-overlay-title="Clipboard Manager" {
+        spawn "dms" "ipc" "call" "clipboard" "toggle";
+    }
+    Mod+M hotkey-overlay-title="Task Manager" { 
+        spawn "dms" "ipc" "call" "processlist" "toggle"; 
+    }
+
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     // Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
     Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+Space hotkey-overlay-title="Application Launcher" {
+      spawn "dms" "ipc" "call" "spotlight" "toggle";
+    }
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 
     // Use spawn-sh to run a shell command. Do this if you need pipes, multiple commands, etc.
@@ -418,8 +450,8 @@ binds {
     // Example brightness key mappings for brightnessctl.
     // You can use regular spawn with multiple arguments too (to avoid going through "sh"),
     // but you need to manually put each argument in separate "" quotes.
-    XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
-    XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
+    // XF86MonBrightnessUp allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "+10%"; }
+    // XF86MonBrightnessDown allow-when-locked=true { spawn "brightnessctl" "--class=backlight" "set" "10%-"; }
 
     // Open/close the Overview: a zoomed-out view of workspaces and windows.
     // You can also move the mouse into the top-left hot corner,
@@ -430,9 +462,9 @@ binds {
 
     Mod+B  { focus-workspace "browser"; }
     Mod+T  { focus-workspace "terminal"; }
-    Mod+P  { focus-workspace "passwords"; }
+    Mod+U  { focus-workspace "utilities"; }
 
-    Mod+Left  { focus-column-left; }
+    // Mod+Left  { focus-column-left; } // disabled for DMS lock
     // Mod+Down  { focus-window-down; }
     // Mod+Up    { focus-window-up; }
     Mod+Down  { focus-window-or-workspace-down; }
@@ -464,6 +496,7 @@ binds {
     Mod+Ctrl+Home { move-column-to-first; }
     Mod+Ctrl+End  { move-column-to-last; }
 
+  // TODO: get rid of arrow key mappings
     Mod+Shift+Left  { focus-monitor-left; }
     Mod+Shift+Down  { focus-monitor-down; }
     Mod+Shift+Up    { focus-monitor-up; }
@@ -491,14 +524,14 @@ binds {
     // Mod+Shift+Ctrl+Left  { move-workspace-to-monitor-left; }
     // ...
 
-    Mod+Page_Down      { focus-workspace-down; }
-    Mod+Page_Up        { focus-workspace-up; }
-    Mod+U              { focus-workspace-down; }
-    Mod+I              { focus-workspace-up; }
-    Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
-    Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
-    Mod+Ctrl+U         { move-column-to-workspace-down; }
-    Mod+Ctrl+I         { move-column-to-workspace-up; }
+    // Mod+Page_Down      { focus-workspace-down; }
+    // Mod+Page_Up        { focus-workspace-up; }
+    // Mod+U              { focus-workspace-down; }
+    // Mod+I              { focus-workspace-up; }
+    // Mod+Ctrl+Page_Down { move-column-to-workspace-down; }
+    // Mod+Ctrl+Page_Up   { move-column-to-workspace-up; }
+    // Mod+Ctrl+U         { move-column-to-workspace-down; }
+    // Mod+Ctrl+I         { move-column-to-workspace-up; }
 
     // Alternatively, there are commands to move just a single window:
     // Mod+Ctrl+Page_Down { move-window-to-workspace-down; }

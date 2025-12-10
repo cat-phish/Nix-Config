@@ -3,6 +3,7 @@
 ORIGINAL_DIR=$(pwd)
 trap 'cd "$ORIGINAL_DIR"' EXIT
 
+# Navigate to the nixCats directory to perform git operations
 cd ~/source/nixCats
 git pull --rebase
 
@@ -12,15 +13,14 @@ nixcats --headless "+Lazy! update" +qa
 
 nix build ~/source/nixCats
 
-# Navigate to the nixCats directory and perform git operations
 git add .
 git commit -m "nvim auto update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push
 
-
+# Navigate to the nix directory to perform git operations
+cd ~/.nix
 git pull --rebase
 nix flake update --flake ~/.nix mynvim
-cd ~/.nix
 git add .
 git commit -m "Nvim flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push
