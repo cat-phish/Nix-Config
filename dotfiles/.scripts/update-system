@@ -90,12 +90,46 @@ gc_nix() {
   echo "Running garbage collection: delete items older than 14 days"
   sudo nix-collect-garbage --delete-older-than 14d
   echo "[✓] nix garbage collection complete"
+
+}
+
+git_pull_rebase() {
+  if ! cmd_exists git; then
+    echo "git not found; skipping git pull --rebase."
+    return 1
+  fi
+
+  echo "Running garbage git pull --rebase"
+  git pull --rebase
+  echo "[✓] git pull --rebase complete"
+}
+
+git_commit_push() {
+  if ! cmd_exists git; then
+    echo "git not found; skipping git commit and push."
+    return 1
+  fi
+  echo "Running garbage collection: delete items older than 14 days"
+  cd ~/.nix
+  git add .
+  git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
+  git push
+  cd
+  echo "[✓] git commit and push complete"
 }
 
 case "$OS_ID" in
   nixos)
     echo "Performing NixOS workflow..."
+    
+    echo ""
+    git_pull_rebase || echo "[!] git pull failed or skipped; continuing"
+
+    echo ""
     update_flake || echo "[!] Flake update failed or skipped; continuing"
+
+    echo ""
+    git_commit_push || echo "[!] git commit and push failed or skipped; continuing"
 
     echo ""
     echo "Rebuilding system with: sudo nixos-rebuild switch --flake $FLAKE_PATH"
@@ -124,7 +158,13 @@ case "$OS_ID" in
     fi
 
     echo ""
+    git_pull_rebase || echo "[!] git pull failed or skipped; continuing"
+
+    echo ""
     update_flake || echo "[!] Flake update failed or skipped"
+
+    echo ""
+    git_commit_push || echo "[!] git commit and push failed or skipped; continuing"
 
     echo ""
     rebuild_home || echo "[!] home-manager rebuild failed or skipped"

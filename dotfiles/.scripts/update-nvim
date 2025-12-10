@@ -13,8 +13,15 @@ cd ~/source/nixCats
 git add .
 git commit -m "nvim auto update [$(date +'%Y-%m-%d %H:%M:%S')]"
 git push
-cd -
+cd
 
+
+git pull --rebase
 nix flake update --flake ~/.nix mynvim
+cd ~/.nix
+git add .
+git commit -m "Nvim flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
+git push
+cd
 
 home-manager switch -b backup --flake ~/.nix

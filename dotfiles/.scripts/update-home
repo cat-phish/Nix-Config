@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
+git pull --rebase
 sudo nix flake update --flake ~/.nix
+cd ~/.nix
+git add .
+git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
+git push
+cd
 
 home-manager switch -b backup --flake ~/.nix
 
