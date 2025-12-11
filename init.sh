@@ -362,7 +362,7 @@ setup_fedora() {
             echo "Installing Tailscale..."
             
             # Add Tailscale repository
-            sudo dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tailscale.repo
+            sudo dnf config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
             
             # Install Tailscale
             sudo dnf install -y tailscale
