@@ -263,7 +263,7 @@ setup_fedora() {
     echo ""
 
     # TODO: setup talon
-    # TODO: setup tailscale
+    # TODO: separate each step into script
 
     # Prompt for Niri installation
     read -p "Would you like to install Niri? (y/n): " install_niri
@@ -639,6 +639,9 @@ setup_fedora() {
       echo "[✓] Git remote set to: git@github.com:cat-phish/NixOS-Config.git"
       echo ""
 
+    fi
+
+    if [ "$use_nix" = true ]; then
       # Prompt for manual session variables
       echo "==== Manual Steps Required ===="
       echo "Please add the following to your shell configuration (~/.bashrc or ~/.zshrc):"
@@ -647,10 +650,10 @@ setup_fedora() {
       echo ""
       read -p "Have you added this line? (y/n): " session_vars_confirm
       if [[ ! "$session_vars_confirm" =~ ^[Yy]$ ]]; then
-          echo "⚠️  Please add this line before continuing!"
+        echo "⚠️  Please add this line before continuing!"
       fi
-      echo ""
     fi
+    echo ""
 
     # Mark setup as complete
     touch "$MARKER_FILE"
