@@ -21,6 +21,7 @@
     ../modules/home/utilities.nix
     ../modules/home/app-wine.nix
     ../modules/home/app-foobar2000-wine-dependencies.nix
+    ../modules/home/app-wireguard-tray.nix
     # ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops
   ];
@@ -94,6 +95,10 @@
       source = ../dotfiles/.scripts;
       recursive = true;
     };
+    ".python-scripts" = {
+      source = ../dotfiles/.python-scripts;
+      recursive = true;
+    };
     ".config/niri/config.kdl" = {
       source = ../dotfiles/.config/niri/config.kdl;
     };
@@ -109,14 +114,14 @@
       Name=foobar2000
       Exec=env WINEPREFIX="$HOME/.wine-foobar2000" WINEARCH=win32 wine "$HOME/wineapps/foobar2000_2.0/foobar2000.exe"
       Type=Application
-      Icon="$HOME/.nix/dotfiles/.img/foobar.jpg"
+      Icon="$HOME/.img/foobar.jpg"
       Categories=AudioVideo;Player;
     '';
   };
 
   home.sessionVariables = {
-    EDITOR = "vim";
-    SHELL = pkgs.zsh;
+    EDITOR = "nvim";
+    SHELL = "/usr/bin/zsh";
   };
 
   nix.gc = {

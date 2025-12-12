@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=WireGuard Tray
+Exec=~/.python-scripts/wireguard-tray.py
+Icon=network-vpn
+Comment=WireGuard system tray manager
+X-GNOME-Autostart-enabled=true

@@ -43,6 +43,10 @@
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
   };
 
+  home.sessionVariables = {
+    SHELL = pkgs.zsh;
+  };
+
   nix.gc = {
     automatic = true;
     dates = "weekly";

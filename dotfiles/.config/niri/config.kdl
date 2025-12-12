@@ -14,6 +14,7 @@ spawn-at-startup "keepassxc"
 spawn-sh-at-startup "konsole -e dgop"
 spawn-at-startup "firefox"
 spawn-at-startup "kitty"
+spawn-sh-at-startup "python ~/.python-scripts/wireguard-tray.py"
 
 
 // Input device configuration.

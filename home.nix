@@ -153,8 +153,8 @@
   #  /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
   #
   home.sessionVariables = {
-    EDITOR = "vim";
-    SHELL = pkgs.zsh;
+    EDITOR = "nvim";
+    # SHELL = pkgs.zsh;
   };
 
   # Let Home Manager install and manage itself.

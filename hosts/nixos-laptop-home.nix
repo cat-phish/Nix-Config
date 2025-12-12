@@ -44,6 +44,10 @@
     };
   };
 
+  home.sessionVariables = {
+    SHELL = pkgs.zsh;
+  };
+
   nix.gc = {
     automatic = true;
     dates = "weekly";
