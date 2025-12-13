@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=foobar2000
+Comment=foobar2000 Audio Player
+Exec=$HOME/.scripts/foobar2000
+Icon=$HOME/.img/foobar.jpg
+Categories=Audio;Music
+Keywords=audio;music;player;
+Terminal=false
+StartupNotify=false

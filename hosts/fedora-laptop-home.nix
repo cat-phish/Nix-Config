@@ -109,14 +109,14 @@
     # "${config.xdg.configHome}/systemd/user/kmonad.service" = {
     #   source = ../dotfiles/.config/kmonad/setup/kmonad_thinkpad_x1_carbon.service;
     # };
-    "${config.xdg.dataHome}/applications/foobar2000.desktop".text = ''
-      [Desktop Entry]
-      Name=foobar2000
-      Exec=env WINEPREFIX="$HOME/.wine-foobar2000" WINEARCH=win32 wine "$HOME/wineapps/foobar2000_2.0/foobar2000.exe"
-      Type=Application
-      Icon="$HOME/.img/foobar.jpg"
-      Categories=AudioVideo;Player;
-    '';
+    # "${config.xdg.dataHome}/applications/foobar2000.desktop".text = ''
+    #   [Desktop Entry]
+    #   Name=foobar2000
+    #   Exec=env WINEPREFIX="$HOME/.wine-foobar2000" WINEARCH=win32 wine "$HOME/wineapps/foobar2000_2.0/foobar2000.exe"
+    #   Type=Application
+    #   Icon="$HOME/.img/foobar.jpg"
+    #   Categories=AudioVideo;Player;
+    # '';
   };
 
   home.sessionVariables = {

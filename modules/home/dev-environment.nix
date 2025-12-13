@@ -32,6 +32,9 @@
       zsh
       zoxide
       wezterm
+
+      # Toolkits/Libraries
+      sfml
     ])
     ++ (with pkgs-stable; [
       nerdfonts # moved to stable because the unstable requires individual fonts to be specified
