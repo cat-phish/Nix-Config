@@ -361,17 +361,18 @@ setup_fedora() {
     fi
     echo ""
 
-    # Prompt for Kitty installation
-    read -p "Would you like to install Kitty? (y/n): " install_kitty
-    if [[ "$install_kitty" =~ ^[Yy]$ ]]; then
-        use_kitty=true
-        TOTAL_STEPS=$((TOTAL_STEPS + 1))
-        echo "[✓] Kitty will be installed."
-    else
-        use_kitty=false
-        echo "[✓] Skipping Kitty installation."
-    fi
-    echo ""
+    # TODO: remove this
+    # # Prompt for Kitty installation
+    # read -p "Would you like to install Kitty? (y/n): " install_kitty
+    # if [[ "$install_kitty" =~ ^[Yy]$ ]]; then
+    #     use_kitty=true
+    #     TOTAL_STEPS=$((TOTAL_STEPS + 1))
+    #     echo "[✓] Kitty will be installed."
+    # else
+    #     use_kitty=false
+    #     echo "[✓] Skipping Kitty installation."
+    # fi
+    # echo ""
     
     # Prompt for git remote change
     read -p "Would you like to change the ~/.nix git remote to ssh? (y/n): " change_git
@@ -504,24 +505,7 @@ setup_fedora() {
         echo ""
     fi
 
-    # Install Niri (conditional)
-    if [ "$use_niri" = true ]; then
-        STEP=$((STEP + 1))
-        echo "[$STEP/$TOTAL_STEPS] Installing Niri..."
-        sudo dnf copr enable -y avengemedia/dms
-        sudo dnf install -y niri dms
-        systemctl --user add-wants niri.service dms
-        # TODO: add prompt above for dankgreet default
-        # Enable dankgreet
-        sudo dnf copr enable avengemedia/danklinux
-        sudo dnf install -y dms-greeter
-        dms greeter enable
-        dms greeter sync
-        dms greeter status
-        sudo systemctl enable greetd
-        sudo systemctl start greetd
-        echo ""
-    fi
+
 
     # Install Kitty
     if [ "$use_kitty" = true ]; then
@@ -654,6 +638,25 @@ setup_fedora() {
       fi
     fi
     echo ""
+
+    # Install Niri (conditional)
+    if [ "$use_niri" = true ]; then
+        STEP=$((STEP + 1))
+        echo "[$STEP/$TOTAL_STEPS] Installing Niri..."
+        sudo dnf copr enable -y avengemedia/dms
+        sudo dnf install -y niri dms
+        systemctl --user add-wants niri.service dms
+        # TODO: add prompt above for dankgreet default
+        # Enable dankgreet
+        sudo dnf copr enable avengemedia/danklinux
+        sudo dnf install -y dms-greeter
+        dms greeter enable
+        dms greeter sync
+        dms greeter status
+        sudo systemctl enable greetd
+        sudo systemctl start greetd
+        echo ""
+    fi
 
     # Mark setup as complete
     touch "$MARKER_FILE"
