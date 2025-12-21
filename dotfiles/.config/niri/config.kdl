@@ -5,6 +5,7 @@
 
 // Include DMS keybind overrides
 // include "dms/binds.kdl"
+include "output.kdl"
 
 workspace "utilities"
 workspace "browser"

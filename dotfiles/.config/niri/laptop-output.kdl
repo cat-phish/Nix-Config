@@ -1,0 +1,6 @@
+// Laptop Screen
+output "eDP-1" {
+  mode "1920x1200@60.000"
+  position x=0 y=0
+  scale 1.25
+}
