@@ -38,6 +38,7 @@
       # docker
       firefox
       kmonad
+      sfml
     ])
     ++ (with pkgs-stable; [
       ]);
@@ -73,6 +74,7 @@
       # }
       "com.usebottles.bottles"
       "dev.deedles.Trayscale"
+      "tv.kodi.Kodi"
     ];
     update.auto = {
       enable = true;

@@ -20,10 +20,15 @@
     (with pkgs; [
       aspell
       bat # cat replacement with syntax highlighting
+      # clang
+      clang-tools
+      llvm
       eza # ls replacement
       fd
       fzf
+      gcc
       jq
+      libgcc
       navi
       oh-my-zsh
       ripgrep

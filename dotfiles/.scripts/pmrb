@@ -57,6 +57,9 @@ auto_queue_shows=("Chapo Trap House" "Grey Wolf Feed" "TRUE ANON TRUTH FEED" "Bo
 # Auto clean the Queue.m3u8 file based on the most recent bookmark from Queue.m3u8.bmark
 auto_clean_queue="yes"
 
+# Device name
+name="JPOD"
+
 # UUID (use "lsblk -f"" to find the UUID of the device)
 uuid="D5AE-9E4C"
 
@@ -86,7 +89,8 @@ ssh_port="$MEDIASERVER_SSH_PORT"
 ### SCRIPT ###
 
 # Mount the drive
-mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
+mount_point=$(udisksctl mount -b "$(blkid -L $name)" | cut -d" " -f 4 | tr -d '\n')
+# mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
 # mount | grep "$mount_point" | grep 'ro,' && echo "Device mounted read-only!" && exit 1
 # Wait for a specified period of time (e.g., 5 seconds)
 sleep $sleep_time
@@ -185,4 +189,5 @@ if [ "$auto_clean_queue" == "yes" ]; then
 fi
 
 # Unmount the drive
-udisksctl unmount -b /dev/disk/by-uuid/$uuid
+udisksctl unmount -b "$(blkid -L $name)"
+# udisksctl unmount -b /dev/disk/by-uuid/$uuid

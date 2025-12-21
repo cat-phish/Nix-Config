@@ -19,7 +19,9 @@
       audacity
       chirp # ham radio programmer
       deskreen # screen mirroring
+      dropbox
       efibootmgr # show boot manager info
+      filezilla
       gparted
       # htop
       htop-vim

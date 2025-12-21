@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
 # Set UUID of iPod
-uuid="D5AE-9E4C"
+name="JPOD"
+# uuid="D5AE-9E4C"
 
 #Mount iPod
-udisksctl unmount -b /dev/disk/by-uuid/$uuid
+udisksctl unmount -b "$(blkid -L $name)"
+# udisksctl unmount -b /dev/disk/by-uuid/$uuid
