@@ -23,8 +23,8 @@ Run this command to install git, clone the repo, and start setup:
 ```bash
 sudo dnf upgrade --refresh -y && \
   sudo dnf install -y git && \
-  git clone https://github.com/cat-phish/Nix-Config.git ~/. nix && \
-  cd ~/. nix && \
+  git clone https://github.com/cat-phish/Nix-Config.git ~/.nix && \
+  cd ~/.nix && \
   bash init.sh
 ```
 
