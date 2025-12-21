@@ -48,8 +48,8 @@
       import.move = true;
       import.log = "/mnt/music_hdd/New/beets.log";
 
-      plugins = ["lyrics" "chroma" "lastgenre" "fetchart" "discogs" "copyartifacts" "ftintitle" "fromfilename" "inline" "rewrite" "spotify" "export" "unimported"];
-
+      plugins = ["chroma" "lastgenre" "fetchart" "discogs" "copyartifacts" "ftintitle" "fromfilename" "inline" "rewrite" "spotify" "export" "unimported"];
+      # TODO: temp not working, removed: "lyrics"
       paths.default = "$albumartist_sort/$album%aunique{} ($original_year) [$format]/%if{$multidisc,Disc $disc/}$track. $title";
       paths.singleton = "Non-Album/$artist/$title";
       paths.comp = "Compilations/$album%aunique{}/$track $title";
@@ -72,10 +72,10 @@
       #   peak = true;
       # };
 
-      lyrics = {
-        auto = true;
-        fallback = "No lyrics found";
-      };
+      # lyrics = {
+      #   auto = true;
+      #   fallback = "No lyrics found";
+      # };
 
       # acoustid.apikey = "$(cat ${config.sops.secrets."beets_acoustid_api".path})";
 

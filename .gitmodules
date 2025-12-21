@@ -1,0 +1,3 @@
+[submodule "dotfiles/.talon/user/community"]
+	path = dotfiles/.talon/user/community
+	url = https://github.com/talonhub/community.git
