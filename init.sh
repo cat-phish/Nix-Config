@@ -271,6 +271,14 @@ setup_fedora() {
         use_niri=true
         TOTAL_STEPS=$((TOTAL_STEPS + 1))
         echo "[✓] Niri will be installed."
+        if [ "$confirmed_machine" = "desktop" ]; then
+          read -p "Would you like to set up the default triple moitor setup? (y/n?): " install_triple_monitors
+          if  [[ "$install_triple_monitors" =~ ^[Yy]$ ]]; then
+            use_triple_monitors=true
+          else
+            use_triple_monitors=false
+          fi
+        fi
     else
         use_niri=false
         echo "[✓] Skipping Niri installation."
@@ -606,10 +614,7 @@ setup_fedora() {
           bash "$HOME/.nix/setup/fedora-kmonad-setup.sh" setup
       else
           echo "⚠️  fedora-kmonad-setup.sh not found at ~/.nix/setup/fedora-kmonad-setup.sh"
-          read -p "Skip kmonad setup? (y/n): " skip_kmonad
-          if [[ !  "$skip_kmonad" =~ ^[Yy]$ ]]; then
-              echo "Please run kmonad setup manually later."
-          fi
+          echo "Please run kmonad setup manually later."
       fi
       echo ""
     fi
@@ -653,6 +658,14 @@ setup_fedora() {
         dms greeter enable
         dms greeter sync
         dms greeter status
+        if [ "$use_triple_monitors" = true ]; then
+          if [ -f "$HOME/.nix/setup/dankgreet-desktop-config.sh" ]; then
+              bash "$HOME/.nix/setup/dankgreet-desktop-config.sh"
+          else
+              echo "⚠️  dankgreet-desktop-config.sh not found at ~/.nix/setup/dankgreet-desktop-config.sh"
+              echo "Please run desktop dankgreeter setup manually later."
+          fi
+        fi
         sudo systemctl enable greetd
         sudo systemctl start greetd
         echo ""
