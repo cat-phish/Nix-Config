@@ -5,6 +5,8 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# Ensure SHELL is set for Nix correctly
+export SHELL="$HOME/.nix-profile/bin/zsh"
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -69,7 +71,7 @@ function delete_empty_dirs_bulk() {
   fi
 }
 
-alias refresh-zsh="source ~/.zshrc"
+alias zsh-refresh="source ~/.zshrc"
 
 # Neovim
 alias v="nvim"
@@ -79,6 +81,12 @@ alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 
 # Emacs
 alias org="emacs --init-directory=~/.config/emacs"
+
+nixedit() {
+  cd ~/.nix || exit
+  git pull
+  nvim .
+}
 
 # Restic Backups
 backup() {
@@ -465,12 +473,17 @@ _fzf_comprun() {
 
 # zsh-vi-mode setup
 ZVM_VI_EDITOR=nvim
+bindkey -M vicmd 'H' beginning-of-line
+bindkey -M vicmd 'L' end-of-line
 
 # Set Bat Theme
 export BAT_THEME="1337"
 
 # set eza as default
-alias lss="eza --color=always --long --no-filesize --icons=always --no-time --no-user --no-permissions"
+alias lss="/bin/ls"
+alias ls="eza --color=always --no-filesize --icons=always --no-time --no-user --no-permissions"
+alias lsa="eza -a --color=always --no-filesize --icons=always --no-time --no-user --no-permissions"
+alias lsl="eza --color=always --long --icons=always"
 
 # thefuck alias for commmand correction
 # eval "$(thefuck --alias)"

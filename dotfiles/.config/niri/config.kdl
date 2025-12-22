@@ -5,11 +5,7 @@
 
 // Include DMS keybind overrides
 // include "dms/binds.kdl"
-include "output.kdl"
-
-workspace "utilities"
-workspace "browser"
-workspace "terminal"
+include "device-config.kdl"
 
 spawn-at-startup "keepassxc"
 spawn-sh-at-startup "konsole -e dgop"
@@ -60,8 +56,8 @@ input {
     mouse {
         // off
         // natural-scroll
-        // accel-speed 0.2
-        // accel-profile "flat"
+        accel-speed 0.1
+        accel-profile "flat"
         // scroll-method "no-scroll"
     }
 
@@ -335,6 +331,21 @@ window-rule {
 
 // Named Workspace Rules
 window-rule {
+  match at-startup=true app-id=r#"xwaylandvideobridge$"#
+  open-on-workspace "utilities"
+  open-maximized false
+}
+window-rule {
+  match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  open-on-workspace "utilities"
+  open-maximized false
+}
+window-rule {
+  match at-startup=true app-id=r#"konsole$"#
+  open-on-workspace "utilities"
+  open-maximized false
+}
+window-rule {
     match at-startup=true app-id=r#"firefox$"#
     open-on-workspace "browser"
     open-maximized true
@@ -343,16 +354,6 @@ window-rule {
     match at-startup=true app-id=r#"kitty$"#
     open-on-workspace "terminal"
     open-maximized true
-}
-window-rule {
-  match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
-  open-on-workspace "utilities"
-  open-maximized true
-}
-window-rule {
-  match at-startup=true app-id=r#"konsole$"#
-  open-on-workspace "utilities"
-  open-maximized true
 }
 
 // Firefox window rules
@@ -391,6 +392,12 @@ window-rule {
 /-window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
+}
+
+gestures {
+  hot-corners {
+    off
+  }
 }
 
 binds {

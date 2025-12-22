@@ -104,8 +104,8 @@
     ".config/niri/config.kdl" = {
       source = ../dotfiles/.config/niri/config.kdl;
     };
-    ".config/niri/output.kdl" = {
-      source = ../dotfiles/.config/niri/laptop-output.kdl;
+    ".config/niri/device-config.kdl" = {
+      source = ../dotfiles/.config/niri/laptop-config.kdl;
     };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;

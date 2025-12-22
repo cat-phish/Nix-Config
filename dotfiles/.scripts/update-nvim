@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 ORIGINAL_DIR=$(pwd)
 trap 'cd "$ORIGINAL_DIR"' EXIT
 
@@ -9,7 +11,8 @@ git pull --rebase
 
 nix flake update --flake ~/source/nixCats
 
-nixcats --headless "+Lazy! update" +qa
+# TODO: error with this, nixcats command not found
+# nixcats --headless "+Lazy! update" +qa
 
 nix build ~/source/nixCats
 

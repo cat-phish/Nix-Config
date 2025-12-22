@@ -17,3 +17,13 @@ output "HDMI-A-1" {
   transform "270"
   position x=3640 y=0
 }
+
+workspace "utilities" {
+  open-on-output "DP-1"
+}
+workspace "browser" {
+  open-on-output "DP-1"
+}
+workspace "terminal" {
+  open-on-output "DP-1"
+}
