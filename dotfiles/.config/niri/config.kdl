@@ -339,11 +339,13 @@ window-rule {
   match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
   open-on-workspace "utilities"
   open-maximized false
+  default-column-width { proportion 0.50; }
 }
 window-rule {
   match at-startup=true app-id=r#"konsole$"#
   open-on-workspace "utilities"
   open-maximized false
+  default-column-width { proportion 0.50; }
 }
 window-rule {
     match at-startup=true app-id=r#"firefox$"#

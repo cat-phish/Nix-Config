@@ -1,6 +1,6 @@
 // Laptop Screen
 output "eDP-1" {
-  mode "1920x1200@60.000"
+  mode "1920x1200@60.003"
   position x=0 y=0
   scale 1.25
 }
@@ -14,3 +14,6 @@ workspace "browser" {
 workspace "terminal" {
   open-on-output "eDP-1"
 }
+// workspace "utilities"
+// workspace "browser"
+// workspace "terminal"
