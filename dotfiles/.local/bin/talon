@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -e
+
+TALON_DIR="$HOME/.talon"
+TALON_TARBALL="$TALON_DIR/talon-linux.tar.xz"
+
+# Check if Talon is already installed
+if [ !  -f "$TALON_DIR/talon" ] && [ !  -f "$TALON_DIR/run.sh" ]; then
+    echo "Talon not found. Downloading..."
+    mkdir -p "$TALON_DIR"
+    
+    # Download latest Talon
+    wget -O "$TALON_TARBALL" "https://talonvoice.com/dl/latest/talon-linux.tar.xz"
+    
+    echo "Extracting..."
+    # Extract with --strip-components=1 to remove the top-level directory
+    tar -xf "$TALON_TARBALL" -C "$TALON_DIR" --strip-components=1
+    
+    # Clean up tarball
+    rm "$TALON_TARBALL"
+    
+    echo "Talon installed to $TALON_DIR"
+fi
+
+# Force X11/XWayland mode for better compatibility with Niri
+export GDK_BACKEND=x11
+export QT_QPA_PLATFORM=xcb
+export SDL_VIDEODRIVER=x11
+
+# Disable accessibility features that might conflict
+export GTK_A11Y=none
+export QT_ACCESSIBILITY=0
+
+# Check for input group membership (warning only)
+if ! groups | grep -q input; then
+    echo "Warning: You are not in the 'input' group"
+    echo "Talon may not have permission to control input"
+    echo "Run: sudo usermod -aG input $USER"
+    echo "Then log out and back in"
+    echo ""
+fi
+
+# Check uinput access (warning only)
+if [ ! -r /dev/uinput ] 2>/dev/null; then
+    echo "Warning: Cannot access /dev/uinput"
+    echo "Talon needs this for input control"
+    echo "You may need to run the setup-talon-permissions script"
+    echo ""
+fi
+
+# Run Talon
+cd "$TALON_DIR"
+
+# Check which executable exists (varies by version)
+if [ -f "$TALON_DIR/run.sh" ]; then
+    exec ./run.sh "$@"
+elif [ -f "$TALON_DIR/talon" ]; then
+    exec ./talon "$@"
+else
+    echo "Error: Talon executable not found in $TALON_DIR"
+    echo "Contents:"
+    ls -la "$TALON_DIR"
+    exit 1
+fi

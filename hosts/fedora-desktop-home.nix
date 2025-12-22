@@ -23,6 +23,7 @@
     ../modules/home/utilities.nix
     ../modules/home/app-wine.nix
     ../modules/home/app-foobar2000-wine-dependencies.nix
+    ../modules/home/app-talon.nix
     ../modules/home/app-wireguard-tray.nix
     # ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops

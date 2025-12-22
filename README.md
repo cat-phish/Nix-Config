@@ -10,7 +10,7 @@ run the following command:
 
 ```sh
 nix-shell -p git --run '
-  git clone https://github.com/your/repo.git $HOME/.nix &&
+  git clone --recurse-submodules https://github.com/your/repo.git $HOME/.nix &&
   cd $HOME/.nix &&
   ./init.sh
 '
@@ -23,8 +23,8 @@ Run this command to install git, clone the repo, and start setup:
 ```bash
 sudo dnf upgrade --refresh -y && \
   sudo dnf install -y git && \
-  git clone https://github.com/cat-phish/Nix-Config.git ~/.nix && \
-  cd ~/.nix && \
+  git clone --recurse-submodules https://github.com/cat-phish/Nix-Config.git $HOME/.nix && \
+  cd $HOME/.nix && \
   bash init.sh
 ```
 

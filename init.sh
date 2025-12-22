@@ -256,7 +256,7 @@ fi
 
 setup_fedora() {
     ## UPDATE THIS WHEN ADDING/REMOVING STEPS ##
-    local TOTAL_STEPS=13
+    local TOTAL_STEPS=0
     local STEP=0
 
     echo "==== Starting Fedora Setup ===="
@@ -369,18 +369,29 @@ setup_fedora() {
     fi
     echo ""
 
-    # TODO: remove this
-    # # Prompt for Kitty installation
-    # read -p "Would you like to install Kitty? (y/n): " install_kitty
-    # if [[ "$install_kitty" =~ ^[Yy]$ ]]; then
-    #     use_kitty=true
-    #     TOTAL_STEPS=$((TOTAL_STEPS + 1))
-    #     echo "[✓] Kitty will be installed."
-    # else
-    #     use_kitty=false
-    #     echo "[✓] Skipping Kitty installation."
-    # fi
-    # echo ""
+    # Prompt for Docker installation for winboat
+    read -p "Would you like to configure Docker (for Winboat or otherwise)? (y/n): " install_docker
+    if [[ "$install_docker" =~ ^[Yy]$ ]]; then
+        use_docker=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Docker will be installed."
+    else
+        use_docker=false
+        echo "[✓] Skipping Docker installation."
+    fi
+    echo ""
+
+    # Prompt for proprietary Nvidia driver installation
+    read -p "Would you like to configure Proprietary Nvidia drivers? (y/n): " install_nvidia
+    if [[ "$install_nvidia" =~ ^[Yy]$ ]]; then
+        use_nvidia=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Proprietary Nvidia drivers will be installed."
+    else
+        use_nvidia=false
+        echo "[✓] Skipping Proprietary Nvidia driver installation."
+    fi
+    echo ""
     
     # Prompt for git remote change
     read -p "Would you like to change the ~/.nix git remote to ssh? (y/n): " change_git
@@ -524,6 +535,22 @@ setup_fedora() {
       echo ""
     fi
 
+    # Install Docker
+    if [ "$use_docker" = true ]; then
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Installing Docker..."
+      bash "$HOME/.nix/setup/fedora-docker-setup.sh" --skip-confirm
+      echo ""
+    fi
+
+    # Install Nvidia proprietary drivers
+    if [ "$use_nvidia" = true ]; then
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Installing proprietary Nvidia drivers..."
+      bash "$HOME/.nix/setup/fedora-nvidia-setup.sh" --skip-confirm
+      echo ""
+    fi
+
     # Install Nix
     if [ "$use_nix" = true ]; then
       STEP=$((STEP + 1))
@@ -660,7 +687,7 @@ setup_fedora() {
         dms greeter status
         if [ "$use_triple_monitors" = true ]; then
           if [ -f "$HOME/.nix/setup/dankgreet-desktop-config.sh" ]; then
-              bash "$HOME/.nix/setup/dankgreet-desktop-config.sh"
+              bash "$HOME/.nix/setup/dankgreet-desktop-config.sh" --skip-confirm
           else
               echo "⚠️  dankgreet-desktop-config.sh not found at ~/.nix/setup/dankgreet-desktop-config.sh"
               echo "Please run desktop dankgreeter setup manually later."

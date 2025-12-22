@@ -23,6 +23,7 @@
     nix-snapd.url = "github:nix-community/nix-snapd";
     nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
     talon-nix.url = "github:nix-community/talon-nix";
+    agenix.url = "github:ryantm/agenix";
     # winboat= {
     #   url = "github:TibixDev/winboat";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -46,6 +47,7 @@
     nix-snapd,
     nix-flatpak,
     talon-nix,
+    agenix,
     # winboat,
     ...
   } @ inputs: let
@@ -157,6 +159,7 @@
           ./home.nix
           ./hosts/fedora-desktop-home.nix
           nix-flatpak.homeManagerModules.nix-flatpak
+          agenix.homeManagerModules.default
         ];
         extraSpecialArgs = {
           inherit inputs;
@@ -174,6 +177,7 @@
           # ./hosts/all-personal-machines/home.nix
           ./hosts/fedora-laptop-home.nix
           nix-flatpak.homeManagerModules.nix-flatpak
+          agenix.homeManagerModules.default
         ];
         extraSpecialArgs = {
           inherit inputs;

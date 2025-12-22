@@ -38,9 +38,6 @@
       tlrc # man page summaries, command is tldr
       traceroute # trace packets over network
       winboat # run windows apps
-      # docker
-      # docker-compose
-      # docker-client
       # ventoy
       xwayland-run
     ])

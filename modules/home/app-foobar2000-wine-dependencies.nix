@@ -23,8 +23,8 @@
     ]);
 
   home.file = {
-    ".local/share/applications/foobar2000.desktop" = {
-      source = ../../dotfiles/.local/share/applications/foobar2000.desktop;
-    };
+    # ".local/share/applications/foobar2000.desktop" = {
+    #   source = ../../dotfiles/.local/share/applications/foobar2000.desktop;
+    # };
   };
 }

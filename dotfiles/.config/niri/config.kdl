@@ -357,6 +357,14 @@ window-rule {
     open-on-workspace "terminal"
     open-maximized true
 }
+window-rule {
+    match app-id=r#"foobar2000$"#
+    open-maximized true
+}
+window-rule {
+    match app-id=r#"talon$"#
+    open-maximized true
+}
 
 // Firefox window rules
 // window-rule {
