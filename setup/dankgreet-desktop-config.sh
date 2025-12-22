@@ -3,6 +3,12 @@
 # Simple script to copy niri.kdl and config.toml to /etc/greetd/
 # Usage: ./simple-copy-greetd.sh
 
+# Check if running as root, if not, re-run with sudo
+if [[ $EUID -ne 0 ]]; then
+    echo "This script requires root privileges. Requesting sudo..."
+    exec sudo "$0" "$@"
+fi
+
 # Confirmation prompt
 echo "=========================================="
 echo "  Triple Monitor Desktop Setup"
@@ -22,12 +28,6 @@ fi
 echo ""
 echo "Proceeding with setup..."
 echo ""
-
-# Check if running as root, if not, re-run with sudo
-if [[ $EUID -ne 0 ]]; then
-    echo "This script requires root privileges. Requesting sudo..."
-    exec sudo "$0" "$@"
-fi
 
 # Get the actual user's home directory (not root's)
 if [ -n "${SUDO_USER:-}" ]; then

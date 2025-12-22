@@ -20,9 +20,9 @@
       # wine
       wineasio
       winetricks
-      wineWowPackages.full
+      # wineWowPackages.full
       # wineWowPackages.unstable
-      # wineWowPackages.waylandFull
+      wineWowPackages.waylandFull
       # erosanix.packages.i686-linux.foobar2000
     ]);
 

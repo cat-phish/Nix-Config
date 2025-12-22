@@ -9,6 +9,7 @@ output "DP-2" {
 output "DP-1" {
   mode "2560x1440@144.000"
   position x=1080 y=0
+  focus-at-startup
 }
 
 // Right Monitor

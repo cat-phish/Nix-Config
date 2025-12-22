@@ -40,8 +40,9 @@
       winboat # run windows apps
       # docker
       # docker-compose
-      docker-client
+      # docker-client
       # ventoy
+      xwayland-run
     ])
     ++ (with pkgs-stable; [
       ]);

@@ -2,12 +2,14 @@ output "DP-2" {
   mode "1920x1080@60.000"
   transform "90"
   position x=0 y=0
+  off
 }
 
 // Center Monitor
 output "DP-1" {
   mode "2560x1440@144.000"
   position x=1080 y=0
+  focus-at-startup
 }
 
 // Right Monitor
@@ -15,6 +17,7 @@ output "HDMI-A-1" {
   mode "1920x1080@60.000"
   transform "270"
   position x=3640 y=0
+  off
 }
 
 hotkey-overlay {

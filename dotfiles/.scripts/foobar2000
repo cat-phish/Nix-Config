@@ -1,12 +1,62 @@
 #!/usr/bin/env bash
 
-# Set the path to your foobar2000 portable executable
-FOOBAR2000_PATH="$HOME/wineapps/foobar2000/foobar2000_2.0/foobar2000.exe"
+# # Set the path to your foobar2000 portable executable
+# FOOBAR2000_PATH="$HOME/wineapps/foobar2000/foobar2000/foobar2000.exe"
+#
+# # Create a Wine prefix for foobar2000 portable if it doesn't exist
+# if [ ! -d "$HOME/wineapps/foobar2000/wine" ]; then
+#   WINEPREFIX="$HOME/wineapps/foobar2000/wine" WINEARCH=win32 wineboot
+# fi
+#
+# # Run foobar2000 portable
+# WINEPREFIX="$HOME/wineapps/foobar2000/wine" WINEARCH=win32 wine "$FOOBAR2000_PATH"
 
-# Create a Wine prefix for foobar2000 portable if it doesn't exist
-if [ ! -d "$HOME/wineapps/foobar2000/wine" ]; then
-  WINEPREFIX="$HOME/wineapps/foobar2000/wine" WINEARCH=win32 wineboot
+set -e
+
+# Configuration
+FOOBAR_DIR="$HOME/wineapps/foobar2000"
+WINEPREFIX="$FOOBAR_DIR/wine"
+FOOBAR_EXE="$FOOBAR_DIR/foobar2000/foobar2000.exe"
+
+# Check if executable exists
+if [ ! -f "$FOOBAR_EXE" ]; then
+    echo "Error: foobar2000.exe not found at $FOOBAR_EXE"
+    exit 1
 fi
 
-# Run foobar2000 portable
-WINEPREFIX="$HOME/wineapps/foobar2000/wine" WINEARCH=win32 wine "$FOOBAR2000_PATH"
+# Create Wine prefix on first run
+if [ ! -d "$WINEPREFIX" ]; then
+    echo "First run detected. Creating Wine prefix..."
+    echo "This may take a minute..."
+    WINEPREFIX="$WINEPREFIX" WINEARCH=win32 wineboot -u
+    
+    # Set Windows version to Windows 10
+    echo "Configuring Wine..."
+    WINEPREFIX="$WINEPREFIX" winetricks -q win10
+    
+    # Install dependencies
+    echo "Installing dependencies..."
+    WINEPREFIX="$WINEPREFIX" winetricks -q vcrun2019 corefonts
+    
+    echo "Setup complete!"
+fi
+
+# Environment variables for better compatibility
+export WINEPREFIX
+export WINEARCH=win32
+export WINEDEBUG=-all
+
+# Graphics/Display settings for Wayland/Niri compatibility
+export LIBGL_ALWAYS_SOFTWARE=1  # Use software rendering if hardware fails
+export MESA_GL_VERSION_OVERRIDE=4.5
+export MESA_GLSL_VERSION_OVERRIDE=450
+
+# Wayland/XWayland settings
+export DISPLAY="${DISPLAY:-:0}"
+export GDK_BACKEND=x11
+
+# Change to foobar directory
+cd "$FOOBAR_DIR/foobar2000"
+
+# Run foobar2000
+exec wine foobar2000.exe "$@"

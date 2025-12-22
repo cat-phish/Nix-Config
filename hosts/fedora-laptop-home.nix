@@ -101,6 +101,10 @@
       source = ../dotfiles/.python-scripts;
       recursive = true;
     };
+    ".img" = {
+      source = ../dotfiles/.img;
+      recursive = true;
+    };
     ".config/niri/config.kdl" = {
       source = ../dotfiles/.config/niri/config.kdl;
     };

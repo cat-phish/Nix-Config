@@ -57,30 +57,36 @@
     ++ (with pkgs-stable; [
       ]);
 
-  # services.flatpak = {
-  #   remotes = lib.mkOptionDefault [
-  #     {
-  #       name = "flathub";
-  #       location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
-  #     }
-  #   ];
-  #   packages = [
-  #     # {
-  #     #   appId = "com.brave.Browser";
-  #     #   origin = "flathub";
-  #     # }
-  #     "com.usebottles.bottles"
-  #     "dev.deedles.Trayscale"
-  #   ];
-  #   update.auto.enable = false;
-  #   uninstallUnmanaged = false;
-  # };
-  #
-  # services.tailscale = {
-  #   enable = true;
-  #   useRoutingFeatures = "client";
-  # };
-  #
+  services.flatpak = {
+    enable = true;
+
+    remotes = lib.mkOptionDefault [
+      {
+        name = "flathub";
+        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      }
+    ];
+    packages = [
+      # {
+      #   appId = "com.brave.Browser";
+      #   origin = "flathub";
+      # }
+      "com.usebottles.bottles"
+      "dev.deedles.Trayscale"
+      "tv.kodi.Kodi"
+      "net.lutris.Lutris"
+      "org.winehq.Wine"
+      "org.winehq.Wine.gecko"
+      "org.winehq.Wine.mono"
+    ];
+    update.auto = {
+      enable = true;
+      onCalendar = "weekly";
+    };
+
+    uninstallUnmanaged = false;
+  };
+
   # #Enable Talon Voice Control
   # programs.talon.enable = true;
   home.file = {
@@ -91,6 +97,10 @@
     };
     ".python-scripts" = {
       source = ../dotfiles/.python-scripts;
+      recursive = true;
+    };
+    ".img" = {
+      source = ../dotfiles/.img;
       recursive = true;
     };
     ".config/niri/config.kdl" = {
