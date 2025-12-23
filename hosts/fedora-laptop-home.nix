@@ -9,7 +9,7 @@
   # Plasma Manager KDE Configuration
   imports = [
     # ../../modules/plasma-config/desktop/plasma-config.nix
-    ../modules/rclone/rclone-gdrive.nix
+    ../modules/rclone/rclone-gdrivedesk.nix
     ../modules/rclone/rclone-mediaserversmb.nix
     # ../modules/rclone/rclone-hetzner.nix
     ../modules/home/communications.nix
