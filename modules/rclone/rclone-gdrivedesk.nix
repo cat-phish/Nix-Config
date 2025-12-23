@@ -34,7 +34,7 @@
         ExecStop = "/run/current-system/sw/bin/fusermount -u ${gdriveDir}";
         Restart = "on-failure";
         RestartSec = "10s";
-        EnvironmentFile = "/home/jordan/.env/.env";
+        EnvironmentFile = "/home/jordan/.ssh/.env";
         Environment = ["PATH=/run/wrappers/bin/:$PATH"];
       };
     };

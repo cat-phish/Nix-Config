@@ -10,8 +10,8 @@
   imports = [
     # ../modules/plasma-config/desktop/plasma-config.nix
     # ../../modules/plasma-config/desktop/plasma-config.nix
-    # ../modules/rclone/rclone-gdrivedesk.nix
-    # ../modules/rclone/rclone-mediaserversmb.nix
+    ../modules/rclone/rclone-gdrivedesk-fedora.nix
+    ../modules/rclone/rclone-mediaserversmb.nix
     # ../modules/rclone/rclone-hetzner.nix
     ../modules/home/app-beets.nix
     ../modules/home/communications.nix

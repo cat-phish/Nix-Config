@@ -6,16 +6,15 @@
   xdg.configFile."rclone/rclone-mediaserversmb.conf".text = ''
     [mediaserversmb]
     type = smb
-    host = mediaserver.local
-    user = media
   '';
+  # user = media
+  # host = mediaserver.local
 
   systemd.user.services = {
     rclone-mediaserver-mount = {
       Unit = {
         Description = "Mounts mediaserver with rclone";
-        After = ["default.target"];
-        Requires = ["default.target"];
+        After = ["network-online.target"];
       };
       Install = {
         WantedBy = ["default.target"];
@@ -23,18 +22,25 @@
 
       Service = let
         mediaserverDir = "/home/jordan/mediaserver";
+        cacheDir = "/home/jordan/.cache/rclone-mediaserver";
       in {
         Type = "simple";
-        ExecStartPre = "/run/current-system/sw/bin/mkdir -p ${mediaserverDir}";
+        ExecStartPre = [
+          "${pkgs.coreutils}/bin/mkdir -p ${mediaserverDir}"
+          "${pkgs.coreutils}/bin/mkdir -p ${cacheDir}"
+        ];
         ExecStart = ''
-          ${pkgs.rclone}/bin/rclone --config=%h/.config/rclone/rclone-mediaserversmb.conf \
-          mount mediaserversmb:/ /home/jordan/mediaserver
+          ${pkgs.rclone}/bin/rclone mount mediaserversmb:/ ${mediaserverDir} \
+            --config=%h/.config/rclone/rclone-mediaserversmb.conf \
+            --vfs-cache-mode full \
+            --vfs-cache-max-age 72h \
+            --cache-dir=${cacheDir} \
+            --log-level INFO
         '';
-        ExecStop = "/run/current-system/sw/bin/fusermount -u ${mediaserverDir}";
+        ExecStop = "${pkgs.fuse}/bin/fusermount -u ${mediaserverDir}";
         Restart = "on-failure";
         RestartSec = "10s";
-        EnvironmentFile = "/home/jordan/.env/.env";
-        Environment = ["PATH=/run/wrappers/bin/:$PATH"];
+        EnvironmentFile = "/home/jordan/.ssh/.env";
       };
     };
   };
