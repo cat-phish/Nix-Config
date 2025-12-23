@@ -18,6 +18,7 @@
       appimage-run
       audacity
       chirp # ham radio programmer
+      chromium
       deskreen # screen mirroring
       dropbox
       efibootmgr # show boot manager info
