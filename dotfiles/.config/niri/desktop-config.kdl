@@ -26,12 +26,78 @@ output "HDMI-A-1" {
   }
 }
 
-workspace "utilities" {
-  open-on-output "DP-1"
-}
 workspace "browser" {
   open-on-output "DP-1"
 }
 workspace "terminal" {
   open-on-output "DP-1"
+}
+workspace "utilities" {
+  open-on-output "DP-2"
+}
+workspace "passwords" {
+  open-on-output "DP-2"
+}
+workspace "emacs" {
+  open-on-output "DP-2"
+}
+workspace "chat" {
+  open-on-output "HDMI-A-1"
+}
+workspace "music" {
+  open-on-output "HDMI-A-1"
+}
+
+// Named Workspace Rules
+// main monitor
+window-rule {
+  match at-startup=true app-id=r#"firefox$"#
+  open-on-workspace "browser"
+  open-maximized true
+}
+window-rule {
+  match at-startup=true app-id=r#"kitty$"#
+  open-on-workspace "terminal"
+  open-maximized true
+}
+// left monitor
+window-rule {
+  match at-startup=true app-id=r#"Emacs$"#
+  open-on-workspace "emacs"
+  open-maximized true
+}
+window-rule {
+  match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  open-on-workspace "passwords"
+  open-maximized true
+  // default-column-width { proportion 0.50; }
+}
+window-rule {
+  match at-startup=true app-id=r#"konsole$"#
+  open-on-workspace "utilities"
+  open-maximized true
+  // default-column-width { proportion 0.50; }
+}
+window-rule {
+  match at-startup=true app-id=r#"xwaylandvideobridge$"#
+  open-on-workspace "utilities"
+  open-maximized false
+}
+// right monitor
+window-rule {
+  match at-startup=true app-id=r#"discord$"#
+  open-on-workspace "chat"
+  open-maximized true
+  // default-column-width { proportion 0.50; }
+}
+window-rule {
+  match at-startup=true app-id=r#"konversation$"#
+  open-on-workspace "chat"
+  open-maximized true
+  // default-column-width { proportion 0.50; }
+}
+
+window-rule {
+    match app-id=r#"foobar2000$"#
+    open-maximized true
 }

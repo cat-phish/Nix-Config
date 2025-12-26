@@ -8,8 +8,11 @@
 include "device-config.kdl"
 
 spawn-at-startup "dropbox"
+spawn-at-startup "emacs"
 spawn-at-startup "keepassxc"
 spawn-sh-at-startup "konsole -e dgop"
+spawn-at-startup "discord"
+spawn-at-startup "konversation"
 spawn-at-startup "firefox"
 spawn-at-startup "kitty"
 spawn-sh-at-startup "python ~/.python-scripts/wireguard-tray.py"
@@ -329,43 +332,17 @@ window-rule {
     match app-id=r#"^org\.wezfurlong\.wezterm$"#
     default-column-width {}
 }
+window-rule {
+  match app-id=r#"Emacs$"#
+  open-maximized true
+}
 
-// Named Workspace Rules
-window-rule {
-  match at-startup=true app-id=r#"xwaylandvideobridge$"#
-  open-on-workspace "utilities"
-  open-maximized false
-}
-window-rule {
-  match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
-  open-on-workspace "utilities"
-  open-maximized false
-  default-column-width { proportion 0.50; }
-}
-window-rule {
-  match at-startup=true app-id=r#"konsole$"#
-  open-on-workspace "utilities"
-  open-maximized false
-  default-column-width { proportion 0.50; }
-}
-window-rule {
-    match at-startup=true app-id=r#"firefox$"#
-    open-on-workspace "browser"
-    open-maximized true
-}
-window-rule {
-    match at-startup=true app-id=r#"kitty$"#
-    open-on-workspace "terminal"
-    open-maximized true
-}
-window-rule {
-    match app-id=r#"foobar2000$"#
-    open-maximized true
-}
-window-rule {
-    match app-id=r#"talon$"#
-    open-maximized true
-}
+// window-rule {
+//     match app-id=r#"talon$"#
+//     open-floating false
+//     open-focused true
+//     open-maximized true
+// }
 
 // Firefox window rules
 // window-rule {
@@ -442,9 +419,9 @@ binds {
     Mod+Y hotkey-overlay-title="Clipboard Manager" {
         spawn "dms" "ipc" "call" "clipboard" "toggle";
     }
-    Mod+M hotkey-overlay-title="Task Manager" { 
-        spawn "dms" "ipc" "call" "processlist" "toggle"; 
-    }
+    // Mod+M hotkey-overlay-title="Task Manager" { 
+    //     spawn "dms" "ipc" "call" "processlist" "toggle"; 
+    // }
 
     // Suggested binds for running programs: terminal, app launcher, screen locker.
     // Mod+T hotkey-overlay-title="Open a Terminal: kitty" { spawn "kitty"; }
@@ -483,6 +460,9 @@ binds {
     Mod+B  { focus-workspace "browser"; }
     Mod+T  { focus-workspace "terminal"; }
     Mod+U  { focus-workspace "utilities"; }
+    Mod+E  { focus-workspace "emacs"; }
+    Mod+P  { focus-workspace "passwords"; }
+    Mod+C  { focus-workspace "chat"; }
 
     // Mod+Left  { focus-column-left; } // disabled for DMS lock
     // Mod+Down  { focus-window-down; }
@@ -643,14 +623,14 @@ binds {
     // Mod+R { switch-preset-column-width-back; }
     Mod+Shift+R { switch-preset-window-height; }
     Mod+Ctrl+R { reset-window-height; }
-    Mod+F { maximize-column; }
+    Mod+M { maximize-column; }
     Mod+Shift+F { fullscreen-window; }
 
     // Expand the focused column to space not taken up by other fully visible columns.
     // Makes the column "fill the rest of the space".
     Mod+Ctrl+F { expand-column-to-available-width; }
 
-    Mod+C { center-column; }
+    // Mod+C { center-column; }
 
     // Center all fully visible columns on screen.
     Mod+Ctrl+C { center-visible-columns; }

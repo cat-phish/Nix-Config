@@ -26,9 +26,9 @@
       eza # ls replacement
       fd
       fzf
-      gcc
+      # gcc
       jq
-      libgcc
+      # libgcc
       navi
       oh-my-zsh
       ripgrep
@@ -66,6 +66,7 @@
     enable = true;
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
   };
+  services.emacs.enable = true;
 
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";

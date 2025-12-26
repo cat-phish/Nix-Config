@@ -24,6 +24,11 @@
     nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
     talon-nix.url = "github:nix-community/talon-nix";
     agenix.url = "github:ryantm/agenix";
+    # numennix.url = "github:anpandey/numen-nix";
+    # numen = {
+    #   url = "github:anpandey/numen-nix"; # or wherever the flake is
+    #   inputs.nixpkgs.follows = "nixpkgs";
+    # };
     # winboat= {
     #   url = "github:TibixDev/winboat";
     #   inputs.nixpkgs.follows = "nixpkgs";
@@ -48,6 +53,7 @@
     nix-flatpak,
     talon-nix,
     agenix,
+    # numen,
     # winboat,
     ...
   } @ inputs: let
@@ -166,6 +172,7 @@
           inherit pkgs-stable;
           inherit mynvim;
           inherit talon-nix;
+          # inherit numen;
           # host is not NixOS (Fedora)
           isNixos = false;
         };

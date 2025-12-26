@@ -14,6 +14,47 @@ workspace "browser" {
 workspace "terminal" {
   open-on-output "eDP-1"
 }
+workspace "chat" {
+  open-on-output "eDP-1"
+}
 // workspace "utilities"
 // workspace "browser"
 // workspace "terminal"
+
+// Named Workspace Rules
+window-rule {
+  match at-startup=true app-id=r#"xwaylandvideobridge$"#
+  open-on-workspace "utilities"
+  open-maximized false
+}
+window-rule {
+  match at-startup=true app-id=r#"konsole$"#
+  open-on-workspace "utilities"
+  open-maximized false
+  default-column-width { proportion 0.50; }
+}
+window-rule {
+  match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
+  open-on-workspace "utilities"
+  open-maximized false
+  default-column-width { proportion 0.50; }
+}
+window-rule {
+  match at-startup=true app-id=r#"Emacs$"#
+  open-on-workspace "utilities"
+  open-maximized true
+}
+window-rule {
+    match at-startup=true app-id=r#"firefox$"#
+    open-on-workspace "browser"
+    open-maximized true
+}
+window-rule {
+    match at-startup=true app-id=r#"kitty$"#
+    open-on-workspace "terminal"
+    open-maximized true
+}
+window-rule {
+    match app-id=r#"foobar2000$"#
+    open-maximized true
+}

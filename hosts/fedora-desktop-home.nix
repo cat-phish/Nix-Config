@@ -4,6 +4,7 @@
   lib,
   pkgs,
   pkgs-stable,
+  # numen,
   ...
 }: {
   # Plasma Manager KDE Configuration
@@ -43,6 +44,7 @@
   home.packages =
     (with pkgs; [
       calibre
+      dotool
       chromaprint
       kid3-kde
       python312Packages.pyacoustid
@@ -57,6 +59,22 @@
     ])
     ++ (with pkgs-stable; [
       ]);
+  # ++ [
+  #   numen.packages.${pkgs.system}.default
+  # ];
+
+  # Optional but recommended: Enable dotool service for Numen
+  systemd. user.services.dotool = {
+    Unit = {
+      Description = "dotool daemon for input automation";
+      After = ["graphical-session.target"];
+    };
+    Service = {
+      ExecStart = "${pkgs.dotool}/bin/dotoold";
+      Restart = "on-failure";
+    };
+    Install. WantedBy = ["graphical-session.target"];
+  };
 
   services.flatpak = {
     enable = true;

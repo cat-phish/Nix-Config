@@ -27,6 +27,7 @@
       # htop
       htop-vim
       keepassxc
+      librewolf
       lshw # list detailed hardware information
       neofetch
       noto-fonts-color-emoji
@@ -35,12 +36,14 @@
       qdirstat
       rclone
       sqlite
+      steam-run
       syncthing
       tlrc # man page summaries, command is tldr
       traceroute # trace packets over network
       winboat # run windows apps
       # ventoy
       xwayland-run
+      # cage
     ])
     ++ (with pkgs-stable; [
       ]);

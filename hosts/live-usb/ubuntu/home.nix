@@ -188,7 +188,7 @@
   # use `lib.mkIf isNixos [ ... ]` to guard them. On Fedora (isNixos=false)
   # those blocks will be skipped.
   programs.emacs = {
-    enable = true;
+    enable = false;
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
   };
 
