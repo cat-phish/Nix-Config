@@ -1,0 +1,72 @@
+# Common programming words
+def: type def 
+class: type class 
+import: type import 
+from: type from 
+return: type return
+if: type if 
+else: type else 
+furr: type for 
+do: type do 
+while: type while 
+break: type break
+continue: type continue
+true: type true
+false: type false
+none: type none
+null: type null
+include: type include 
+using: type using 
+
+# C/C++ Types
+void: type void 
+standard: type std::
+int: type int 
+double: type double 
+float: type float 
+string: type string 
+char: type char 
+boolean: type bool 
+signed: type signed 
+unsigned: type unsigned 
+long: type long 
+dine array: type vector
+dine int: type vector<int>
+dine double: type vector<double>
+dine float: type vector<float>
+dine string: type vector<string>
+dine char: type vector<char>
+
+# Terminal Commands
+shell durr: type cd 
+shell copy: type cp 
+shell list: type ls 
+shell make durr: type mkdir 
+shell move: type mv 
+
+# Git Commands
+get: type git 
+get commit: type git commit -m "
+get push: type git push
+get pull: type git pull
+get add: type git add .
+
+# Misc
+nicks: type nix
+comment: mod shift \
+  press c \
+  repeat 1 \
+  stick off
+comment to do: type TODO: 
+comment hack: type HACK: 
+comment note: type NOTE: 
+comment bug: type BUG: 
+con fig: type config
+ee macks: type emacs
+
+# Nvim Commands
+terminal: mod ctrl \
+  press backslash \
+  stick off
+skip down: press ctrl+d
+skip up: press ctrl+u

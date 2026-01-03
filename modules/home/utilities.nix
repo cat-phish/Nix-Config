@@ -37,16 +37,17 @@
       rclone
       sqlite
       steam-run
-      syncthing
       tlrc # man page summaries, command is tldr
       traceroute # trace packets over network
       winboat # run windows apps
+      wl-color-picker
       # ventoy
       xwayland-run
       # cage
     ])
     ++ (with pkgs-stable; [
-      ]);
+      rssguard
+    ]);
 
   home.file = {
     ".scripts" = {

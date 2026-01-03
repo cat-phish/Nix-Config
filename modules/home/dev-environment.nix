@@ -64,6 +64,10 @@
 
   programs.emacs = {
     enable = true;
+    # package = pkgs-stable.emacs.override { # xwidgets for launching org-roam ui inside emacs
+    #   withXwidgets = true;
+    #   withGTK3 = true;
+    # };
     extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
   };
   services.emacs.enable = true;

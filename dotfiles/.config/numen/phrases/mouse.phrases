@@ -1,0 +1,30 @@
+# I use keyboard-focused programs so I rarely need to click anything, but
+# in a pinch (maybe to click a bad element on a webpage) I use coord[1] which
+# lets you specify a point to click, and is bound to Super+p in Tiles[2].
+# [1] https://git.sr.ht/~geb/coord
+# [2] https://git.sr.ht/~geb/tiles
+
+# Click
+dot: click left \
+  stick off
+righty: click 3 \
+  stick off
+dub: click left \
+  repeat 1 \
+  stick off
+trip: click left \
+  repeat 2 \
+  stick off
+drag: buttondown left \
+  stick off
+drop: buttonup left \
+  stick off
+
+# Center the cursor
+center: mouseto 0 0 \
+	mouseto 0.5 0.5
+
+# Scroll
+# (I very occasionally use these if "page"/"reel" and "up"/"down" don't work.)
+scroll up: wheel 7
+scroll down: wheel -7

@@ -3,6 +3,13 @@ output "eDP-1" {
   mode "1920x1200@60.003"
   position x=0 y=0
   scale 1.25
+  layout {
+    default-column-width { proportion 0.5; }
+    struts {
+        left 16
+        right 16
+    }
+  }
 }
 
 workspace "utilities" {

@@ -80,7 +80,8 @@ alias nvim-ssh="~/.scripts/nvim-ssh.sh"
 alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 
 # Emacs
-alias org="emacs --init-directory=~/.config/emacs-org"
+alias org="emacs ~/org/Tasks.org"
+alias doom-emacs="emacs --init-directory=~/.config/emacs-doom"
 
 nixedit() {
   cd ~/.nix || exit

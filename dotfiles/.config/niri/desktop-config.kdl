@@ -4,7 +4,11 @@ output "DP-2" {
   transform "90"
   position x=0 y=0
   layout {
-      default-column-width { proportion 1.0; }
+    default-column-width { proportion 1.0; }
+    struts {
+        left 16
+        right 16
+    }
   }
 }
 
@@ -13,6 +17,13 @@ output "DP-1" {
   mode "2560x1440@144.000"
   position x=1080 y=0
   variable-refresh-rate on-demand=true
+  layout {
+    default-column-width { proportion 0.5; }
+    struts {
+        left 32
+        right 32
+    }
+  }
   focus-at-startup
 }
 
@@ -22,7 +33,11 @@ output "HDMI-A-1" {
   transform "270"
   position x=3640 y=0
   layout {
-      default-column-width { proportion 1.0; }
+    default-column-width { proportion 1.0; }
+    struts {
+        left 16
+        right 16
+    }
   }
 }
 
@@ -32,13 +47,13 @@ workspace "browser" {
 workspace "terminal" {
   open-on-output "DP-1"
 }
-workspace "utilities" {
+workspace "emacs" {
   open-on-output "DP-2"
 }
 workspace "passwords" {
   open-on-output "DP-2"
 }
-workspace "emacs" {
+workspace "utilities" {
   open-on-output "DP-2"
 }
 workspace "chat" {

@@ -1,0 +1,107 @@
+air: press a
+bat: press b
+cap: press c
+drum: press d
+each: press e
+fine: press f
+gust: press g
+hick: press h
+ice: press i
+jive: press j
+kid: press k
+look: press l
+made: press m
+near: press n
+odd: press o
+pit: press p
+quid: press q
+red: press r
+sun: press s
+tip: press t
+urge: press u
+vin: press v
+whiz: press w
+plex: press x
+yank: press y
+zip: press z
+
+##a: press a
+#b: press b
+#c: press c
+#d: press d
+#e: press e
+#f: press f
+#g: press g
+#h: press h
+#i: press i
+#j: press j
+#k: press k
+#l: press l
+#m: press m
+#n: press n
+#o: press o
+#p: press p
+#q: press q
+#r: press r
+#s: press s
+#t: press t
+#u: press u
+#v: press v
+#w: press w
+#x: press x
+#y: press y
+#z: press z
+
+zero: press 0
+one: press 1
+two: press 2
+three: press 3
+four: press 4
+five: press 5
+six: press 6
+seven: press 7
+eight: press 8
+nine: press 9
+
+queue: press question
+#mark: press question
+plus: press plus
+minus: press minus
+dash: press minus
+till: press asciitilde
+till duh: press asciitilde
+bang: press exclam
+dollar: press dollar
+underscore: press underscore
+score: press underscore
+colon: press colon
+coal: press colon
+semicolon: press semicolon
+semi coal: press semicolon
+semi: press semicolon
+pair: press parenleft
+are pair: press parenright
+brace: press braceleft
+are brace: press braceright
+brac: press bracketleft
+are brac: press bracketright
+less: press less
+greater: press greater
+star: press asterisk
+hash: press numbersign
+percent: press percent
+blunt: press asciicircum
+at sign: press at
+snail: press at
+gain: press ampersand
+pipe: press bar
+double q: press quotedbl
+single q: press apostrophe
+mark: press apostrophe
+tick: press grave
+slash: press slash
+slope: press backslash
+backslash: press backslash
+comma: press comma
+point: press period
+equals: press equal

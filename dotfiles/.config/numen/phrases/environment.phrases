@@ -1,0 +1,110 @@
+# I use these for managing application windows but they just simulate keys,
+# so you'll need to configure your desktop environment, or you can use my
+# preconfigured desktop environment: https://git.sr.ht/~geb/tiles
+
+# Navigate to the window in the given direction
+west: stick off \
+	press super+h
+east: stick off \
+	press super+l
+north: stick off \
+	press super+k
+south: stick off \
+  press super+j
+window left: stick off \
+	press super+h
+window right: stick off \
+	press super+l
+window up: stick off \
+	press super+k
+window down: stick off \
+	press super+j
+win left: stick off \
+  press super+h
+win right: stick off \
+  press super+l
+win up: stick off \
+  press super+k
+win down: stick off \
+  press super+j
+
+# Monitor focus switch
+monitor left: stick off \
+  press super+shift+h
+monitor right: stick off \
+  press super+shift+l
+mon left: stick off \
+  press super+shift+h
+mon right: stick off \
+  press super+shift+l
+go left: stick off \
+  press super+shift+h
+go right: stick off \
+  press super+shift+l
+
+# Cycle round the windows
+cycle: stick off \
+	press super+c
+recycle: stick off \
+	press super+C
+
+# Close window
+window kill: stick off \
+	press super+q
+win kill: stick off \
+  press super+q
+
+# Window maximise
+window max: stick off \
+	press super+m
+win max: stick off \
+  press super+m
+
+# Toggle fullscreen
+full screen: stick off \
+	press super+shift+f
+
+# Move window
+window move left: stick off \
+  press super+ctrl+h
+window move right: stick off \
+  press super+ctrl+l
+window move up: stick off \
+  press super+ctrl+k
+window move down: stick off \
+  press super+ctrl+j
+win move left: stick off \
+  press super+ctrl+h
+win move right: stick off \
+  press super+ctrl+l
+win move up: stick off \
+  press super+ctrl+k
+win move down: stick off \
+  press super+ctrl+j
+
+# Move window to monitor
+window monitor left: stick off \
+  press super+ctrl+shift+h
+window monitor right: stick off \
+  press super+ctrl+shift+l
+win mon left: stick off \
+  press super+ctrl+shift+h
+win mon right: stick off \
+  press super+ctrl+shift+l
+
+tab left: stick off \
+  press ctrl+shift+h
+tab right: stick off \
+  press ctrl+shift+l
+
+next: stick off \
+  press ctrl+n
+last: stick off \
+  press ctrl+p
+
+# These two are just for --gadget mode.
+
+# Switch to controlling the gadget
+@gadget shock gadget: handler uinput
+# Switch to controlling the host machine
+@gadget shock host: handler gadget
