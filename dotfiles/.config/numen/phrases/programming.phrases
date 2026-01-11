@@ -43,6 +43,7 @@ shell copy: type cp
 shell list: type ls 
 shell make durr: type mkdir 
 shell move: type mv 
+shell pseudo: type sudo 
 
 # Git Commands
 get: type git 
