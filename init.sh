@@ -405,6 +405,18 @@ setup_fedora() {
     fi
     echo ""
 
+    # Prompt for Steam installation
+    read -p "Would you like to install Steam? (y/n): " install_steam
+    if [[ "$install_steam" =~ ^[Yy]$ ]]; then
+        use_steam=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Steam will be installed."
+    else
+        use_steam=false
+        echo "[✓] Skipping Steam installation."
+    fi
+    echo ""
+
     # TODO: fix the total steps math here, move the confirmation to above
     # Setup fingerprint authentication
     if [ "$use_fingerprint" = true ]; then
@@ -548,6 +560,14 @@ setup_fedora() {
       STEP=$((STEP + 1))
       echo "[$STEP/$TOTAL_STEPS] Installing proprietary Nvidia drivers..."
       bash "$HOME/.nix/setup/fedora-nvidia-setup.sh" --skip-confirm
+      echo ""
+    fi
+
+    # Install Steam proprietary drivers
+    if [ "$use_steam" = true ]; then
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Installing proprietary Steam drivers..."
+      bash "$HOME/.nix/setup/fedora-steam-setup.sh" --skip-confirm
       echo ""
     fi
 

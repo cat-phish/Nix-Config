@@ -18,6 +18,7 @@
     ../modules/home/communications.nix
     ../modules/home/dev-environment.nix
     ../modules/home/fun-apps.nix
+    # ../modules/home/games.nix
     ../modules/home/media-playback.nix
     ../modules/home/media-mgmt.nix
     ../modules/home/office-suite.nix
@@ -66,7 +67,7 @@
   # ];
 
   # Optional but recommended: Enable dotool service for Numen
-  systemd. user.services.dotool = {
+  systemd.user.services.dotool = {
     Unit = {
       Description = "dotool daemon for input automation";
       After = ["graphical-session.target"];

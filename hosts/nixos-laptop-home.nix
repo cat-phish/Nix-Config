@@ -12,12 +12,14 @@
     ../modules/home/media-mgmt.nix
     ../modules/home/office-suite.nix
     ../modules/home/utilities.nix
-    ../modules/home/app-wine.nix
-    ../modules/home/app-foobar2000-wine-dependencies.nix
+    # ../modules/home/app-wine.nix
+    # ../modules/home/app-foobar2000-wine-dependencies.nix
+    ../modules/home/app-syncthing.nix
+    ../modules/home/app-numen.nix
     ../modules/plasma-config/nixos-laptop/plasma-config.nix
     ../modules/rclone/rclone-gdrivelap.nix
     ../modules/rclone/rclone-mediaserversmb.nix
-    ../modules/rclone/rclone-hetzner.nix
+    # ../modules/rclone/rclone-hetzner.nix
   ];
 
   # Home Manager needs a bit of information about you and the paths it should

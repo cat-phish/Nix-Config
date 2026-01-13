@@ -28,6 +28,7 @@
       htop-vim
       keepassxc
       librewolf
+      localsend
       lshw # list detailed hardware information
       neofetch
       noto-fonts-color-emoji
