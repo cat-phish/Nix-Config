@@ -9,6 +9,11 @@ output "DP-2" {
         left 16
         right 16
     }
+    preset-column-widths {
+        proportion 0.5
+        proportion 1.0
+    }
+    // preset-window-heights { }
   }
 }
 
@@ -22,6 +27,12 @@ output "DP-1" {
     struts {
         left 32
         right 32
+    }
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+        proportion 1.0
     }
   }
   focus-at-startup
@@ -37,6 +48,10 @@ output "HDMI-A-1" {
     struts {
         left 16
         right 16
+    }
+    preset-column-widths {
+        proportion 0.5
+        proportion 1.0
     }
   }
 }
