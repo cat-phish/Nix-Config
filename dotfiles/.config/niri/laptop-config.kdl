@@ -27,6 +27,9 @@ workspace "browser" {
 workspace "terminal" {
   open-on-output "eDP-1"
 }
+workspace "emacs" {
+  open-on-output "eDP-1"
+}
 workspace "chat" {
   open-on-output "eDP-1"
 }
@@ -54,7 +57,7 @@ window-rule {
 }
 window-rule {
   match at-startup=true app-id=r#"Emacs$"#
-  open-on-workspace "utilities"
+  open-on-workspace "emacs"
   open-maximized true
 }
 window-rule {
