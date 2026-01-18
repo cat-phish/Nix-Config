@@ -38,6 +38,7 @@
       rclone
       sqlite
       steam-run
+      thunar
       tlrc # man page summaries, command is tldr
       traceroute # trace packets over network
       winboat # run windows apps

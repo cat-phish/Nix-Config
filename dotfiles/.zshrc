@@ -468,7 +468,7 @@ _fzf_comprun() {
   case "$cmd" in
     cd)             fzf --preview  'eza --tree --color=always {} | head -200' "$@" ;;
     export|unset)   fzf --preview "eval 'echo \$ {}'" "$@" ;;
-    *)              fzf --preview "--preview bat --color=always --style=header,grid --line-range :500 {}" "$@" ;;
+    *)              fzf --preview "bat --color=always --style=header,grid --line-range :500 {}" "$@" ;;
   esac
 }
 
@@ -476,6 +476,22 @@ _fzf_comprun() {
 ZVM_VI_EDITOR=nvim
 bindkey -M vicmd 'H' beginning-of-line
 bindkey -M vicmd 'L' end-of-line
+# Function to define custom bindings after zsh-vi-mode loads
+fzf-file-widget-with-space() {
+  # Insert a space if the current character isn't already a space
+  [[ "$LBUFFER" != *" " ]] && LBUFFER+=' '
+  # Ensure we return to insert mode after selection
+  zvm_select_vi_mode insert
+
+  # Call the original fzf widget
+  zle fzf-file-widget
+}
+zle -N fzf-file-widget-with-space
+zvm_after_init() {
+  zvm_bindkey vicmd ' ff' fzf-file-widget-with-space
+  # Note: We use the ZVM specific internal function
+  zvm_bindkey vicmd ' v' zvm_vi_edit_command_line
+}
 
 # Set Bat Theme
 export BAT_THEME="1337"
