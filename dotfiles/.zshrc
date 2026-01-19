@@ -83,6 +83,15 @@ alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 alias org="emacs ~/org/Tasks.org"
 alias doom-emacs="emacs --init-directory=~/.config/emacs-doom"
 
+# Yazi
+function y() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")" cwd
+	command yazi "$@" --cwd-file="$tmp"
+	IFS= read -r -d '' cwd < "$tmp"
+	[ "$cwd" != "$PWD" ] && [ -d "$cwd" ] && builtin cd -- "$cwd"
+	rm -f -- "$tmp"
+}
+
 nixedit() {
   cd ~/.nix || exit
   git pull

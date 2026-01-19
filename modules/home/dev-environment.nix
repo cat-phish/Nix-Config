@@ -85,6 +85,10 @@
     ".prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
+    ".config/yazi" = {
+      source = ../../dotfiles/.config/yazi;
+      recursive = true;
+    };
     ".p10k.zsh" = {
       source = ../../dotfiles/.p10k.zsh;
     };
