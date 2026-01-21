@@ -15,8 +15,10 @@
 
   home.packages =
     (with pkgs; [
+      aerc
       appimage-run
       audacity
+      browsh
       chirp # ham radio programmer
       chromium
       deskreen # screen mirroring

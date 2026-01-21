@@ -43,13 +43,13 @@
       };
     };
     settings = {
-      directory = "/mnt/music_hdd/New/2 - Beets Sorted";
-      library = "/mnt/music_hdd/New/2 - Beets Sorted/musiclibrary.blb";
+      directory = "~/music/New/2 - Beets Sorted";
+      library = "~/music/New/2 - Beets Sorted/musiclibrary.blb";
       import.move = true;
-      import.log = "/mnt/music_hdd/New/beets.log";
+      import.log = "~/music/New/beets.log";
 
-      plugins = ["chroma" "lastgenre" "fetchart" "discogs" "copyartifacts" "ftintitle" "fromfilename" "inline" "rewrite" "spotify" "export" "unimported"];
-      # TODO: temp not working, removed: "lyrics"
+      plugins = ["chroma" "lastgenre" "fetchart" "discogs" "copyartifacts" "ftintitle" "fromfilename" "inline" "rewrite" "export" "unimported"];
+      # TODO: temp not working, removed: "lyrics" "spotify"
       paths.default = "$albumartist_sort/$album%aunique{} ($original_year) [$format]/%if{$multidisc,Disc $disc/}$track. $title";
       paths.singleton = "Non-Album/$artist/$title";
       paths.comp = "Compilations/$album%aunique{}/$track $title";

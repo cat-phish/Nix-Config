@@ -17,41 +17,26 @@ end
 -- ~/.config/yazi/init.lua
 require("relative-motions"):setup({ show_numbers = "relative", show_motion = true, enter_mode = "first" })
 
--- function Current:render(area)
--- 	self.area = area
---
--- 	local markers = {}
--- 	local items = {}
---
--- 	local cursor = cx.active.current.cursor
--- 	local offset = cx.active.current.offset
---
--- 	for i, f in ipairs(Folder:by_kind(Folder.CURRENT).window) do
--- 		local name = Folder:highlighted_name(f)
---
--- 		local idx = i - 1 - cursor + offset
--- 		if idx == 0 then
--- 			idx = cursor
--- 		end
---
--- 		local item = ui.ListItem(ui.Line({ ui.Span(string.format("%3d", idx)), Folder:icon(f), table.unpack(name) }))
--- 		-- Highlight hovered file
--- 		if f:is_hovered() then
--- 			item = item:style(THEME.manager.hovered)
--- 		else
--- 			item = item:style(f:style())
--- 		end
--- 		items[#items + 1] = item
---
--- 		-- Mark yanked/selected files
--- 		local yanked = f:is_yanked()
--- 		if yanked ~= 0 then
--- 			markers[#markers + 1] = { i, yanked }
--- 		elseif f:is_selected() then
--- 			markers[#markers + 1] = { i, 3 }
--- 		end
--- 	end
--- 	return ya.flat({ ui.List(area, items), Folder:linemode(area), Folder:markers(area, markers) })
--- end
+require("bunny"):setup({
+	hops = {
+		{ key = "/", path = "/" },
+		{ key = "t", path = "/tmp" },
+		{ key = "n", path = "/nix/store", desc = "Nix store" },
+		{ key = "~", path = "~", desc = "Home" },
+		{ key = "m", path = "~/Music", desc = "Music" },
+		{ key = "d", path = "~/Desktop", desc = "Desktop" },
+		{ key = "D", path = "~/Documents", desc = "Documents" },
+		{ key = "c", path = "~/.config", desc = "Config files" },
+		{ key = { "l", "s" }, path = "~/.local/share", desc = "Local share" },
+		{ key = { "l", "b" }, path = "~/.local/bin", desc = "Local bin" },
+		{ key = { "l", "t" }, path = "~/.local/state", desc = "Local state" },
+		-- key and path attributes are required, desc is optional
+	},
+	desc_strategy = "path", -- If desc isn't present, use "path" or "filename", default is "path"
+	ephemeral = true, -- Enable ephemeral hops, default is true
+	tabs = true, -- Enable tab hops, default is true
+	notify = false, -- Notify after hopping, default is false
+	fuzzy_cmd = "fzf", -- Fuzzy searching command, default is "fzf"
+})
 
 require("git"):setup()

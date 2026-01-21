@@ -23,5 +23,9 @@
       ]);
 
   home.file = {
+    ".config/sounds" = {
+      source = ../../dotfiles/.config/sounds;
+      recursive = true;
+    };
   };
 }
