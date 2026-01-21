@@ -24,6 +24,7 @@
       clang-tools
       llvm
       eza # ls replacement
+      gtest
       fd
       fzf
       # gcc
