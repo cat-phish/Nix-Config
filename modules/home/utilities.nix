@@ -29,7 +29,7 @@
       # htop
       htop-vim
       keepassxc
-      librewolf
+      #librewolf
       localsend
       lshw # list detailed hardware information
       neofetch
@@ -48,6 +48,7 @@
       # ventoy
       xwayland-run
       # cage
+      zoom
     ])
     ++ (with pkgs-stable; [
       rssguard
