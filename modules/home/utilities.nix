@@ -59,5 +59,21 @@
       source = ../../dotfiles/.scripts;
       recursive = true;
     };
+    ".local/share/applications/org-mode.desktop" = {
+      text = ''
+        [Desktop Entry]
+        Type=Application
+        Name=Org Mode
+        Comment=Launch Tasks
+        Generic Name=Task Tracker
+        Exec=emacs ${config.home.homeDirectory}/org/main/Tasks.org
+        Icon=${config.home.homeDirectory}/.img/org-mode-unicorn.png
+        Categories=Office:TextEditor;
+        Keywords=organization;tasks;
+        Terminal=false
+        StartupWMClass=Emacs
+        StartupNotify=false
+      '';
+    };
   };
 }

@@ -198,14 +198,14 @@ binds {
     XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
     XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
 
-    Mod+O repeat=false { toggle-overview; }
+    Mod+Backspace repeat=false { toggle-overview; }
 
     Mod+Q repeat=false { close-window; }
 
     Mod+B  { focus-workspace "browser"; }
     Mod+T  { focus-workspace "terminal"; }
     Mod+U  { focus-workspace "utilities"; }
-    Mod+E  { focus-workspace "emacs"; }
+    Mod+O  { focus-workspace "org-mode"; }
     Mod+P  { focus-workspace "passwords"; }
     Mod+C  { focus-workspace "chat"; }
 

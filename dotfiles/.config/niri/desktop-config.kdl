@@ -62,7 +62,7 @@ workspace "browser" {
 workspace "terminal" {
   open-on-output "DP-1"
 }
-workspace "emacs" {
+workspace "org-mode" {
   open-on-output "DP-2"
 }
 workspace "passwords" {
@@ -93,7 +93,7 @@ window-rule {
 // left monitor
 window-rule {
   match at-startup=true app-id=r#"Emacs$"#
-  open-on-workspace "emacs"
+  open-on-workspace "org-mode"
   open-maximized true
 }
 window-rule {

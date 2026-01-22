@@ -27,7 +27,7 @@ workspace "browser" {
 workspace "terminal" {
   open-on-output "eDP-1"
 }
-workspace "emacs" {
+workspace "org-mode" {
   open-on-output "eDP-1"
 }
 workspace "chat" {
@@ -56,9 +56,9 @@ window-rule {
   default-column-width { proportion 0.50; }
 }
 window-rule {
-  match at-startup=true app-id=r#"Emacs$"#
-  open-on-workspace "emacs"
-  open-maximized true
+    match at-startup=true app-id=r#"Emacs$"#
+    open-on-workspace "org-mode"
+    open-maximized true
 }
 window-rule {
     match at-startup=true app-id=r#"firefox$"#
