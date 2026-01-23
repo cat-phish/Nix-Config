@@ -8,6 +8,10 @@
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
     mynvim.url = "github:cat-phish/Neovim";
+    emacs-config = {
+      url = "github:cat-phish/Emacs";
+      flake = false; # Treat as a source repo, not a flake
+    };
     kmonad = {
       url = "github:kmonad/kmonad?dir=nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -46,6 +50,7 @@
     home-manager,
     # sops-nix,
     mynvim,
+    emacs-config,
     kmonad,
     plasma-manager,
     darkmatter-grub-theme,
@@ -132,6 +137,7 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
+          inherit emacs-config;
           inherit plasma-manager;
           inherit talon-nix;
           # host is NixOS
@@ -151,6 +157,7 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
+          inherit emacs-config;
           inherit plasma-manager;
           inherit talon-nix;
           # host is NixOS
@@ -171,6 +178,7 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
+          inherit emacs-config;
           inherit talon-nix;
           # inherit numen;
           # host is not NixOS (Fedora)
@@ -190,6 +198,7 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit mynvim;
+          inherit emacs-config;
           # inherit plasma-manager;
           inherit talon-nix;
           # host is not NixOS (Fedora)

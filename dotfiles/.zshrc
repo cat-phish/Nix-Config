@@ -82,6 +82,7 @@ alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 # Emacs
 alias org="emacs ~/org/Tasks.org"
 alias doom-emacs="emacs --init-directory=~/.config/emacs-doom"
+alias dev-emacs='emacs --init-directory ~/source/emacs-config'
 
 # Yazi
 function y() {

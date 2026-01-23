@@ -64,6 +64,22 @@
         "type": "github"
       }
     },
+    "emacs-config": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1769150403,
+        "narHash": "sha256-Tr5giqBFLq/2g5mqI8FFcwa+DaZDc+kxKKgkBNAOoNI=",
+        "owner": "cat-phish",
+        "repo": "Emacs",
+        "rev": "13b4ff87510335eacdaf70721fcf52a1e83c5c26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cat-phish",
+        "repo": "Emacs",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -162,11 +178,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1768942641,
-        "narHash": "sha256-i25tkhqjsfo0YKz8To/+gzazW1v4f8qUGqJQ8OLrkqE=",
+        "lastModified": 1769132734,
+        "narHash": "sha256-gmU9cRplrQWqoback9PgQX7Dlsdx8JlhlVZwf0q1F7E=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "9997de2f62d1875644f02ddf96cf485a4baecb6f",
+        "rev": "d055b309a6277343cb1033a11d7500f0a0f669fc",
         "type": "github"
       },
       "original": {
@@ -183,11 +199,11 @@
       },
       "locked": {
         "dir": "nix",
-        "lastModified": 1768856224,
-        "narHash": "sha256-Fdy7d1GKb7fjDTpt4ckjXdLhMUd4JTT1hT7s3IyP72s=",
+        "lastModified": 1769122383,
+        "narHash": "sha256-m7AmsMYn8V3oZea3uI4T25y19yYt4eGBspuynbiu8Cw=",
         "owner": "kmonad",
         "repo": "kmonad",
-        "rev": "5513c59cb29581c39630ce9e7e75cf1b9896e503",
+        "rev": "927495416a34facded92c1ea216c9b5e8f11df1d",
         "type": "github"
       },
       "original": {
@@ -408,11 +424,11 @@
     },
     "nixpkgs_4": {
       "locked": {
-        "lastModified": 1768886240,
-        "narHash": "sha256-C2TjvwYZ2VDxYWeqvvJ5XPPp6U7H66zeJlRaErJKoEM=",
+        "lastModified": 1769018530,
+        "narHash": "sha256-MJ27Cy2NtBEV5tsK+YraYr2g851f3Fl1LpNHDzDX15c=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "80e4adbcf8992d3fd27ad4964fbb84907f9478b0",
+        "rev": "88d3861acdd3d2f0e361767018218e51810df8a1",
         "type": "github"
       },
       "original": {
@@ -497,6 +513,7 @@
       "inputs": {
         "agenix": "agenix",
         "darkmatter-grub-theme": "darkmatter-grub-theme",
+        "emacs-config": "emacs-config",
         "home-manager": "home-manager_2",
         "kmonad": "kmonad",
         "mynvim": "mynvim",

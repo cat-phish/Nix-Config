@@ -5,6 +5,7 @@
   pkgs,
   pkgs-stable,
   mynvim,
+  emacs-config,
   ...
 }: {
   # Plasma Manager KDE Configuration
@@ -81,6 +82,10 @@
     };
     ".config/kitty" = {
       source = ../../dotfiles/.config/kitty;
+      recursive = true;
+    };
+    ".config/emacs" = {
+      source = emacs-config;
       recursive = true;
     };
     ".prettierrc" = {
