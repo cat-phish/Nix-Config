@@ -86,7 +86,7 @@ frank one one: press F11
 frank one two: press F12
 
 # This saves your changes in vi-style programs
-safe: caps off \
+save file: caps off \
 	press ctrl+s
 # This cycles round splits in Vim
 switch: caps off \
