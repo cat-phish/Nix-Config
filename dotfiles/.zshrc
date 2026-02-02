@@ -49,6 +49,7 @@ fi
 # General
 alias cdd="cd .."
 alias c="clear"
+alias op="xdg-open"
 # alias ls="eza"
 # alias ls="eza --color=always --long --git --no-filesize --icons=always --no-time --no-user --no-permissions"
 
