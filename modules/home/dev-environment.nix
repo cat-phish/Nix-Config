@@ -80,6 +80,7 @@
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;
     };
+    "CPPLINT.cfg".source = ../../dotfiles/CPPLINT.cfg;
     ".config/kitty" = {
       source = ../../dotfiles/.config/kitty;
       recursive = true;
