@@ -94,6 +94,99 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+# Copy config into cur dir
+function cfgen() {
+  local target=$1
+  local src=""
+  local dest=""
+
+  case "$target" in
+    cpplint)
+      src="$HOME/.nix/dotfiles/CPPLINT.cfg"
+      dest="CPPLINT.cfg"
+      ;;
+    clang-format)
+      src="$HOME/.nix/dotfiles/.clang-format"
+      dest=".clang-format"
+      ;;
+    prettier)
+      src="$HOME/.nix/dotfiles/.prettierrc"
+      dest=".prettierrc"
+      ;;
+    *)
+      echo "Usage: cfgen [cpplint|clang-format|prettier]"
+      return 1
+      ;;
+  esac
+
+  if [[ -f "$src" ]]; then
+    if [[ -f "$dest" ]]; then
+      echo "Error: $dest already exists in this directory."
+    else
+      cp -v "$src" "$dest"
+      echo "Successfully copied $target cfg"
+    fi
+  else
+    echo "Error: Source file $src not found in home directory."
+  fi
+}
+
+setopt extended_glob
+SPEC_SOURCE_DIR="$HOME/.nix/dotfiles" # Configuration: Set your dotfiles directory here
+function spec() {
+  # Required for the advanced globbing logic below
+  setopt local_options extended_glob
+
+  local query=$1
+  local config_dir="$SPEC_SOURCE_DIR"
+
+  if [[ -z "$query" ]]; then
+    echo "Usage: spec <config_name> (e.g., spec cpplint)"
+    return 1
+  fi
+
+  # Enhanced globbing:
+  # .?          -> Optional leading dot
+  # (#i)${query} -> Case-insensitive name match
+  # (|.cfg|rc)  -> Optional extensions
+  # (N)         -> Null-glob (don't error if nothing is found)
+  local src
+  src=( $config_dir/(#i)(.|)${query}(|.cfg|rc)(N) )
+
+  if [[ ${#src} -gt 0 ]]; then
+    local matched_file="${src[1]}"
+    local dest_name=$(basename "$matched_file")
+
+    if [[ -f "./$dest_name" ]]; then
+      echo "Aborting: ./$dest_name already exists in this directory."
+      return 1
+    fi
+
+    echo -n "Copy $dest_name to current directory? [y/N]: "
+    read -k 1 response
+    echo ""
+
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+      cp -v "$matched_file" "./$dest_name"
+    else
+      echo "Cancelled."
+    fi
+  else
+    echo "Could not find a config matching '$query' in $config_dir"
+    echo "Searched for: ${query}, .${query}, ${query}rc, .${query}.cfg, etc."
+  fi
+}
+
+# Updated completion to match the new flexible naming
+_spec_completion() {
+  local config_dir="$SPEC_SOURCE_DIR"
+  if [[ -d "$config_dir" ]]; then
+    # Finds files, removes leading dots and common extensions for the suggestion list
+    _values 'configs' $(find "$config_dir" -maxdepth 1 -type f -printf "%f\n" | sed -E 's/^\.//; s/(rc|\.cfg)$//I' | sort -u)
+  fi
+}
+compdef _spec_completion spec
+
 nixedit() {
   cd ~/.nix || exit
   git pull
