@@ -35,6 +35,7 @@
       neofetch
       noto-fonts-color-emoji
       nurl # fetching nix package options from git, maybe others
+      # obs-studio # driver issue on fedora
       pinta
       qdirstat
       rclone
