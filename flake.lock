@@ -221,11 +221,11 @@
         "plugins-capslock-nvim": "plugins-capslock-nvim"
       },
       "locked": {
-        "lastModified": 1770154232,
-        "narHash": "sha256-2zgwnXstpYgVk0NkJB023/E1z5jkygbOVM83hwGd+eY=",
+        "lastModified": 1770196526,
+        "narHash": "sha256-kH4Cdmv2KOS9rycfDmLdqWnkPLH41a9qNOsMCOshA/0=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "4b76caf4da608ef0655835c9fcb4efa59b81e407",
+        "rev": "feb018388007b57f93310e38fd24260661ca2d2b",
         "type": "github"
       },
       "original": {
