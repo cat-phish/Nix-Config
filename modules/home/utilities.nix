@@ -22,7 +22,7 @@
       chirp # ham radio programmer
       chromium
       deskreen # screen mirroring
-      dropbox
+      # dropbox
       efibootmgr # show boot manager info
       filezilla
       gparted

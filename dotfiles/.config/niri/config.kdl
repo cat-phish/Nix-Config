@@ -7,7 +7,7 @@
 // include "dms/binds.kdl"
 include "device-config.kdl"
 
-spawn-at-startup "dropbox"
+// spawn-at-startup "dropbox"
 spawn-sh-at-startup "konsole -e dgop"
 spawn-at-startup "keepassxc"
 spawn-at-startup "discord"
@@ -163,10 +163,10 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
     // DMS Keybinds
     Mod+N hotkey-overlay-title="Notification Center" {
-        spawn "dms" "ipc" "call" "notifications" "toggle"; 
+        spawn "dms" "ipc" "call" "notifications" "toggle";
     }
-    Mod+Alt+L hotkey-overlay-title="Lock Screen" { 
-        spawn "dms" "ipc" "call" "lock" "lock"; 
+    Mod+Alt+L hotkey-overlay-title="Lock Screen" {
+        spawn "dms" "ipc" "call" "lock" "lock";
     }
     XF86MonBrightnessUp allow-when-locked=true {
        spawn "dms" "ipc" "call" "brightness" "increment" "5" "";
@@ -177,8 +177,8 @@ binds {
     Mod+Y hotkey-overlay-title="Clipboard Manager" {
         spawn "dms" "ipc" "call" "clipboard" "toggle";
     }
-    // Mod+M hotkey-overlay-title="Task Manager" { 
-    //     spawn "dms" "ipc" "call" "processlist" "toggle"; 
+    // Mod+M hotkey-overlay-title="Task Manager" {
+    //     spawn "dms" "ipc" "call" "processlist" "toggle";
     // }
 
     // Application Launchers
