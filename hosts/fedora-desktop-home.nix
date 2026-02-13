@@ -63,7 +63,7 @@
     ++ (with pkgs-stable; [
       ]);
   # ++ [
-  #   numen.packages.${pkgs.system}.default
+  #   numen.packages.${pkgs.stdenv.hostPlatform.system}.default
   # ];
 
   # Optional but recommended: Enable dotool service for Numen

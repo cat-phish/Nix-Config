@@ -48,7 +48,7 @@
     ])
     # Personal nixCats Nvim Flake
     ++ (with mynvim; [
-      packages.${pkgs.system}.nvim
+      packages.${pkgs.stdenv.hostPlatform.system}.nvim
     ]);
 
   programs.git = {
