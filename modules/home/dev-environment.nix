@@ -93,6 +93,10 @@
     ".prettierrc" = {
       source = ../../dotfiles/.prettierrc;
     };
+    ".config/opencode" = {
+      source = ../../dotfiles/.config/opencode;
+      recursive = true;
+    };
     ".config/yazi" = {
       source = ../../dotfiles/.config/yazi;
       recursive = true;
