@@ -1,3 +1,77 @@
 #!/usr/bin/env bash
 
-sudo nixos-rebuild switch --flake ~/.nix
+# sudo nixos-rebuild switch --flake ~/.nix
+
+set -euo pipefail
+
+FLAKE_PATH="$HOME/.nix"
+ORIGINAL_DIR=$(pwd)
+# Cleanup: kill sudo loop and return to original directory
+trap 'cd "$ORIGINAL_DIR"; [ -n "${SUDO_PID:-}" ] && kill "$SUDO_PID" 2>/dev/null' EXIT
+
+# --- Helper Functions ---
+
+# Keep sudo alive for the system-level rebuild
+keep_sudo_alive() {
+  echo "Authenticating for System-level tasks..."
+  sudo -v
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+}
+
+sync_remote() {
+  cd "$FLAKE_PATH"
+  echo "Checking remote for updates..."
+  git fetch origin >/dev/null 2>&1
+  if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
+    echo "Remote changes found. Synchronizing..."
+    git rebase origin/$(git branch --show-current)
+  else
+    echo "[✓] Git repo is up to date."
+  fi
+}
+
+handle_git_workflow() {
+  cd "$FLAKE_PATH"
+
+  if ! git diff-index --quiet HEAD --; then
+    echo "--------------------------------------------------------"
+    echo "[!] Uncommitted system configuration changes:"
+    git status -s
+    echo "--------------------------------------------------------"
+
+    read -p "Commit and push these changes now? (y/N): " confirm
+    if [[ $confirm == [yY] ]]; then
+      read -p "Commit message (Enter for timestamp): " msg
+      [ -z "$msg" ] && msg="System-only rebuild [$(date +'%Y-%m-%d %H:%M:%S')]"
+
+      git add .
+      git commit -m "$msg"
+      git push
+      echo "[✓] Changes synced."
+    else
+      echo "[!] Warning: Proceeding with uncommitted system changes."
+    fi
+  fi
+}
+
+# --- Main Execution ---
+
+# 1. Sync and Guard
+sync_remote
+handle_git_workflow
+
+# 2. Authenticate
+keep_sudo_alive
+SUDO_PID=$!
+
+# 3. System Rebuild (No Home-Manager switch)
+echo "Rebuilding NixOS System..."
+if sudo nixos-rebuild switch --flake "$FLAKE_PATH"; then
+  echo "--------------------------------------------------------"
+  echo "[✓] System rebuild successful."
+  echo "Note: Home-manager was NOT switched in this run."
+  echo "--------------------------------------------------------"
+else
+  echo "[!] System rebuild failed."
+  exit 1
+fi

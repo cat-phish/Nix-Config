@@ -1,31 +1,121 @@
 #!/usr/bin/env bash
 
+# set -euo pipefail
+#
+# ORIGINAL_DIR=$(pwd)
+# trap 'cd "$ORIGINAL_DIR"' EXIT
+#
+# # Navigate to the nixCats directory to perform git operations
+# cd ~/source/nixCats
+# git pull --rebase
+#
+# nix flake update --flake ~/source/nixCats
+#
+# # TODO: error with this, nixcats command not found
+# # nixcats --headless "+Lazy! update" +qa
+#
+# nix build ~/source/nixCats
+#
+# git add .
+# git commit -m "nvim auto update [$(date +'%Y-%m-%d %H:%M:%S')]"
+# git push
+#
+# # Navigate to the nix directory to perform git operations
+# cd ~/.nix
+# git pull --rebase
+# nix flake update --flake ~/.nix mynvim
+# git add .
+# git commit -m "Nvim flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
+# git push
+#
+# home-manager switch -b backup --flake ~/.nix
+
 set -euo pipefail
 
+NC_PATH="$HOME/source/nixCats"
+FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)
-trap 'cd "$ORIGINAL_DIR"' EXIT
 
-# Navigate to the nixCats directory to perform git operations
-cd ~/source/nixCats
-git pull --rebase
+# Cleanup: return home and kill any sudo loops if we add them later
+trap 'cd "$ORIGINAL_DIR"; [ -n "${SUDO_PID:-}" ] && kill "$SUDO_PID" 2>/dev/null' EXIT
 
-nix flake update --flake ~/source/nixCats
+# --- Helper Functions ---
 
-# TODO: error with this, nixcats command not found
-# nixcats --headless "+Lazy! update" +qa
+sync_repo() {
+  local repo_path=$1
+  cd "$repo_path"
+  echo "Checking remote for $(basename "$repo_path")..."
+  git fetch origin >/dev/null 2>&1
+  if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
+    echo "Remote changes found in $(basename "$repo_path"). Synchronizing..."
+    git rebase origin/$(git branch --show-current)
+  fi
+}
 
-nix build ~/source/nixCats
+handle_git_workflow() {
+  local repo_path=$1
+  local context=$2
+  cd "$repo_path"
 
-git add .
-git commit -m "nvim auto update [$(date +'%Y-%m-%d %H:%M:%S')]"
-git push
+  if ! git diff-index --quiet HEAD --; then
+    echo "--------------------------------------------------------"
+    echo "[!] Uncommitted changes in $context ($repo_path)"
+    git status -s
+    echo "--------------------------------------------------------"
 
-# Navigate to the nix directory to perform git operations
-cd ~/.nix
-git pull --rebase
-nix flake update --flake ~/.nix mynvim
-git add .
-git commit -m "Nvim flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
-git push
+    read -p "Commit and push $context changes? (y/N): " confirm
+    if [[ $confirm == [yY] ]]; then
+      read -p "Commit message (Enter for timestamp): " msg
+      [ -z "$msg" ] && msg="$context update [$(date +'%Y-%m-%d %H:%M:%S')]"
 
-home-manager switch -b backup --flake ~/.nix
+      git add .
+      git commit -m "$msg"
+      git push
+      echo "[✓] $context synced."
+    else
+      echo "[!] Warning: Proceeding with uncommitted $context changes."
+    fi
+  fi
+}
+
+# --- Main Execution ---
+
+# PHASE 1: Update nixCats Config
+echo "=== Phase 1: nixCats Neovim Update ==="
+sync_repo "$NC_PATH"
+cd "$NC_PATH"
+
+echo "Updating nixCats flake inputs..."
+nix flake update
+
+# FIX: To run the 'Lazy update' in nixCats, use 'nix run' to ensure the binary is in path
+echo "Updating Neovim plugins (headless)..."
+if nix run . -- --headless "+Lazy! update" +qa; then
+    echo "[✓] Plugins updated."
+else
+    echo "[!] Lazy update failed or nixCats not runnable; skipping."
+fi
+
+handle_git_workflow "$NC_PATH" "nixCats"
+
+# PHASE 2: Update Main Flake's Pointer to nixCats
+echo -e "\n=== Phase 2: Main Flake Synchronization ==="
+sync_repo "$FLAKE_PATH"
+cd "$FLAKE_PATH"
+
+echo "Updating 'mynvim' input in system flake..."
+# This specifically updates only the nixCats input (mynvim) in your main flake
+nix flake lock --update-input mynvim
+
+handle_git_workflow "$FLAKE_PATH" "System Flake (nvim pointer)"
+
+# PHASE 3: Apply Changes
+echo -e "\n=== Phase 3: Applying Configuration ==="
+if home-manager switch -b backup --flake "$FLAKE_PATH"; then
+  echo "--------------------------------------------------------"
+  echo "[✓] Neovim and System updated successfully!"
+  echo "--------------------------------------------------------"
+else
+  echo "[!] Home Manager update failed."
+  exit 1
+fi

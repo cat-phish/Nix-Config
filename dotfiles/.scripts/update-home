@@ -18,62 +18,84 @@ set -euo pipefail
 
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)
-trap 'cd "$ORIGINAL_DIR"' EXIT
+# Cleanup: ensure we go back home and stop the sudo-keep-alive loop
+trap 'cd "$ORIGINAL_DIR"; [ -n "${SUDO_PID:-}" ] && kill "$SUDO_PID" 2>/dev/null' EXIT
 
 # --- Helper Functions ---
+
+# Keep sudo alive ONLY for the garbage collection at the end
+keep_sudo_alive() {
+  echo "Authenticating for system tasks (GC)..."
+  sudo -v
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+}
 
 sync_remote() {
   cd "$FLAKE_PATH"
   echo "Checking for remote updates..."
   git fetch origin >/dev/null 2>&1
-  # Only rebase if we are actually behind
-  UPSTREAM=${1:-'@{u}'}
-  LOCAL=$(git rev-parse @)
-  REMOTE=$(git rev-parse "$UPSTREAM")
-
-  if [ "$LOCAL" != "$REMOTE" ]; then
-    echo "Remote changes found. Rebasing..."
+  # Only rebase if local is different from remote
+  if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
+    echo "Remote changes found. Synchronizing..."
     git rebase origin/$(git branch --show-current)
   else
-    echo "Already up to date with remote."
+    echo "[✓] Already up to date with remote."
   fi
 }
 
-handle_local_changes() {
+handle_git_workflow() {
   cd "$FLAKE_PATH"
+
+  # 1. Update the lockfile first
+  echo "Updating nix flake..."
+  nix flake update
+
+  # 2. Check for changes (either flake.lock or your .nix files)
   if ! git diff-index --quiet HEAD --; then
     echo "--------------------------------------------------------"
-    echo "[!] Uncommitted changes in $FLAKE_PATH"
+    echo "[!] Changes detected (lockfile or config edits):"
     git status -s
     echo "--------------------------------------------------------"
 
-    read -p "Commit and sync changes? (y/N): " confirm
+    read -p "Would you like to sync these changes? (y/N): " confirm
     if [[ $confirm == [yY] ]]; then
       read -p "Commit message (Enter for timestamp): " msg
-      [ -z "$msg" ] && msg="Config update [$(date +'%Y-%m-%d %H:%M:%S')]"
+      [ -z "$msg" ] && msg="Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
 
       git add .
       git commit -m "$msg"
       git push
-      echo "[✓] Synced."
+      echo "[✓] Git sync complete."
     else
-      echo "Proceeding without syncing..."
+      echo "[!] Warning: Proceeding with uncommitted changes."
     fi
+  else
+    echo "[-] No changes to commit."
   fi
 }
 
 # --- Main Execution ---
 
-# No sudo priming here!
+# 1. Pre-sync to avoid building on stale code
 sync_remote
-handle_local_changes
 
+# 2. Update and handle Git
+handle_git_workflow
+
+# 3. Apply changes (User-level, usually no sudo needed)
 echo "Starting home-manager switch..."
-# We run it normally. If it hits a specific file that requires sudo,
-# it will prompt you naturally in the terminal.
 if home-manager switch -b backup --flake "$FLAKE_PATH"; then
-  echo "[✓] Success!"
+  echo "[✓] Home Manager updated successfully."
 else
-  echo "[!] Failed."
+  echo "[!] Home Manager update failed."
   exit 1
 fi
+
+# 4. Cleanup (System-level, needs sudo)
+echo ""
+keep_sudo_alive
+SUDO_PID=$!
+
+echo "Running garbage collection..."
+sudo nix-collect-garbage --delete-older-than 14d
+echo "[✓] Cleanup complete."

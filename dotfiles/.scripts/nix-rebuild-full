@@ -1,5 +1,89 @@
 #!/usr/bin/env bash
 
-sudo nixos-rebuild switch --flake ~/.nix
+# sudo nixos-rebuild switch --flake ~/.nix
+#
+# home-manager switch -b backup --flake ~/.nix
 
-home-manager switch -b backup --flake ~/.nix
+set -euo pipefail
+
+FLAKE_PATH="$HOME/.nix"
+ORIGINAL_DIR=$(pwd)
+# Cleanup: kill sudo loop and return to original directory
+trap 'cd "$ORIGINAL_DIR"; [ -n "${SUDO_PID:-}" ] && kill "$SUDO_PID" 2>/dev/null' EXIT
+
+# --- Helper Functions ---
+
+# Prime sudo at the start for nixos-rebuild
+keep_sudo_alive() {
+  echo "Authenticating for System Rebuild..."
+  sudo -v
+  while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+}
+
+sync_remote() {
+  cd "$FLAKE_PATH"
+  echo "Checking remote for updates..."
+  git fetch origin >/dev/null 2>&1
+  if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
+    echo "Remote changes found. Synchronizing..."
+    git rebase origin/$(git branch --show-current)
+  else
+    echo "[✓] Git repo is up to date."
+  fi
+}
+
+handle_git_workflow() {
+  cd "$FLAKE_PATH"
+
+  # Check if there are uncommitted changes BEFORE we build
+  if ! git diff-index --quiet HEAD --; then
+    echo "--------------------------------------------------------"
+    echo "[!] Changes detected in your configuration:"
+    git status -s
+    echo "--------------------------------------------------------"
+
+    read -p "Would you like to commit and push these changes now? (y/N): " confirm
+    if [[ $confirm == [yY] ]]; then
+      read -p "Commit message (Enter for timestamp): " msg
+      [ -z "$msg" ] && msg="System rebuild update [$(date +'%Y-%m-%d %H:%M:%S')]"
+
+      git add .
+      git commit -m "$msg"
+      git push
+      echo "[✓] Changes synced to remote."
+    else
+      echo "[!] Warning: Building with uncommitted local changes."
+    fi
+  fi
+}
+
+# --- Main Execution ---
+
+# 1. Safety and Sync
+sync_remote
+handle_git_workflow
+
+# 2. Initiate Sudo Loop (needed for nixos-rebuild)
+keep_sudo_alive
+SUDO_PID=$!
+
+# 3. NixOS System Rebuild
+echo "Starting NixOS System Rebuild..."
+if sudo nixos-rebuild switch --flake "$FLAKE_PATH"; then
+  echo "[✓] System rebuild successful."
+else
+  echo "[!] System rebuild failed."
+  exit 1
+fi
+
+# 4. Home Manager Switch (Run as user)
+echo "Starting Home Manager Switch..."
+if home-manager switch -b backup --flake "$FLAKE_PATH"; then
+  echo "[✓] Home Manager updated."
+else
+  echo "[!] Home Manager update failed."
+  exit 1
+fi
+
+echo "---------------------------------------"
+echo "Full Rebuild Complete."
