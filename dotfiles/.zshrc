@@ -82,8 +82,8 @@ alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 
 # Emacs
 alias org="emacs ~/org/Tasks.org"
-alias doom-emacs="emacs --init-directory=~/.config/emacs-doom"
-alias dev-emacs='emacs --init-directory ~/source/emacs-config'
+alias emacs-doom="emacs --init-directory=~/.config/emacs-doom"
+alias emacs-dev='emacs --init-directory ~/source/emacs-config'
 
 # Yazi
 function y() {
@@ -94,46 +94,47 @@ function y() {
 	rm -f -- "$tmp"
 }
 
+# TODO: remove in favor of cpcfg below
 # Copy config into cur dir
-function cfgen() {
-  local target=$1
-  local src=""
-  local dest=""
-
-  case "$target" in
-    cpplint)
-      src="$HOME/.nix/dotfiles/CPPLINT.cfg"
-      dest="CPPLINT.cfg"
-      ;;
-    clang-format)
-      src="$HOME/.nix/dotfiles/.clang-format"
-      dest=".clang-format"
-      ;;
-    prettier)
-      src="$HOME/.nix/dotfiles/.prettierrc"
-      dest=".prettierrc"
-      ;;
-    *)
-      echo "Usage: cfgen [cpplint|clang-format|prettier]"
-      return 1
-      ;;
-  esac
-
-  if [[ -f "$src" ]]; then
-    if [[ -f "$dest" ]]; then
-      echo "Error: $dest already exists in this directory."
-    else
-      cp -v "$src" "$dest"
-      echo "Successfully copied $target cfg"
-    fi
-  else
-    echo "Error: Source file $src not found in home directory."
-  fi
-}
+# function cfgen() {
+#   local target=$1
+#   local src=""
+#   local dest=""
+#
+#   case "$target" in
+#     cpplint)
+#       src="$HOME/.nix/dotfiles/CPPLINT.cfg"
+#       dest="CPPLINT.cfg"
+#       ;;
+#     clang-format)
+#       src="$HOME/.nix/dotfiles/.clang-format"
+#       dest=".clang-format"
+#       ;;
+#     prettier)
+#       src="$HOME/.nix/dotfiles/.prettierrc"
+#       dest=".prettierrc"
+#       ;;
+#     *)
+#       echo "Usage: cfgen [cpplint|clang-format|prettier]"
+#       return 1
+#       ;;
+#   esac
+#
+#   if [[ -f "$src" ]]; then
+#     if [[ -f "$dest" ]]; then
+#       echo "Error: $dest already exists in this directory."
+#     else
+#       cp -v "$src" "$dest"
+#       echo "Successfully copied $target cfg"
+#     fi
+#   else
+#     echo "Error: Source file $src not found in home directory."
+#   fi
+# }
 
 setopt extended_glob
 SPEC_SOURCE_DIR="$HOME/.nix/dotfiles" # Configuration: Set your dotfiles directory here
-function spec() {
+cpcfg() {
   # Required for the advanced globbing logic below
   setopt local_options extended_glob
 
@@ -176,7 +177,6 @@ function spec() {
     echo "Searched for: ${query}, .${query}, ${query}rc, .${query}.cfg, etc."
   fi
 }
-
 # Updated completion to match the new flexible naming
 _spec_completion() {
   local config_dir="$SPEC_SOURCE_DIR"
@@ -187,9 +187,30 @@ _spec_completion() {
 }
 compdef _spec_completion spec
 
-nixedit() {
-  cd ~/.nix || exit
-  git pull
+# Usage: 'nixconf' for system, 'nixconf nvim' for nixCats
+nixconf() {
+  # Set target dir
+  local TARGET="$HOME/.nix"
+  if [[ "$1" == "nvim" ]]; then
+    TARGET="$HOME/source/nixCats"
+  fi
+
+  cd "$TARGET" || return 1
+
+  # Fetch and Rebase instead of Pull
+  # This keeps your git history linear and avoids unnecessary merge commits
+  echo "Checking for remote changes..."
+  git fetch origin >/dev/null 2>&1
+
+  # Only rebase if we are actually behind the remote
+  if [ "$(git rev-parse HEAD)" != "$(git rev-parse @{u})" ]; then
+    echo "Updating local files to match remote..."
+    git rebase origin/$(git branch --show-current)
+  else
+    echo "[✓] Already up to date."
+  fi
+
+  # Open Neovim
   nvim .
 }
 
@@ -206,7 +227,8 @@ backup() {
 }
 
 # SSH auto xterm-colors
-alias ssh-color="TERM=xterm-256color ssh"
+alias ssh="TERM=xterm-256color ssh"
+alias ssh="TERM=xterm-256color ssh"
 
 function search-zsh-history() {
    grep -a "$1" ~/.zsh_history
@@ -293,39 +315,45 @@ function ts() {
 
 
 # Git
-# alias g="git"
-# alias gs="git status"
-# function ga() {
-#    git add "$1"
-# }
-# alias gaa="git add ."
-# function gcm() {
-#    git commit -m $1
-# }
-#
-# # alias gcm="git commit -m"
-#
-# alias gpu="git push"
-# alias gpl="git pull"
-# function gac() {
-#    if [[ -z "$1" ]]; then
-#       echo "No commit message provided"
-#       return
-#    fi
-#    git add .
-#    git commit -m "$1"
-# }
-# function gacp() {
-#    if [[ -z "$1" ]]; then
-#       echo "No commit message provided"
-#       return
-#    fi
-#    git add .
-#    git commit -m "$1"
-#    git push
-# }
-# alias gco="git checkout"
-# alias gcob="git checkout -b"
+# General
+alias g="git"
+alias gs="git status"
+
+# Adding
+alias ga="git add"
+alias gaa="git add ."
+
+# Committing
+# Use "$@" to catch the entire message even if you forget quotes
+gcm() { git commit -m "$*"; }
+alias gc="git commit -v" # -v shows the diff in your editor while you write
+
+# Pushing/Pulling
+alias gpu="git push"
+alias gpl="git pull --rebase" # Better for your Nix sync workflow
+
+# Chained Commands
+# Using "$*" ensures the whole sentence is treated as one commit message
+gac() {
+   if [[ -z "$*" ]]; then
+      echo "Error: No commit message provided."
+      return 1
+   fi
+   git add . && git commit -m "$*"
+}
+
+gacp() {
+   if [[ -z "$*" ]]; then
+      echo "Error: No commit message provided."
+      return 1
+   fi
+   git add . && git commit -m "$*" && git push
+}
+
+# Branching
+alias gco="git checkout"
+alias gcob="git checkout -b"
+alias gb="git branch"
 
 
 ### OH-MY-ZSH CONFIG ###
