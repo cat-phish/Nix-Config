@@ -21,9 +21,11 @@
       browsh
       chirp # ham radio programmer
       chromium
+      cinny-unwrapped
       deskreen # screen mirroring
       # dropbox
       efibootmgr # show boot manager info
+      element-desktop
       filezilla
       gparted
       # htop
@@ -33,6 +35,7 @@
       localsend
       lshw # list detailed hardware information
       neofetch
+      # nheko # matrix client # has cve in dependency
       noto-fonts-color-emoji
       nurl # fetching nix package options from git, maybe others
       # obs-studio # driver issue on fedora
