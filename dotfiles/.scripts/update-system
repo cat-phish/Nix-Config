@@ -2,192 +2,140 @@
 
 set -euo pipefail
 
+# --- Configuration ---
+FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)
 trap 'cd "$ORIGINAL_DIR"' EXIT
 
-# update-system.sh
-# Detect NixOS vs Fedora. On NixOS: update flake, rebuild system, rebuild home, GC.
-# On Fedora: dnf upgrade, update flake, rebuild home, GC if nix available.
-#
-# Run this as your regular user (not as root). The script will use sudo when needed.
+# --- Helper Functions ---
 
-if [ "$(id -u)" -eq 0 ]; then
-  echo "Please run this script as your regular user (not as root)."
-  exit 1
-fi
-
-# Where your flake lives
-FLAKE_PATH="$HOME/.nix"
-
-# Helper: check command exists
+# Check if a command exists
 cmd_exists() { command -v "$1" >/dev/null 2>&1; }
 
-# Load /etc/os-release if present to detect OS
-OS_ID=""
-if [ -f /etc/os-release ]; then
-  # shellcheck source=/dev/null
-  . /etc/os-release
-  OS_ID="${ID:-}"
-fi
+# Stop if there are uncommitted manual changes
+check_git_status() {
+  if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
+  cd "$FLAKE_PATH"
+  if ! git diff-index --quiet HEAD --; then
+    echo "--------------------------------------------------------"
+    echo "[!] ERROR: Uncommitted changes detected in $FLAKE_PATH"
+    echo "    Please commit or stash your manual edits first."
+    echo "--------------------------------------------------------"
+    exit 1
+  fi
+}
 
-echo "Detected OS: ${OS_ID:-unknown}"
-echo ""
+# Sync with remote before making any changes
+git_sync_remote() {
+  if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
+  cd "$FLAKE_PATH"
+  echo "Syncing with remote repository..."
+  git fetch origin
+  # Rebase to keep a clean, linear history
+  git rebase origin/$(git branch --show-current)
+  echo "[✓] Git sync complete"
+}
 
-# Common: update flake (run as user)
+# Update the flake.lock
 update_flake() {
   if ! cmd_exists nix; then
-    echo "nix not found in PATH; skipping flake update."
+    echo "nix not found; skipping flake update."
     return 1
   fi
-
-  if [ ! -d "$FLAKE_PATH" ]; then
-    echo "Flake path does not exist: $FLAKE_PATH"
-    echo "Skip flake update or clone your flake to that location first."
-    return 1
-  fi
-
   echo "Updating flake at $FLAKE_PATH..."
-  if nix flake update --flake "$FLAKE_PATH"; then
+  cd "$FLAKE_PATH"
+  if nix flake update; then
     echo "[✓] Flake updated"
-    return 0
   else
     echo "[!] Failed to update flake"
     return 1
   fi
 }
 
-# Common: run home-manager switch (as user)
-rebuild_home() {
-  if cmd_exists home-manager; then
-    echo "Running: home-manager switch --flake $FLAKE_PATH"
-    if home-manager switch -b backup --flake "$FLAKE_PATH"; then
-      echo "[✓] home-manager switch succeeded"
-    else
-      echo "[!] home-manager switch failed"
-      return 1
-    fi
-  else
-    echo "home-manager binary not found; trying 'nix run' fallback..."
-    if cmd_exists nix; then
-      if nix run nixpkgs#home-manager --switch --flake "$FLAKE_PATH"; then
-        echo "[✓] home-manager (nix run) switch succeeded"
-      else
-        echo "[!] home-manager (nix run) failed"
-        return 1
-      fi
-    else
-      echo "Neither home-manager nor nix found; skipping home rebuild."
-      return 1
-    fi
-  fi
-}
-
-# Common: garbage collect (requires sudo for multi-user)
-gc_nix() {
-  if ! cmd_exists nix; then
-    echo "nix not found; skipping garbage collection."
-    return 1
-  fi
-
-  echo "Running garbage collection: delete items older than 14 days"
-  sudo nix-collect-garbage --delete-older-than 14d
-  echo "[✓] nix garbage collection complete"
-
-}
-
-git_pull_rebase() {
-  if ! cmd_exists git; then
-    echo "git not found; skipping git pull --rebase."
-    return 1
-  fi
-
-  echo "Running garbage git pull --rebase"
-  cd ~/.nix
-  git pull --rebase
-  echo "[✓] git pull --rebase complete"
-}
-
+# Commit and Push ONLY if flake.lock changed
 git_commit_push() {
-  if ! cmd_exists git; then
-    echo "git not found; skipping git commit and push."
-    return 1
+  if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
+  cd "$FLAKE_PATH"
+
+  if git diff --exit-code flake.lock >/dev/null; then
+    echo "[-] No changes detected in flake.lock. Skipping push."
+    return 0
   fi
-  echo "Running garbage collection: delete items older than 14 days"
-  cd ~/.nix
-  git add .
+
+  echo "Changes detected. Committing and pushing..."
+  git add flake.lock
   git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
   git push
-  # cd
-  echo "[✓] git commit and push complete"
+  echo "[✓] Changes pushed to remote"
 }
 
+# Nix home-manager rebuild
+rebuild_home() {
+  echo "Rebuilding Home Manager..."
+  if ! home-manager switch -b backup --flake "$FLAKE_PATH"; then
+    echo "[!] home-manager switch failed"
+    return 1
+  fi
+  echo "[✓] Home Manager switch succeeded"
+}
+
+# Run Nix Garbage Collection
+gc_nix() {
+  echo "Running Nix garbage collection (older than 14d)..."
+  sudo nix-collect-garbage --delete-older-than 14d
+}
+
+# --- Main Execution ---
+
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Please run this script as your regular user (not as root)."
+  exit 1
+fi
+
+OS_ID=""
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+  OS_ID="${ID:-}"
+fi
+
+echo "Detected OS: $OS_ID"
+echo "---------------------------------------"
+
+# Step 1: Safety Checks & Sync
+check_git_status
+git_sync_remote
+
+# Step 2: Update Flake & Share
+update_flake || true
+git_commit_push || true
+
+# Step 3: Apply System Changes
 case "$OS_ID" in
   nixos)
-    echo "Performing NixOS workflow..."
-    
-    echo ""
-    git_pull_rebase || echo "[!] git pull failed or skipped; continuing"
-
-    echo ""
-    update_flake || echo "[!] Flake update failed or skipped; continuing"
-
-    echo ""
-    git_commit_push || echo "[!] git commit and push failed or skipped; continuing"
-
-    echo ""
-    echo "Rebuilding system with: sudo nixos-rebuild switch --flake $FLAKE_PATH"
+    echo "Applying NixOS System Rebuild..."
     if sudo nixos-rebuild switch --flake "$FLAKE_PATH"; then
       echo "[✓] nixos-rebuild succeeded"
     else
       echo "[!] nixos-rebuild failed"
       exit 1
     fi
-
-    echo ""
-    rebuild_home || echo "[!] home-manager rebuild failed or skipped"
-
-    echo ""
+    rebuild_home || true
     gc_nix || true
     ;;
 
   fedora)
-    echo "Performing Fedora workflow..."
-    if cmd_exists dnf; then
-      echo "Updating system packages with dnf..."
-      sudo dnf upgrade --refresh -y
-      echo "[✓] dnf upgrade finished"
-    else
-      echo "dnf not found; skipping system package update."
-    fi
+    echo "Applying Fedora DNF Upgrade..."
+    sudo dnf upgrade --refresh -y
 
-    echo ""
-    git_pull_rebase || echo "[!] git pull failed or skipped; continuing"
-
-    echo ""
-    update_flake || echo "[!] Flake update failed or skipped"
-
-    echo ""
-    git_commit_push || echo "[!] git commit and push failed or skipped; continuing"
-
-    echo ""
-    rebuild_home || echo "[!] home-manager rebuild failed or skipped"
-
-    echo ""
-    # If Nix is installed as multi-user, we can GC as root; otherwise skip
-    if cmd_exists nix; then
-      gc_nix || true
-    else
-      echo "nix not found; skipping nix garbage collection."
-    fi
+    rebuild_home || true
+    if cmd_exists nix; then gc_nix || true; fi
     ;;
 
   *)
-    echo "Unknown or unsupported OS: ${OS_ID:-unknown}"
-    echo "I'll attempt a safe/default flow: update flake, rebuild home (if available)."
-    update_flake || echo "[!] Flake update failed or skipped"
-    rebuild_home || echo "[!] home-manager rebuild failed or skipped"
+    echo "Unsupported OS. Attempting Home Manager rebuild only..."
+    rebuild_home || true
     ;;
 esac
 
-echo ""
+echo "---------------------------------------"
 echo "Done."
