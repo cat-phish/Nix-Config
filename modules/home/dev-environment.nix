@@ -33,6 +33,7 @@
       # libgcc
       navi
       oh-my-zsh
+      opencode
       ripgrep
       vscode
       yazi
