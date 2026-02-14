@@ -12,6 +12,25 @@ trap 'cd "$ORIGINAL_DIR"' EXIT
 # Check if a command exists
 cmd_exists() { command -v "$1" >/dev/null 2>&1; }
 
+# Keep sudo timestamp updated while the script runs
+keep_sudo_alive() {
+  # Update the timestamp immediately
+  sudo -v
+
+  # Run a background loop to refresh the timestamp every 60 seconds
+  while true; do
+    sudo -n true
+    sleep 60
+    # Exit the loop if the parent script finishes
+    kill -0 "$$" || exit
+  done 2>/dev/null &
+}
+
+# Clear credentials on exit
+clear_sudo() {
+  sudo -k
+}
+
 # Stop if there are uncommitted manual changes
 check_git_status() {
   if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
@@ -91,6 +110,13 @@ if [ "$(id -u)" -eq 0 ]; then
   echo "Please run this script as your regular user (not as root)."
   exit 1
 fi
+
+# Prime sudo and keep it alive
+echo "This script requires sudo for system updates. Please authenticate:"
+keep_sudo_alive
+
+# Add clear_sudo to trap at script termination
+trap 'cd "$ORIGINAL_DIR"; sudo -k' EXIT
 
 OS_ID=""
 if [ -f /etc/os-release ]; then
