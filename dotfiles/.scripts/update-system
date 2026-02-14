@@ -5,7 +5,7 @@ set -euo pipefail
 # --- Configuration ---
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)
-trap 'cd "$ORIGINAL_DIR"' EXIT
+# trap 'cd "$ORIGINAL_DIR"' EXIT # TODO: remove in favor of sudo trap below
 
 # --- Helper Functions ---
 
@@ -111,12 +111,14 @@ if [ "$(id -u)" -eq 0 ]; then
   exit 1
 fi
 
-# Prime sudo and keep it alive
+# Start sudo loop
 echo "This script requires sudo for system updates. Please authenticate:"
 keep_sudo_alive
+SUDO_LOOP_PID=$! # Capture the PID of the background loop
 
-# Add clear_sudo to trap at script termination
-trap 'cd "$ORIGINAL_DIR"; sudo -k' EXIT
+# This ensures that if the script exits (normally or by error),
+# we kill the background loop and clear the sudo timestamp.
+trap 'kill "$SUDO_LOOP_PID" 2>/dev/null; sudo -k; cd "$ORIGINAL_DIR"; echo "Cleaned up sudo and returned to $ORIGINAL_DIR"' EXIT
 
 OS_ID=""
 if [ -f /etc/os-release ]; then

@@ -1,3 +1,67 @@
 #!/usr/bin/env bash
 
-home-manager switch -b backup --flake ~/.nix
+# home-manager switch -b backup --flake ~/.nix
+
+set -euo pipefail
+
+FLAKE_PATH="$HOME/.nix"
+ORIGINAL_DIR=$(pwd)
+trap 'cd "$ORIGINAL_DIR"' EXIT
+
+# --- Helper Functions ---
+
+sync_remote() {
+  cd "$FLAKE_PATH"
+  echo "Checking for remote updates..."
+  git fetch origin >/dev/null 2>&1
+  # Only rebase if we are actually behind
+  UPSTREAM=${1:-'@{u}'}
+  LOCAL=$(git rev-parse @)
+  REMOTE=$(git rev-parse "$UPSTREAM")
+
+  if [ "$LOCAL" != "$REMOTE" ]; then
+    echo "Remote changes found. Rebasing..."
+    git rebase origin/$(git branch --show-current)
+  else
+    echo "Already up to date with remote."
+  fi
+}
+
+handle_local_changes() {
+  cd "$FLAKE_PATH"
+  if ! git diff-index --quiet HEAD --; then
+    echo "--------------------------------------------------------"
+    echo "[!] Uncommitted changes in $FLAKE_PATH"
+    git status -s
+    echo "--------------------------------------------------------"
+
+    read -p "Commit and sync changes? (y/N): " confirm
+    if [[ $confirm == [yY] ]]; then
+      read -p "Commit message (Enter for timestamp): " msg
+      [ -z "$msg" ] && msg="Config update [$(date +'%Y-%m-%d %H:%M:%S')]"
+
+      git add .
+      git commit -m "$msg"
+      git push
+      echo "[✓] Synced."
+    else
+      echo "Proceeding without syncing..."
+    fi
+  fi
+}
+
+# --- Main Execution ---
+
+# No sudo priming here!
+sync_remote
+handle_local_changes
+
+echo "Starting home-manager switch..."
+# We run it normally. If it hits a specific file that requires sudo,
+# it will prompt you naturally in the terminal.
+if home-manager switch -b backup --flake "$FLAKE_PATH"; then
+  echo "[✓] Success!"
+else
+  echo "[!] Failed."
+  exit 1
+fi
