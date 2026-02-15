@@ -19,6 +19,7 @@
       appimage-run
       audacity
       browsh
+      cargo
       chirp # ham radio programmer
       chromium
       cinny-unwrapped
