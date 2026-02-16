@@ -44,6 +44,7 @@
       pinta
       qdirstat
       rclone
+      rofi
       sqlite
       steam-run
       thunar
