@@ -37,10 +37,10 @@ handle_git_workflow() {
 
   # Check if there are uncommitted changes BEFORE we build
   if ! git diff-index --quiet HEAD --; then
-    echo "--------------------------------------------------------"
+    echo "--------------------------------------------------"
     echo "[!] Changes detected in your configuration:"
     git status -s
-    echo "--------------------------------------------------------"
+    echo "--------------------------------------------------"
 
     read -p "Would you like to commit and push these changes now? (y/N): " confirm
     if [[ $confirm == [yY] ]]; then

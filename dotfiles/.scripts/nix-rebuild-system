@@ -34,10 +34,10 @@ handle_git_workflow() {
   cd "$FLAKE_PATH"
 
   if ! git diff-index --quiet HEAD --; then
-    echo "--------------------------------------------------------"
+    echo "--------------------------------------------------"
     echo "[!] Uncommitted system configuration changes:"
     git status -s
-    echo "--------------------------------------------------------"
+    echo "--------------------------------------------------"
 
     read -p "Commit and push these changes now? (y/N): " confirm
     if [[ $confirm == [yY] ]]; then

@@ -20,6 +20,7 @@
       audacity
       browsh
       cargo
+      chafa
       chirp # ham radio programmer
       chromium
       cinny-unwrapped

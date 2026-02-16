@@ -30,10 +30,10 @@ sync_remote() {
 handle_local_changes() {
   cd "$FLAKE_PATH"
   if ! git diff-index --quiet HEAD --; then
-    echo "--------------------------------------------------------"
+    echo "--------------------------------------------------"
     echo "[!] Uncommitted changes in $FLAKE_PATH"
     git status -s
-    echo "--------------------------------------------------------"
+    echo "--------------------------------------------------"
 
     read -p "Commit and sync changes? (y/N): " confirm
     if [[ $confirm == [yY] ]]; then
