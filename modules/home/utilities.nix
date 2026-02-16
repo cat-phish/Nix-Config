@@ -61,6 +61,30 @@
       rssguard
     ]);
 
+  services.flatpak = {
+    enable = true;
+
+    remotes = lib.mkOptionDefault [
+      {
+        name = "flathub";
+        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
+      }
+    ];
+    packages = [
+      # {
+      #   appId = "com.brave.Browser";
+      #   origin = "flathub";
+      # }
+      "im.nheko.Nheko"
+    ];
+    update.auto = {
+      enable = true;
+      onCalendar = "weekly";
+    };
+
+    uninstallUnmanaged = false;
+  };
+
   home.file = {
     ".scripts" = {
       source = ../../dotfiles/.scripts;
