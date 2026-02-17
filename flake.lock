@@ -457,11 +457,11 @@
         "plugins-snacks": "plugins-snacks"
       },
       "locked": {
-        "lastModified": 1771312324,
-        "narHash": "sha256-E90vuUPAGmZRETHezi4u3E2vNuWkN2/8dgQKvKxLf4o=",
+        "lastModified": 1771313600,
+        "narHash": "sha256-fvUVoqvxC/RTjwAt4ttqb/473D7SV/1tr4NVUQ+6lBM=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "098b007b0699a711cf24f6d88e7e9d4b46708a01",
+        "rev": "6ed78b450973f722942247301f6601c345fee1ac",
         "type": "github"
       },
       "original": {
