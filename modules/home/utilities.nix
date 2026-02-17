@@ -20,12 +20,14 @@
       audacity
       browsh
       cargo
+      caligula # iso to disk burning, dd alternative
       chafa
       chirp # ham radio programmer
       chromium
       cinny-unwrapped
       deskreen # screen mirroring
       # dropbox
+      # TODO: package durdraw
       efibootmgr # show boot manager info
       element-desktop
       filezilla
@@ -36,11 +38,13 @@
       #librewolf
       localsend
       lshw # list detailed hardware information
+      ncdu
       neofetch
       # nheko # matrix client # has cve in dependency
       noto-fonts-color-emoji
       nurl # fetching nix package options from git, maybe others
       # obs-studio # driver issue on fedora
+      pastel # cli color picker
       pinta
       qdirstat
       rclone
