@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Check if a host is provided
+if [ -z "$1" ]; then
+    echo "Usage: nvim-ssh [user@]host [/path/to/dir]"
+    exit 1
+fi
+
+HOST=$1
+# Default to root / if no path is provided
+REMOTE_PATH=${2:-/}
+
+# Ensure the path starts with a slash for the URI format
+[[ $REMOTE_PATH != /* ]] && REMOTE_PATH="/$REMOTE_PATH"
+
+# Launch nvim with the oil-ssh URI
+nvim "oil-ssh://$HOST$REMOTE_PATH"
