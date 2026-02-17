@@ -222,11 +222,11 @@
         "plugins-snacks": "plugins-snacks"
       },
       "locked": {
-        "lastModified": 1771310199,
-        "narHash": "sha256-7+IiDYxCUiqjMA+nhc12Sol11WI91l9yL4wDZRruqXI=",
+        "lastModified": 1771310971,
+        "narHash": "sha256-4MH6EZK69nJ53/rbmePjXjJ+FmCV49wmFeyevpQ8m7g=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "8821f72967d8704f4f23e4019a77cf9397029775",
+        "rev": "afd73b53a8385684ea940f4b823378bfd5f11c60",
         "type": "github"
       },
       "original": {

@@ -55,6 +55,7 @@ sync_repo() {
 handle_git_workflow() {
   local repo_path=$1
   local context=$2
+  local default_msg=${3:-"$context update [$(date +'%Y-%m-%d %H:%M:%S')]"}
   cd "$repo_path"
 
   if ! git diff-index --quiet HEAD --; then
@@ -65,8 +66,8 @@ handle_git_workflow() {
 
     read -p "Commit and push $context changes? (y/N): " confirm
     if [[ $confirm == [yY] ]]; then
-      read -p "Commit message (Enter for timestamp): " msg
-      [ -z "$msg" ] && msg="$context update [$(date +'%Y-%m-%d %H:%M:%S')]"
+      read -p "Commit message (Enter for default): " msg
+      [ -z "$msg" ] && msg="$default_msg"
 
       git add .
       git commit -m "$msg"
@@ -107,7 +108,7 @@ echo "Updating 'mynvim' input in system flake..."
 # This specifically updates only the nixCats input (mynvim) in your main flake
 nix flake lock --update-input mynvim
 
-handle_git_workflow "$FLAKE_PATH" "System Flake (nvim pointer)"
+handle_git_workflow "$FLAKE_PATH" "System Flake (nvim pointer)" "nvim update"
 
 # PHASE 3: Apply Changes
 echo -e "\n=== Phase 3: Applying Configuration ==="
