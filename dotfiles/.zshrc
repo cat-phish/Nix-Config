@@ -77,7 +77,7 @@ alias zsh-refresh="source ~/.zshrc"
 # Neovim
 alias v="nvim"
 alias vv="nvim ."
-alias nvim-ssh="~/.scripts/nvim-ssh"
+alias nvim-ssh="$HOME/.scripts/nvim-ssh"
 alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 alias uv="nvim-unstable"
 alias uvv="nvim-unstable ."
