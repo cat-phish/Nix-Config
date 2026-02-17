@@ -50,7 +50,7 @@
     # Personal nixCats Nvim Flake
     ++ (with nvim-config; [
       packages.${pkgs.stdenv.hostPlatform.system}.nvim
-      packages.${pkgs.stdenv.hostPlatform.system}.unstable
+      packages.${pkgs.stdenv.hostPlatform.system}.nvim-unstable
     ]);
 
   programs.git = {
