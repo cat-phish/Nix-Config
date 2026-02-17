@@ -218,14 +218,15 @@
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixCats": "nixCats",
         "nixpkgs": "nixpkgs_3",
-        "plugins-capslock-nvim": "plugins-capslock-nvim"
+        "plugins-capslock-nvim": "plugins-capslock-nvim",
+        "plugins-snacks": "plugins-snacks"
       },
       "locked": {
-        "lastModified": 1771307720,
-        "narHash": "sha256-ul/5Me3Avjd02/jt8gxOVt7YW4PlxfqOmekjjAomCyM=",
+        "lastModified": 1771310199,
+        "narHash": "sha256-7+IiDYxCUiqjMA+nhc12Sol11WI91l9yL4wDZRruqXI=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "e49719851d0cafe481759a66e14befab2317deda",
+        "rev": "8821f72967d8704f4f23e4019a77cf9397029775",
         "type": "github"
       },
       "original": {
@@ -506,6 +507,22 @@
       "original": {
         "owner": "barklan",
         "repo": "capslock.nvim",
+        "type": "github"
+      }
+    },
+    "plugins-snacks": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1763464072,
+        "narHash": "sha256-vRedYg29QGPGW0hOX9qbRSIImh1d/SoDZHImDF2oqKM=",
+        "owner": "folke",
+        "repo": "snacks.nvim",
+        "rev": "fe7cfe9800a182274d0f868a74b7263b8c0c020b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "folke",
+        "repo": "snacks.nvim",
         "type": "github"
       }
     },
