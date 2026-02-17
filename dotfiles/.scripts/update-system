@@ -4,8 +4,7 @@ set -euo pipefail
 
 # --- Configuration ---
 FLAKE_PATH="$HOME/.nix"
-ORIGINAL_DIR=$(pwd)
-# trap 'cd "$ORIGINAL_DIR"' EXIT # TODO: remove in favor of sudo trap below
+ORIGINAL_DIR=$(pwd) # Used in sudo trap command below
 
 # --- Helper Functions ---
 
@@ -149,11 +148,17 @@ case "$OS_ID" in
     fi
     rebuild_home || true
     gc_nix || true
+    zinit self-update
+    zinit update
     ;;
 
   fedora)
     echo "Applying Fedora DNF Upgrade..."
     sudo dnf upgrade --refresh -y
+
+    echo "Updating Zsh Zinit and it's Plugins..."
+    zinit self-update
+    zinit update
 
     rebuild_home || true
     if cmd_exists nix; then gc_nix || true; fi

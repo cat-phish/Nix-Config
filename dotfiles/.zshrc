@@ -547,7 +547,7 @@ zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/copyfile/c
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/copypath/copypath.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/extract/extract.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/fzf/fzf.plugin.zsh'
-zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/git.plugin.zsh'
+# zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/git.plugin.zsh' # way too many aliases
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git-auto-fetch/git-auto-fetch.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/gitignore/gitignore.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/github/github.plugin.zsh'
