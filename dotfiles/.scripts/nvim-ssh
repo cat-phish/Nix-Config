@@ -13,5 +13,9 @@ REMOTE_PATH=${2:-/}
 # Ensure the path starts with a slash for the URI format
 [[ $REMOTE_PATH != /* ]] && REMOTE_PATH="/$REMOTE_PATH"
 
-# Launch nvim with the oil-ssh URI
-nvim "oil-ssh://$HOST$REMOTE_PATH"
+# If the host is just a name from ~/.ssh/config, oil-ssh should handle it,
+# but sometimes it needs the colon separator for the path.
+URI="oil-ssh://$HOST$REMOTE_PATH"
+
+echo "Connecting to $URI..."
+nvim "$URI"
