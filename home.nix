@@ -3,7 +3,7 @@
   inputs,
   pkgs,
   pkgs-stable,
-  mynvim,
+  nvim-config,
   # talon-nix,
   ...
 }: {
@@ -80,7 +80,7 @@
     ++ (with pkgs-stable; [
       ])
     # Personal nixCats Nvim Flake
-    ++ (with mynvim; [
+    ++ (with nvim-config; [
       ])
     # ++ (with talon-nix; [
     #   packages.${builtins.currentSystem}.default

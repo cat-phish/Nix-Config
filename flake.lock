@@ -113,7 +113,7 @@
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": [
-          "mynvim",
+          "nvim-config",
           "neovim-nightly-overlay",
           "nixpkgs"
         ]
@@ -213,7 +213,7 @@
         "type": "github"
       }
     },
-    "mynvim": {
+    "nvim-config": {
       "inputs": {
         "neovim-nightly-overlay": "neovim-nightly-overlay",
         "nixCats": "nixCats",
@@ -533,7 +533,7 @@
         "emacs-config": "emacs-config",
         "home-manager": "home-manager_2",
         "kmonad": "kmonad",
-        "mynvim": "mynvim",
+        "nvim-config": "nvim-config",
         "nix-flatpak": "nix-flatpak",
         "nix-snapd": "nix-snapd",
         "nixpkgs": "nixpkgs_4",

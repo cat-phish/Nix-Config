@@ -4,7 +4,7 @@
   lib,
   pkgs,
   pkgs-stable,
-  mynvim,
+  nvim-config,
   emacs-config,
   ...
 }: {
@@ -48,8 +48,9 @@
       nerdfonts # moved to stable because the unstable requires individual fonts to be specified
     ])
     # Personal nixCats Nvim Flake
-    ++ (with mynvim; [
+    ++ (with nvim-config; [
       packages.${pkgs.stdenv.hostPlatform.system}.nvim
+      packages.${pkgs.stdenv.hostPlatform.system}.unstable
     ]);
 
   programs.git = {

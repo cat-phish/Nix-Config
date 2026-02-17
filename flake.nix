@@ -7,7 +7,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
-    mynvim.url = "github:cat-phish/Neovim";
+    nvim-config.url = "github:cat-phish/Neovim";
     emacs-config = {
       url = "github:cat-phish/Emacs";
       flake = false; # Treat as a source repo, not a flake
@@ -49,7 +49,7 @@
     nixpkgs-stable,
     home-manager,
     # sops-nix,
-    mynvim,
+    nvim-config,
     emacs-config,
     kmonad,
     plasma-manager,
@@ -136,7 +136,7 @@
         extraSpecialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit mynvim;
+          inherit nvim-config;
           inherit emacs-config;
           inherit plasma-manager;
           inherit talon-nix;
@@ -156,7 +156,7 @@
         extraSpecialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit mynvim;
+          inherit nvim-config;
           inherit emacs-config;
           inherit plasma-manager;
           inherit talon-nix;
@@ -177,7 +177,7 @@
         extraSpecialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit mynvim;
+          inherit nvim-config;
           inherit emacs-config;
           inherit talon-nix;
           # inherit numen;
@@ -197,7 +197,7 @@
         extraSpecialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit mynvim;
+          inherit nvim-config;
           inherit emacs-config;
           # inherit plasma-manager;
           inherit talon-nix;
@@ -217,7 +217,7 @@
         extraSpecialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit mynvim;
+          inherit nvim-config;
           # inherit plasma-manager;
           inherit talon-nix;
           # host is not NixOS (Ubuntu)
