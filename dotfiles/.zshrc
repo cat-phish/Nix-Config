@@ -639,5 +639,8 @@ alias lsl="eza --color=always --long --icons=always"
 # thefuck alias for commmand correction
 # eval "$(thefuck --alias)"
 
+# Navi
+eval "$(navi widget zsh)"
+
 # Zoxide
 eval "$(zoxide init --cmd cd zsh)"
