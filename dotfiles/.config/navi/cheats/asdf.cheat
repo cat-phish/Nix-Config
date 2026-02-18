@@ -1,0 +1,25 @@
+% asdf
+
+# Update all plugins
+asdf plugin update --all
+
+# List installed plugins
+asdf plugin list --urls
+
+# List currently installed tools and their currently set version
+asdf current
+
+# List installed versions for a tool
+asdf list <tool_name>
+
+# List latest stable version for a tool and compare it to your installed versions
+printf "Latest Stable Version\n" && asdf latest <tool_name> && printf "\nInstalled Versions\n" && asdf list <tool_name>
+
+# Install latest stable tool version
+asdf install <tool_name> latest
+
+# Set tool to latest installed stable version
+asdf set -u <tool_name> latest
+
+# Uninstall a tool version
+asdf uninstall <tool_name> <tool_version>

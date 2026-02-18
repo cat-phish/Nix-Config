@@ -1,6 +1,6 @@
 cheats:
   paths:
-    - /path/to/some/dir
+    - ~/.config/navi/cheats
 # style:
 #   tag:
 #     color: blue

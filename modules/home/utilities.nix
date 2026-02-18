@@ -31,7 +31,9 @@
       efibootmgr # show boot manager info
       element-desktop
       filezilla
+      fswatch # a file change watcher
       gparted
+      httpie # http api tool
       # htop
       htop-vim
       keepassxc
@@ -49,14 +51,17 @@
       qdirstat
       rclone
       rofi
+      strace # stack racer for linux system calls
       sqlite
       steam-run
       thunar
       tlrc # man page summaries, command is tldr
       traceroute # trace packets over network
+      trashy # trash files
       winboat # run windows apps
       wl-color-picker
       # ventoy
+      xmlto
       xwayland-run
       # cage
       zoom
@@ -92,6 +97,10 @@
   home.file = {
     ".scripts" = {
       source = ../../dotfiles/.scripts;
+      recursive = true;
+    };
+    ".config/navi" = {
+      source = ../../dotfiles/.config/navi;
       recursive = true;
     };
     ".local/share/applications/org-mode.desktop" = {
