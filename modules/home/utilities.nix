@@ -89,6 +89,9 @@
     uninstallUnmanaged = false;
   };
 
+  # Generate mandb docs for apropos etc.
+  documentation.man.generateCaches = true;
+
   home.file = {
     ".scripts" = {
       source = ../../dotfiles/.scripts;
