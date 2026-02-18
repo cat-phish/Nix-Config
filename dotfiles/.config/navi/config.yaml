@@ -1,0 +1,10 @@
+cheats:
+  paths:
+    - /path/to/some/dir
+# style:
+#   tag:
+#     color: blue
+#   comment:
+#     color: white
+#   snippet:
+#     color: red
