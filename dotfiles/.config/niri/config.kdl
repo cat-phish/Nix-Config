@@ -14,6 +14,7 @@ spawn-at-startup "discord"
 spawn-at-startup "konversation"
 spawn-at-startup "firefox"
 spawn-at-startup "kitty"
+spawn-at-startup "syncthingtray"
 spawn-sh-at-startup "python ~/.python-scripts/wireguard-tray.py"
 spawn-sh-at-startup "emacs ~/org/main/Tasks.org"
 
