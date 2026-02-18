@@ -16,6 +16,7 @@
   home.packages =
     (with pkgs; [
       syncthing
+      syncthingtray
     ])
     ++ (with pkgs-stable; [
       ]);
