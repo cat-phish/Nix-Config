@@ -67,11 +67,11 @@
     "emacs-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1771442872,
-        "narHash": "sha256-pexjd+R5eZztmtVSt2xKYMkKdjDqYSR7dsSlVE7fx/k=",
+        "lastModified": 1771486344,
+        "narHash": "sha256-+97I8Y85psjFrmRRHQqzaKYfguYTcp9nJvncyQ+8U/M=",
         "owner": "cat-phish",
         "repo": "Emacs",
-        "rev": "ef3432e6d71cbee13556e4cd942dc95b239c2ce8",
+        "rev": "1c3483c773deb62ddda1cc0d4b6c4cf173b8ac73",
         "type": "github"
       },
       "original": {
@@ -457,11 +457,11 @@
         "plugins-snacks": "plugins-snacks"
       },
       "locked": {
-        "lastModified": 1771455017,
-        "narHash": "sha256-BMQRWE/jBTChzUKVExo9vNa20AZxvJ69fvqBAhSonFg=",
+        "lastModified": 1771487880,
+        "narHash": "sha256-qUCWVIhC/o7nQwZSdHEwLn1F7XK2zdL7kb012E5mO5Y=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "c18e3d199dc53f1d52a901f0dd02f86ced02ea87",
+        "rev": "fff3742b2cb2d5a3c916efd7ba86b92da0ec23d1",
         "type": "github"
       },
       "original": {
