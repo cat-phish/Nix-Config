@@ -6,6 +6,8 @@ set -euo pipefail
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd) # Used in sudo trap command below
 ZINIT_HOME="${HOME}/.local/share/zinit/zinit.git"
+ACTUAL_USER=${SUDO_USER:-$USER}
+USER_HOME=$(getent passwd "$ACTUAL_USER" | cut -d: -f6)
 
 # Source the zinit script so the 'zinit' command is available
 if [ -f "$ZINIT_HOME/zinit.zsh" ]; then
@@ -166,8 +168,11 @@ case "$OS_ID" in
     sudo dnf upgrade --refresh -y
 
     echo "Updating Zsh Zinit and it's Plugins..."
+sudo -u "$ACTUAL_USER" zsh <<-EOF
+    source "$USER_HOME/.local/share/zinit/zinit.git/zinit.zsh"
     zinit self-update
     zinit update
+EOF
 
     rebuild_home || true
     if cmd_exists nix; then gc_nix || true; fi
