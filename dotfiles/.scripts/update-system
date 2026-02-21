@@ -5,6 +5,15 @@ set -euo pipefail
 # --- Configuration ---
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd) # Used in sudo trap command below
+ZINIT_HOME="${HOME}/.local/share/zinit/zinit.git"
+
+# Source the zinit script so the 'zinit' command is available
+if [ -f "$ZINIT_HOME/zinit.zsh" ]; then
+    source "$ZINIT_HOME/zinit.zsh"
+else
+    echo "Zinit not found at $ZINIT_HOME"
+    exit 1
+fi
 
 # --- Helper Functions ---
 
