@@ -36,6 +36,7 @@
       opencode
       ripgrep
       vscode
+      vim
       qtspim
       yazi
       zsh
