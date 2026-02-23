@@ -18,7 +18,7 @@
       activate-linux
       asciiquarium-transparent # an aquarium, duh
       cmatrix # just take the blue pill
-      vim-golf
+      vimgolf
     ])
     ++ (with pkgs-stable; [
       ]);
