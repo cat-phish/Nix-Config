@@ -18,7 +18,11 @@
       activate-linux
       asciiquarium-transparent # an aquarium, duh
       cmatrix # just take the blue pill
-      vimgolf
+      # vimgolf
+      # Override vimgolf to handle Ruby extension
+      (vimgolf.override {
+        ruby = ruby.withPackages (ps: with ps; [rbs racc debug]);
+      })
     ])
     ++ (with pkgs-stable; [
       ]);
