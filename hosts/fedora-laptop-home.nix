@@ -113,6 +113,10 @@
     ".config/niri/device-config.kdl" = {
       source = ../dotfiles/.config/niri/laptop-config.kdl;
     };
+
+    ".config/niri/scripts/open_keepassxc.sh" = {
+      source = ../dotfiles/.config/niri/scripts/open_keepassxc.sh;
+    };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;
       recursive = true;
