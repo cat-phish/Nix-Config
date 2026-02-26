@@ -67,11 +67,11 @@
     "emacs-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1772093705,
-        "narHash": "sha256-ol2dglf1kKf9AMmZ7grWjNrdQZKOhRouc7K/G5cIzAs=",
+        "lastModified": 1772094360,
+        "narHash": "sha256-WYvmulOUn7i/0QFne95jjSVHSIrcF0BI02E519L6p2c=",
         "owner": "cat-phish",
         "repo": "Emacs",
-        "rev": "4a80eea63bd81711ed93de3bcd8f4c7086d3b03d",
+        "rev": "836562a3636d6594ff4ec199a37dd5c2df4d2b11",
         "type": "github"
       },
       "original": {
