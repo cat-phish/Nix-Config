@@ -131,6 +131,9 @@
     ".config/niri/device-config.kdl" = {
       source = ../dotfiles/.config/niri/desktop-config.kdl;
     };
+    ".config/niri/scripts/focus_keepassxc.sh" = {
+      source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
+    };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;
       recursive = true;

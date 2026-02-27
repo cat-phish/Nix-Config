@@ -130,8 +130,3 @@ window-rule {
     match app-id=r#"foobar2000$"#
     open-maximized true
 }
-
-// Binds
-binds {
-  Mod+P  { focus-workspace "passwords"; }
-}
