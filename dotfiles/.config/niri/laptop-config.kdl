@@ -21,6 +21,9 @@ output "eDP-1" {
 workspace "utilities" {
   open-on-output "eDP-1"
 }
+workspace "chat" {
+  open-on-output "eDP-1"
+}
 workspace "browser" {
   open-on-output "eDP-1"
 }
@@ -28,9 +31,6 @@ workspace "terminal" {
   open-on-output "eDP-1"
 }
 workspace "org-mode" {
-  open-on-output "eDP-1"
-}
-workspace "chat" {
   open-on-output "eDP-1"
 }
 // workspace "utilities"
@@ -79,4 +79,8 @@ window-rule {
 window-rule {
     match app-id=r#"foobar2000$"#
     open-maximized true
+}
+
+binds {
+    Mod+P { spawn "~/.config/niri/focus_keepass.sh"; }
 }
