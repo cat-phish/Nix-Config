@@ -272,7 +272,7 @@
    XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  @min
   grv    !    @    #    $    %    ^    &    *    (    )   XX   XX   @atab
   @atab  XX  @fw   XX   XX   XX   XX   XX   XX   XX @prv @dkl @dkr  @tild
-  @ectl @sfcp  XX   XX  @tmx @rmx  lft  down XX rght @tabp @tabn    @acr
+  @ectl @sfcp  XX   XX  @tmx @rmx  lft  down @k rght @tabp @tabn    @acr
   lsft     XX  XX  @cpy @pst @bw  @nxt @lsd @d1  @d2  @d3         XX
   lctl lmet lalt            @aspc                     XX    XX XX   @cup  XX
                                                                @clf @cdn  @crt
