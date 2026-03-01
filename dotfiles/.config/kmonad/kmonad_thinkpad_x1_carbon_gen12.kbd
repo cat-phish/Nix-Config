@@ -165,12 +165,12 @@
    ;; main layer letter shortcuts, these should each have corresponding delay layer shortcuts
    d (tap-hold 200 d (layer-toggle d-cuts)) ;; s on short press, toggle shortcuts layer on hold
    s (tap-hold 200 s (layer-toggle s-cuts))  ;; f on short press, alt on hold
-   ;; k (tap-hold 200 k (layer-toggle d-cuts)) ;; k on short press, toggle shortcuts layer on hold
+    k (tap-hold 200 k (layer-toggle k-cuts)) ;; k on short press, toggle shortcuts layer on hold
    a (tap-hold 200 a (layer-toggle altcuts))  ;; a on short press, toggle altcuts layer on hold
 
    ;; ctrl layer mappings
    ;; c-a (tap-hold 200 C-a (layer-toggle d-cuts))
- 
+
    ;; d-cuts layer aliases
    acr A-ret  ;; tap alt-ret
    atab (tap-hold 250 A-tab M-A-right)  ;; tap switch app, cycle screens/windows
@@ -239,7 +239,7 @@
   caps f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12  home  end  ins del
   grv  1    2    3    4    5    6    7    8    9    0    -    =   bspc
   tab   q    w    e    r    t    y    u    i    o    p    [    ]  \
-  @ectl @a   @s   @d    f    g    h    j    k    l    ;    '      ret
+  @ectl @a   @s   @d    f    g    h    j    @k   l    ;    '      ret
   @lsft     z    x    c    v    b    n    m    ,    .    /      rsft
   lctl lmet lalt          spc                   @ralt  rctl    pgup  up  pgdn
                                                                left down rght
@@ -261,9 +261,18 @@
 ;; this layer is for commonly used shortcuts and motions when typing or coding
 (deflayer d-cuts
    XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  @min
-   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   @atab
+    `    !    @    #    $    %    ^    &    *    (    )   XX   XX   @atab
   @atab  XX  @fw   XX   XX   XX   XX   XX   XX   XX @prv @dkl @dkr  @tild
   @ectl @sfcp  XX   XX  @tmx @rmx  lft  down up rght @tabp @tabn    @acr
+  lsft     XX  XX  @cpy @pst @bw  @nxt @lsd @d1  @d2  @d3         XX
+  lctl lmet lalt            @aspc                     XX    XX XX   @cup  XX
+                                                               @clf @cdn  @crt
+)
+(deflayer k-cuts
+   XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  XX  @min
+    `    !    @    #    $    %    ^    &    *    (    )   XX   XX   @atab
+  @atab  XX  @fw   XX   XX   XX   XX   XX   XX   XX @prv @dkl @dkr  @tild
+  @ectl @sfcp  XX   XX  @tmx @rmx  lft  down XX rght @tabp @tabn    @acr
   lsft     XX  XX  @cpy @pst @bw  @nxt @lsd @d1  @d2  @d3         XX
   lctl lmet lalt            @aspc                     XX    XX XX   @cup  XX
                                                                @clf @cdn  @crt
