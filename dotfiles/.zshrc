@@ -78,6 +78,7 @@ alias zsh-refresh="source ~/.zshrc"
 # Neovim
 alias v="nvim"
 alias vv="nvim ."
+alias vf='nvim $(fzf -m --preview="bat --color=always {}")'
 alias nvim-ssh="$HOME/.scripts/nvim-ssh"
 alias nixcats="$HOME/source/nixCats/result/bin/nvim"
 alias uv="nvim-unstable"
@@ -594,8 +595,8 @@ bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
 # Set up fzf key bindings and fuzzy completion
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 source <(fzf --zsh)
-export FZF_CTRL_T_OPTS="--preview 'bat --color=always --style=header,grid --line-range :500 {}'"
-export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+export FZF_CTRL_F_OPTS="-m --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
+export FZF_CTRL_ALT_F_OPTS="--preview 'eza --tree --color=always {} | head -200'"
 _fzf_comprun() {
   local cmd=$1
   shift
