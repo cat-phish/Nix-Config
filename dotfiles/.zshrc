@@ -595,8 +595,9 @@ bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
 # Set up fzf key bindings and fuzzy completion
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 source <(fzf --zsh)
-export FZF_CTRL_F_OPTS="-m --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
-export FZF_CTRL_ALT_F_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+export FZF_DEFAULT_OPTS="--layout=reverse --border=bold --border=rounded --margin=3% --color=dark"
+export FZF_CTRL_T_OPTS="-m --preview 'bat --color=always --style=header,grid --line-range :500 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
 _fzf_comprun() {
   local cmd=$1
   shift
