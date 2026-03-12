@@ -36,6 +36,9 @@ if [ -f "$HOME/.ssh/.env" ]; then
   set +a  # Disable automatic export
 fi
 
+
+export SUDO_EDITOR=nvim
+
 ### Aliases ###
 
 # TODO: decide if I want to keep this
