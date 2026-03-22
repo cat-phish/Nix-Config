@@ -30,6 +30,7 @@
       # TODO: package durdraw
       efibootmgr # show boot manager info
       element-desktop
+      fastfetch
       filezilla
       fswatch # a file change watcher
       gparted
@@ -41,7 +42,6 @@
       localsend
       lshw # list detailed hardware information
       ncdu
-      neofetch
       # nheko # matrix client # has cve in dependency
       noto-fonts-color-emoji
       nurl # fetching nix package options from git, maybe others
