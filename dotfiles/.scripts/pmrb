@@ -49,7 +49,7 @@ device_sync_path="/Podcasts/Shows"
 device_queue_location="/Podcasts"
 
 # Set the max age for auto-cleanup in days, 0 to disable (based on file modified time)
-max_age=180
+max_age=60
 
 # Define the array of podcasts to auto queue (this should match case-sensitive to the folder names of each podcast)
 auto_queue_shows=("Chapo Trap House" "Grey Wolf Feed" "TRUE ANON TRUTH FEED" "Box of Neutrals F1 Podcast" "Pendejo Time" "WFYM PREMIUM")
