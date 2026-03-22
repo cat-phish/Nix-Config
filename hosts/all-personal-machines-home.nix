@@ -21,6 +21,7 @@
       deskreen
       dropbox
       eza # ls replacement
+      fastfetch
       fd
       flameshot
       ghostty
@@ -36,7 +37,6 @@
       mpv
       multiviewer-for-f1
       navi
-      neofetch
       neovide
       noisetorch
       nurl # fetching nix package options from git, maybe others
