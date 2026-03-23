@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Use fzf to pick a file from your sync folder
-selection=$(ls ~/sync/kitty-sessions/*.conf | xargs -n 1 basename | fzf --height 40% --reverse)
+selection=$(ls ~/sync/kitty-sessions/* 2>/dev/null | xargs -n 1 basename | fzf --height 40% --reverse)
 
 if [ -n "$selection" ]; then
-    # Launch a new OS window using that session file
-    kitten @ launch --type=os-window --session "$HOME/sync/kitty-sessions/$selection"
+    # 'goto_session' is the correct internal action for loading
+    kitten @ action goto_session "$HOME/sync/kitty-sessions/$selection"
+else
+    echo "No session selected."
+    sleep 1
 fi

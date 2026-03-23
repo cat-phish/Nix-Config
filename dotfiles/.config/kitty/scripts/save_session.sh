@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Prompt for a name using read (runs inside a kitty window)
-echo "Enter session name (no extension):"
+echo "Enter session name:"
 read session_name
 
 if [ -n "$session_name" ]; then
-    # Save the current state to your sync folder
-    kitten @ save-as-session "$HOME/sync/kitty-sessions/$session_name.conf"
+    # The --do-not-open-in-editor flag stops the new window/editor popup
+    kitten @ action save_as_session --do-not-open-in-editor "$HOME/sync/kitty-sessions/$session_name.conf"
     echo "Saved to $session_name.conf"
     sleep 1
 fi
