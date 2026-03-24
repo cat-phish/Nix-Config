@@ -62,6 +62,7 @@
       user.email = "134035929+cat-phish@users.noreply.github.com";
       init.defaultBranch = "master";
     };
+    signing.format = null;
   };
 
   programs.lazygit = {
