@@ -59,7 +59,7 @@
       tlrc # man page summaries, command is tldr
       traceroute # trace packets over network
       trashy # trash files
-      winboat # run windows apps
+      # winboat # run windows apps TODO: tmp disabled bc of dependency issue
       wl-color-picker
       # ventoy
       xmlto
