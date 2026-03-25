@@ -51,6 +51,7 @@
       qdirstat
       rclone
       rofi
+      sl
       strace # stack racer for linux system calls
       sqlite
       steam-run
