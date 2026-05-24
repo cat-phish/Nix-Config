@@ -15,6 +15,8 @@
 
   home.packages =
     (with pkgs; [
+      fcast-client
+      fcast-reciever
       lsp-plugins # a collection of open source audio plugins
       mpv
       vlc
