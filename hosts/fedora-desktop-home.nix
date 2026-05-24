@@ -24,6 +24,7 @@
     ../modules/home/office-suite.nix
     ../modules/home/utilities.nix
     ../modules/home/app-wine.nix
+    # ../modules/home/app-fcast-sender.nix
     ../modules/home/app-foobar2000-wine-dependencies.nix
     ../modules/home/app-syncthing.nix
     ../modules/home/app-numen.nix
@@ -100,6 +101,7 @@
       "org.winehq.Wine"
       "org.winehq.Wine.gecko"
       "org.winehq.Wine.mono"
+      "org.fcast.Sender"
     ];
     update.auto = {
       enable = true;
