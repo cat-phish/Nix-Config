@@ -98,9 +98,9 @@
       "dev.deedles.Trayscale"
       "tv.kodi.Kodi"
       "net.lutris.Lutris"
-      "org.winehq.Wine"
-      "org.winehq.Wine.gecko"
-      "org.winehq.Wine.mono"
+      # "org.winehq.Wine"
+      # "org.winehq.Wine.gecko"
+      # "org.winehq.Wine.mono"
       "org.fcast.Sender"
     ];
     update.auto = {
@@ -134,6 +134,9 @@
       source = ../dotfiles/.config/niri/desktop-config.kdl;
     };
     ".config/niri/scripts/focus_keepassxc.sh" = {
+      source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
+    };
+    ".config/niri/scripts/syncthingtray_startup_delay.sh" = {
       source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
     };
     "${config.xdg.configHome}/kmonad" = {
