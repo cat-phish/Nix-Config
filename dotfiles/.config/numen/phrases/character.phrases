@@ -90,7 +90,7 @@ seven: press 7
 eight: press 8
 nine: press 9
 
-queue: press question
+quest: press question
 #mark: press question
 plus: press plus
 minus: press minus
