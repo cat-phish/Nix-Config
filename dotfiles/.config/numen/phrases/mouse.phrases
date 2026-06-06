@@ -7,6 +7,8 @@
 # Click
 dot: click left \
   stick off
+touch: click left \
+  stick off
 righty: click 3 \
   stick off
 dub: click left \
