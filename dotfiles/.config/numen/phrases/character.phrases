@@ -1,5 +1,4 @@
 air: press a
-ay: press a
 bat: press b
 cap: press c
 drum: press d
@@ -25,6 +24,33 @@ whiz: press w
 plex: press x
 yank: press y
 zip: press z
+
+ay: press a
+bee: press b
+see: press c
+dee: press d
+ee: press e
+eff: press f
+gee: press g
+aytch: press h
+eye: press i
+jay: press j
+kay: press k
+elle: press l
+emm: press m
+enn: press n
+oh: press o
+pee: press p
+queue: press q
+are: press r
+ess: press s
+tee: press t
+you: press u
+vee: press v
+double you: press w
+exe: press x
+why: press y
+zee: press z
 
 ##a: press a
 #b: press b
