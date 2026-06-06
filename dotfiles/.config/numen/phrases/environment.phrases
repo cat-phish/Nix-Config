@@ -102,6 +102,9 @@ next: stick off \
 last: stick off \
   press ctrl+p
 
+open: stick off \
+  press super+space
+
 # These two are just for --gadget mode.
 
 # Switch to controlling the gadget
