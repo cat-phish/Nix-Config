@@ -16,6 +16,7 @@
   home.packages =
     (with pkgs; [
       android-tools
+      android-sdk
     ])
     ++ (with pkgs-stable; [
       ]);
