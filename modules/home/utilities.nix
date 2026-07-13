@@ -65,7 +65,6 @@
       xmlto
       xwayland-run
       # cage
-      zoom
     ])
     ++ (with pkgs-stable; [
       rssguard

@@ -17,7 +17,7 @@
     (with pkgs; [
       discord
       kdePackages.konversation
-      zoom
+      # zoom
     ])
     ++ (with pkgs-stable; [
       ]);
