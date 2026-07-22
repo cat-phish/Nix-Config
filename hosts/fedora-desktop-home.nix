@@ -99,6 +99,7 @@
       "dev.deedles.Trayscale"
       "tv.kodi.Kodi"
       "net.lutris.Lutris"
+      "org.fcast.Sender"
       # "org.winehq.Wine"
       # "org.winehq.Wine.gecko"
       # "org.winehq.Wine.mono"
