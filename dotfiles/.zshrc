@@ -13,6 +13,7 @@ export SHELL="$HOME/.nix-profile/bin/zsh"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="$HOME/.config/.emacs.d/bin:$PATH"
 export PATH="$HOME/.local/share/gem/ruby/3.3.0/bin:$PATH"
+export PATH="$HOME/go/bin:$PATH"
 # Path to your oh-my-zsh installation.
 # export ZSH="$HOME/.oh-my-zsh"
 
