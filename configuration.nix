@@ -25,7 +25,8 @@
 
   config = {
     nixpkgs.config.permittedInsecurePackages = [
-      "wavebox-10.133.4-2"
+      # "wavebox-10.133.4-2"
+      "electron-40.10.5"
     ];
     my.arbitrary.option = "test";
 
