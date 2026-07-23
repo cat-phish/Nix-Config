@@ -24,7 +24,7 @@ sed '4d' "$IPOD_LOG" > "$TEMP_LOG"
 
 # Run Scotty to beam the listens to Maloja
 echo "Beaming scrobbles to Maloja via Scotty..."
-scotty beam "$SCROBBLER_NAME" "$MALOJA_NAME"
+scotty beam listens "$SCROBBLER_NAME" "$MALOJA_NAME"
 
 # Check if Scotty exited successfully
 # if [ $? -eq 0 ]; then
