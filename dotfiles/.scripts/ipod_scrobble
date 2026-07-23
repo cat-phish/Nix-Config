@@ -26,11 +26,24 @@ echo "Beaming scrobbles to Maloja via Scotty..."
 scotty beam "$TEMP_LOG" "$SERVICE_NAME"
 
 # Check if Scotty exited successfully
+# if [ $? -eq 0 ]; then
+#     echo "Sync successful! Clearing the iPod scrobbler log..."
+#     > "$IPOD_LOG"
+#     rm -f "$TEMP_LOG"
+#     echo "Done! Your iPod scrobbler log has been wiped clean for your next session."
+# else
+#     echo "Error: Scotty sync failed. The iPod log was left untouched so you can retry."
+#     rm -f "$TEMP_LOG"
+#     exit 1
+# fi
 if [ $? -eq 0 ]; then
-    echo "Sync successful! Clearing the iPod scrobbler log..."
-    > "$IPOD_LOG"
+    echo "Sync successful! Resetting iPod log with clean headers..."
+
+    # Re-create the file with standard Rockbox headers intact
+    printf "#AUDIOSCROBBLER/1.1\n#TZ/UNKNOWN\n#CLIENT/Rockbox\n#ARTIST\t#ALBUM\t#TITLE\t#TRACKNUM\t#LENGTH\t#RATING\t#TIMESTAMP\t#MUSICBRAINZ_TRACKID\n" > "$IPOD_LOG"
+
     rm -f "$TEMP_LOG"
-    echo "Done! Your iPod scrobbler log has been wiped clean for your next session."
+    echo "Done! Your iPod scrobbler log is clean and ready for your next session."
 else
     echo "Error: Scotty sync failed. The iPod log was left untouched so you can retry."
     rm -f "$TEMP_LOG"
