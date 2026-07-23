@@ -37,16 +37,16 @@ echo ""
 username_confirmed=false
 while [ "$username_confirmed" = false ]; do
     read -p "Enter username for home-manager flake: " input_username
-    
+
     if [ -z "$input_username" ]; then
         echo "⚠️  Username cannot be empty."
         continue
     fi
-    
+
     echo ""
     echo "Username: $input_username"
     read -p "Is this correct? (y/n): " username_check
-    
+
     if [[ "$username_check" =~ ^[Yy]$ ]]; then
         confirmed_username="$input_username"
         username_confirmed=true
@@ -61,29 +61,29 @@ echo ""
 # Ask for confirmation if OS was detected
 if [ "$os_id" = "nixos" ] || [ "$os_id" = "fedora" ]; then
     read -p "Is this a $os_id $machine_type?  (y/n): " confirm
-    
+
     if [[ "$confirm" =~ ^[Yy]$ ]]; then
         confirmed_os="$os_id"
         confirmed_machine="$machine_type"
-        
+
         # Present default hostname
         default_hostname="$confirmed_os-$confirmed_machine"
         echo ""
         echo "Default hostname for flake: $default_hostname"
         read -p "Use this hostname?  (y/n): " hostname_confirm
-        
+
         if [[ "$hostname_confirm" =~ ^[Yy]$ ]]; then
             confirmed_hostname="$default_hostname"
         else
             read -p "Enter alternate hostname: " alt_hostname
-            
+
             if [ -n "$alt_hostname" ]; then
                 confirmed_hostname="$alt_hostname"
                 echo ""
                 echo "⚠️  IMPORTANT: This hostname must already be configured in your Nix config."
                 echo "   Flake configuration: $confirmed_hostname"
                 read -p "Do you understand and confirm this hostname exists in your config? (y/n): " hostname_exists_confirm
-                
+
                 if [[ !  "$hostname_exists_confirm" =~ ^[Yy]$ ]]; then
                     echo "Cannot continue without valid hostname configuration. Exiting."
                     exit 1
@@ -136,14 +136,14 @@ if [ -z "$confirmed_os" ]; then
             echo ""
             echo "=== Custom Configuration ==="
             echo ""
-            
+
             # OS Selection
             echo "Select OS:"
             echo "1) NixOS"
             echo "2) Fedora"
             echo "3) Other (exit)"
             read -p "Enter choice (1-3): " os_choice
-            
+
             case $os_choice in
                 1)
                     confirmed_os="nixos"
@@ -162,7 +162,7 @@ if [ -z "$confirmed_os" ]; then
                     exit 1
                     ;;
             esac
-            
+
             # Machine Type Selection
             echo ""
             echo "Select machine type:"
@@ -170,7 +170,7 @@ if [ -z "$confirmed_os" ]; then
             echo "2) Laptop"
             echo "3) Other (exit)"
             read -p "Enter choice (1-3): " machine_choice
-            
+
             case $machine_choice in
                 1)
                     confirmed_machine="desktop"
@@ -189,25 +189,25 @@ if [ -z "$confirmed_os" ]; then
                     exit 1
                     ;;
             esac
-            
+
             # Hostname Entry
             echo ""
             read -p "Enter hostname for flake: " custom_hostname
-            
+
             if [ -z "$custom_hostname" ]; then
                 echo "Hostname cannot be empty. Exiting."
                 exit 1
             fi
-            
+
             confirmed_hostname="$custom_hostname"
-            
+
             echo ""
             echo "⚠️  IMPORTANT: This hostname must already be configured in your Nix config."
             echo "   Flake configuration: $confirmed_hostname"
             echo "   Expected OS: $confirmed_os"
             echo "   Expected Machine: $confirmed_machine"
             read -p "Do you understand and confirm this hostname exists in your config? (y/n): " hostname_exists_confirm
-            
+
             if [[ !  "$hostname_exists_confirm" =~ ^[Yy]$ ]]; then
                 echo "Cannot continue without valid hostname configuration. Exiting."
                 exit 1
@@ -369,6 +369,18 @@ setup_fedora() {
     fi
     echo ""
 
+    # Prompt for Scotty Scobbler installation
+    read -p "Would you like to install Scotty for scrobbling? (y/n): " install_scotty
+    if [[ "$install_scotty" =~ ^[Yy]$ ]]; then
+        use_scotty=true
+        TOTAL_STEPS=$((TOTAL_STEPS + 1))
+        echo "[✓] Proprietary Nvidia drivers will be installed."
+    else
+        use_scotty=false
+        echo "[✓] Skipping Proprietary Nvidia driver installation."
+    fi
+    echo ""
+
     # Prompt for Docker installation for winboat
     read -p "Would you like to configure Docker (for Winboat or otherwise)? (y/n): " install_docker
     if [[ "$install_docker" =~ ^[Yy]$ ]]; then
@@ -392,7 +404,7 @@ setup_fedora() {
         echo "[✓] Skipping Proprietary Nvidia driver installation."
     fi
     echo ""
-    
+
     # Prompt for git remote change
     read -p "Would you like to change the ~/.nix git remote to ssh? (y/n): " change_git
     if [[ "$change_git" =~ ^[Yy]$ ]]; then
@@ -439,7 +451,7 @@ setup_fedora() {
           sudo sed -i '/#%PAM-1.0/a auth       sufficient   pam_fprintd.so' "$PAM_FILE"
           echo "[✓] Fingerprint authentication configured"
       fi
-      
+
       # Prompt to enroll fingerprint
       read -p "Enroll fingerprint now? (y/n): " enroll_now
       if [[ "$enroll_now" =~ ^[Yy]$ ]]; then
@@ -459,22 +471,22 @@ setup_fedora() {
       # Check if Tailscale is already installed
       if !  command -v tailscale &> /dev/null; then
           echo "Installing Tailscale..."
-          
+
           # Add Tailscale repository
           sudo dnf config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
-          
+
           # Install Tailscale
           sudo dnf install -y tailscale
-          
+
           echo "[✓] Tailscale installed"
       else
           echo "[✓] Tailscale already installed"
       fi
-      
+
       # Enable and start Tailscale service
       sudo systemctl enable --now tailscaled
       echo "[✓] Tailscale service enabled and started"
-      
+
       # Check if already authenticated
       if sudo tailscale status &> /dev/null && sudo tailscale status | grep -q "Logged in"; then
           echo "[✓] Tailscale already authenticated"
@@ -485,7 +497,7 @@ setup_fedora() {
           echo ""
           echo "Tailscale needs to be authenticated..."
           read -p "Authenticate Tailscale now? (y/n): " auth_now
-          
+
           if [[ "$auth_now" =~ ^[Yy]$ ]]; then
               # Ask about additional options
               echo ""
@@ -493,20 +505,20 @@ setup_fedora() {
               read -p "Accept routes from other devices? (y/n): " accept_routes
               read -p "Advertise this machine as an exit node? (y/n): " exit_node
               read -p "Enable SSH access via Tailscale? (y/n): " tailscale_ssh
-              
+
               # Build tailscale up command
               TAILSCALE_CMD="sudo tailscale up"
-              
+
               [[ "$accept_routes" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --accept-routes"
               [[ "$exit_node" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --advertise-exit-node"
               [[ "$tailscale_ssh" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --ssh"
-              
+
               echo ""
               echo "Running: $TAILSCALE_CMD"
               echo "This will open a browser window for authentication..."
-              
+
               eval $TAILSCALE_CMD
-              
+
               echo ""
               echo "[✓] Tailscale configured"
               echo ""
@@ -516,7 +528,7 @@ setup_fedora() {
               echo "You can authenticate later with: sudo tailscale up"
           fi
       fi
-      
+
       echo ""
       echo "Useful Tailscale commands:"
       echo "  sudo tailscale status      - Show connection status"
@@ -544,6 +556,14 @@ setup_fedora() {
       echo "[$STEP/$TOTAL_STEPS] Installing Kitty..."
       sudo dnf copr enable -y gagbo/kitty-latest
       sudo dnf --refresh install -y kitty
+      echo ""
+    fi
+
+    # Install Kitty
+    if [ "$use_scotty" = true ]; then
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Installing Scotty..."
+      go install go.uploadedlobster.com/scotty@latest
       echo ""
     fi
 
@@ -770,17 +790,17 @@ setup_nixos() {
         echo "⚠️  Hardware configuration already exists at:"
         echo "   $HW_CONFIG_DEST"
         read -p "Overwrite?  (y/n): " overwrite_choice
-        
+
         if [[ "$overwrite_choice" =~ ^[Yy]$ ]]; then
             cp -f "$HW_CONFIG_SOURCE" "$HW_CONFIG_DEST"
             echo "[✓] Hardware configuration copied."
         else
             read -p "Enter an alternate filename (or press Enter to skip): " alt_name
-            
+
             if [ -n "$alt_name" ]; then
                 # Use alternate name in the same directory
                 ALT_DEST="$(dirname "$HW_CONFIG_DEST")/$alt_name"
-                
+
                 if cp "$HW_CONFIG_SOURCE" "$ALT_DEST"; then
                     echo "[✓] Hardware configuration saved as: $alt_name"
                 else
@@ -797,13 +817,13 @@ setup_nixos() {
         else
             echo "[!] Failed to copy hardware configuration."
             read -p "Would you like to enter an alternate name?  (y/n): " alt_choice
-            
+
             if [[ "$alt_choice" =~ ^[Yy]$ ]]; then
                 read -p "Enter alternate filename: " alt_name
-                
+
                 if [ -n "$alt_name" ]; then
                     ALT_DEST="$(dirname "$HW_CONFIG_DEST")/$alt_name"
-                    
+
                     if cp "$HW_CONFIG_SOURCE" "$ALT_DEST"; then
                         echo "[✓] Hardware configuration saved as: $alt_name"
                     else

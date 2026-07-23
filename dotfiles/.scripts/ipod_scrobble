@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+IPOD_LOG="/run/media/jordan/JPOD/.scrobbler.log"
+TEMP_LOG="/tmp/ipod_scotty_scrobbler.log"
+SERVICE_NAME="mediaserver-maloja"
+
+# Set UUID of iPod
+name="JPOD"
+# uuid="D5AE-9E4C"
+
+#Mount iPod
+mount_point=$(udisksctl mount -b "$(blkid -L $name)" | cut -d" " -f 4 | tr -d '\n')
+# mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
+
+echo "Mounted at $mount_point"
+# Check if the iPod log is present and mounted
+if [ ! -f "$IPOD_LOG" ]; then
+    echo "Error: iPod .scrobbler.log not found at $IPOD_LOG. Is the iPod plugged in?"
+    exit 1
+fi
+
+# Strip line 4 (#TRACKNUM) to prevent Scotty's parser from crashing
+sed '4d' "$IPOD_LOG" > "$TEMP_LOG"
+
+# Run Scotty to beam the listens to Maloja
+echo "Beaming scrobbles to Maloja via Scotty..."
+scotty beam "$TEMP_LOG" "$SERVICE_NAME"
+
+# Check if Scotty exited successfully
+if [ $? -eq 0 ]; then
+    echo "Sync successful! Clearing the iPod scrobbler log..."
+    > "$IPOD_LOG"
+    rm -f "$TEMP_LOG"
+    echo "Done! Your iPod scrobbler log has been wiped clean for your next session."
+else
+    echo "Error: Scotty sync failed. The iPod log was left untouched so you can retry."
+    rm -f "$TEMP_LOG"
+    exit 1
+fi
+
+#Mount iPod
+udisksctl unmount -b "$(blkid -L $name)"
+# udisksctl unmount -b /dev/disk/by-uuid/$uuid
+
