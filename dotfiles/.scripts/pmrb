@@ -46,7 +46,7 @@ device_sync_path="/Podcasts/Shows"
 
 # Set the location you would like to sync your Queue.m3u8 to)
 # (No trailing slash!)
-device_queue_location="/Podcasts"
+device_queue_location="Podcasts"
 
 # Set the max age for auto-cleanup in days, 0 to disable (based on file modified time)
 max_age=60

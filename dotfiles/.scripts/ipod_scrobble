@@ -7,10 +7,12 @@ SCROBBLER_NAME="scrobbler-log"
 # Set UUID of iPod
 name="JPOD"
 # uuid="D5AE-9E4C"
+sleep_time=10
 
 #Mount iPod
 mount_point=$(udisksctl mount -b "$(blkid -L $name)" | cut -d" " -f 4 | tr -d '\n')
 # mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
+sleep $sleep_time
 
 echo "Mounted at $mount_point"
 # Check if the iPod log is present and mounted
