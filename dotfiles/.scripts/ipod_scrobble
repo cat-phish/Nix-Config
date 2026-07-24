@@ -57,21 +57,38 @@
 # udisksctl unmount -b "$(blkid -L $name)"
 # # udisksctl unmount -b /dev/disk/by-uuid/$uuid
 
-
-
-
-#!/usr/bin/env bash
 IPOD_LOG="/run/media/jordan/JPOD/.scrobbler.log"
+BACKUP_LOG="/run/media/jordan/JPOD/.scrobbler.log.bak"
 TEMP_LOG="/tmp/ipod_scotty_scorbbler.log"
 MALOJA_NAME="mediaserver-maloja"
 SCROBBLER_NAME="scrobbler-log"
 
 name="JPOD"
-sleep_time=2
+sleep_time=10
+USE_BAK=false
+
+# Parse command line flags
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -b|--bak) USE_BAK=true ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+# Determine which log file to process
+if [ "$USE_BAK" = true ]; then
+    SOURCE_LOG="$BACKUP_LOG"
+    echo "Running in BACKUP mode (-b). Using $SOURCE_LOG"
+else
+    SOURCE_LOG="$IPOD_LOG"
+    echo "Running in NORMAL mode. Using live $SOURCE_LOG"
+fi
 
 # Mount iPod
 echo "Mounting iPod..."
 mount_output=$(udisksctl mount -b "$(blkid -L $name)" 2>&1)
+sleep $sleep_time
 if [ $? -ne 0 ]; then
     echo "Error: Failed to mount iPod. Output: $mount_output"
     exit 1
@@ -79,19 +96,17 @@ fi
 
 # Extract mount point cleanly
 mount_point=$(echo "$mount_output" | grep -oE '/run/media/[^ ]+')
-sleep $sleep_time
-
 echo "Mounted at $mount_point"
 
-# Check if the iPod log is present
-if [ ! -f "$IPOD_LOG" ]; then
-    echo "Error: iPod .scrobbler.log not found at $IPOD_LOG."
+# Check if the target log file exists
+if [ ! -f "$SOURCE_LOG" ]; then
+    echo "Error: Log file not found at $SOURCE_LOG."
     udisksctl unmount -b "$(blkid -L $name)"
     exit 1
 fi
 
 # Strip line 4 (#TRACKNUM) to prevent Scotty's parser from crashing
-sed '4d' "$IPOD_LOG" > "$TEMP_LOG"
+sed '4d' "$SOURCE_LOG" > "$TEMP_LOG"
 
 # Run Scotty to beam the listens to Maloja
 echo "Beaming scrobbles to Maloja via Scotty..."
@@ -101,18 +116,19 @@ SCOTTY_EXIT=$?
 # Clean up the temp file
 rm -f "$TEMP_LOG"
 
-# Check if Scotty exited successfully (Exit code 0)
+# Handle success/failure based on mode
 if [ $SCOTTY_EXIT -eq 0 ]; then
-    echo "Sync successful! Resetting iPod log with clean headers..."
-
-    # Re-create the file with standard Rockbox headers intact
-    printf "#AUDIOSCROBBLER/1.1\n#TZ/UNKNOWN\n#CLIENT/Rockbox\n#ARTIST\t#ALBUM\t#TITLE\t#TRACKNUM\t#LENGTH\t#RATING\t#TIMESTAMP\t#MUSICBRAINZ_TRACKID\n" > "$IPOD_LOG"
-
-    echo "Done! Your iPod scrobbler log is clean and ready for your next session."
+    if [ "$USE_BAK" = true ]; then
+        echo "Sync from backup successful! Backup log preserved untouched."
+    else
+        echo "Sync successful! Rotating live log to backup (.bak)..."
+        mv -f "$IPOD_LOG" "$BACKUP_LOG"
+        echo "Done! .scrobbler.log has been moved to .scrobbler.log.bak."
+    fi
 else
     echo "------------------------------------------------------------------"
     echo "Error: Scotty sync failed (Exit code: $SCOTTY_EXIT)."
-    echo "The iPod scrobbler log was left completely untouched so you can retry."
+    echo "No log files were modified, so you can safely retry."
     echo "------------------------------------------------------------------"
 fi
 
