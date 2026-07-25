@@ -735,6 +735,7 @@ setup_fedora() {
         fi
         sudo systemctl enable greetd
         sudo systemctl start greetd
+        sudo dnf install dankcalendar-git
         echo ""
     fi
 

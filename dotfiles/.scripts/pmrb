@@ -96,17 +96,17 @@ mount_point=$(udisksctl mount -b "$(blkid -L $name)" | cut -d" " -f 4 | tr -d '\
 sleep $sleep_time
 
 # Create a temporary directory for syncing
-mkdir -p "$mount_point/$device_sync_path/.tmp"
+mkdir -p "$mount_point$device_sync_path/.tmp"
 
 if [ "$remote_sync" = "yes" ]; then
    # Sync the podcasts from the remote source to the temporary directory
-   rsync -avz -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$mount_point/$device_sync_path/.tmp/"
+   rsync -avz -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$mount_point$device_sync_path/.tmp/"
 
    # Delete the source mp3 files after syncing
    ssh -p $ssh_port $remote_user@$remote_host "find $source_podcast_path/ -type f -name '*.mp3' -exec rm -f {} \;"
 else
    # Sync the podcasts from the local source to the temporary directory
-   rsync -av --progress --times "$source_podcast_path/" "$mount_point/$device_sync_path/.tmp/"
+   rsync -av --progress --times "$source_podcast_path/" "$mount_point$device_sync_path/.tmp/"
 
    # Delete the source mp3 files after syncing
    find "$source_podcast_path/" -type f -name '*.mp3' -exec rm -f {} \;
@@ -114,7 +114,7 @@ fi
 
 # Rename each file to include the parent folder name
 if [ "$append_podcast_name" = "yes" ]; then
-   find "$mount_point/$device_sync_path/.tmp" -type f -name '*.mp3' -print0 | while IFS= read -r -d $'\0' file; do
+   find "$mount_point$device_sync_path/.tmp" -type f -name '*.mp3' -print0 | while IFS= read -r -d $'\0' file; do
       dir=$(dirname "$file")
       base=$(basename "$file")
       parent=$(basename "$dir")
@@ -124,27 +124,27 @@ fi
 
 # Create a sorted list of files based on modified date, only for podcasts in the auto_queue_shows array
 for podcast in "${auto_queue_shows[@]}"; do
-   find "$mount_point/$device_sync_path/.tmp/$podcast" -type f -name '*.mp3' -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- >>sorted_files.txt
+   find "$mount_point$device_sync_path/.tmp/$podcast" -type f -name '*.mp3' -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- >>sorted_files.txt
 done
 
 # Append the newly synced auto-queue episodes to the m3u8 playlist queue
 while IFS= read -r -d $'\0' line; do
-   playlist_path="${line/$mount_point\/$device_sync_path\/.tmp/$device_sync_path}"
+   playlist_path="${line/$mount_point\$device_sync_path\/.tmp$device_sync_path}"
    echo "$playlist_path" >>"$mount_point/$device_queue_location/Queue.m3u8"
 done <sorted_files.txt
 
 # Move the synced files to the device path
-rsync -av --remove-source-files "$mount_point/$device_sync_path/.tmp/" "$mount_point/$device_sync_path/"
+rsync -av --remove-source-files "$mount_point$device_sync_path/.tmp/" "$mount_point$device_sync_path/"
 
 # Clean up
 rm sorted_files.txt
-if [ "$mount_point/$device_sync_path/.tmp" == "$mount_point/$device_sync_path/.tmp" ]; then
-   rm -rf "$mount_point/$device_sync_path/.tmp"
+if [ "$mount_point$device_sync_path/.tmp" == "$mount_point$device_sync_path/.tmp" ]; then
+   rm -rf "$mount_point$device_sync_path/.tmp"
 fi
 
 # Auto-cleanup old files based on max_age
 if [ "$max_age" -gt 0 ]; then
-   find "$mount_point/$device_sync_path" -type f -name '*.mp3' -mtime +$max_age -exec rm -f {} \;
+   find "$mount_point$device_sync_path" -type f -name '*.mp3' -mtime +$max_age -exec rm -f {} \;
 fi
 
 # Check if auto_clean_queue is set to yes
