@@ -102,14 +102,15 @@ if [ -z "$device_path" ]; then
     exit 1
 fi
 
-# Mount the drive
-mount_point=$(udisksctl mount -b "$device_path" | cut -d" " -f 4 | tr -d '\n')
+# Mount the drive and strip the trailing period from udisksctl output
+mount_point=$(udisksctl mount -b "$device_path" | awk '{print $4}' | sed 's/\.$//')
 
 # Wait for Rockbox file transfer to initialize
 sleep $sleep_time
 
 # CRITICAL: Abort if the device mounted read-only to prevent script failure
-if mount | grep -q "$mount_point.*ro,"; then
+# We use findmnt to strictly check for the exact 'ro' option
+if findmnt -n -o OPTIONS "$device_path" | grep -E -q '(^|,)ro(,|$)'; then
     echo "Error: Device mounted read-only! Filesystem requires repair."
     udisksctl unmount -b "$device_path"
     exit 1
