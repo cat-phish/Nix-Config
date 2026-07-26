@@ -74,7 +74,8 @@ queue_editor="${queue_editor:-${EDITOR:-nano}}"
 # Amount of time to sleep in seconds after mounting the drive in seconds
 # (prevents the script from moving on too fast before your system can
 # mount your device)
-sleep_time=5
+# At least 5 seconds is recommended here
+sleep_time=10
 
 # Append podcast name to end of the episode file name? (yes or no)
 # Podgrab does not add the podcast name to the episode file name, which can cause some
@@ -159,6 +160,13 @@ mount_device() {
   sleep $sleep_time
 }
 
+unmount_device() {
+  # Unmount device safely
+  echo "Unmounting device..."
+  udisksctl unmount -b "$(blkid -L $name)"
+  echo "Safe to unplug."
+}
+
 show_help() {
     cat << EOF
 Usage: $(basename "$0") [OPTION]
@@ -227,8 +235,7 @@ run_queue_editor() {
         echo "Error: Queue file not found at $queue_file"
     fi
 
-    echo "Unmounting $name..."
-    udisksctl unmount -b "$dev_path"
+    unmount_device
     exit 0
 }
 
@@ -263,10 +270,7 @@ scrobble() {
       echo "------------------------------------------------------------------"
   fi
 
-  # Unmount device safely
-  echo "Unmounting device..."
-  udisksctl unmount -b "$(blkid -L $name)"
-  echo "Safe to unplug."
+  unmount_device
 
   # Exit script to avoid double unmount when called at end of script
   exit 0
@@ -276,6 +280,14 @@ scrobble() {
 case "$1" in
     -h|--help)
         show_help
+        ;;
+    -m|--mount)
+        mount_device
+        exit 0
+        ;;
+    -u|--unmount)
+        unmount_device
+        exit 0
         ;;
     -f|--fix)
         run_fix
@@ -476,7 +488,4 @@ if [ "$scrobble_on_sync" = "yes" ]; then
    scrobble
 fi
 
-# Unmount device safely
-echo "Unmounting device..."
-udisksctl unmount -b "$(blkid -L $name)"
-echo "Safe to unplug."
+unmount_device
