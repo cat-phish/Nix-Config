@@ -1,56 +1,54 @@
 #!/usr/bin/env bash
-IPOD_LOG="/run/media/jordan/JPOD/.scrobbler.log"
-BACKUP_LOG="/run/media/jordan/JPOD/.scrobbler.log.bak"
-TEMP_LOG="/tmp/ipod_scotty_scorbbler.log"
-MALOJA_NAME="mediaserver-maloja"
-SCROBBLER_NAME="scrobbler-log"
 
-QUEUE_LOCATION="/Podcasts/Queue.m3u8"
-name="JPOD"
+device_name="JPOD"
+queue_location="/Podcasts/Queue.m3u8"
 sleep_time=10
 
-#
-# # Parse command line flags
-# while [[ "$#" -gt 0 ]]; do
-#     case $1 in
-#         -b|--bak) USE_BAK=true ;;
-#         *) echo "Unknown parameter: $1"; exit 1 ;;
-#     esac
-#     shift
-# done
-#
-# # Determine which log file to process
-# if [ "$USE_BAK" = true ]; then
-#     SOURCE_LOG="$BACKUP_LOG"
-#     echo "Running in BACKUP mode (-b). Using $SOURCE_LOG"
-# else
-#     SOURCE_LOG="$IPOD_LOG"
-#     echo "Running in NORMAL mode. Using live $SOURCE_LOG"
+# Mount iPod
+echo "Mounting device..."
+# Get the block device path
+device_path=$(blkid -L "$device_name")
+
+if [ -z "$device_path" ]; then
+    echo "Error: Device label '$device_name' not found."
+    exit 1
+fi
+
+# Mount the drive and strip the trailing period from udisksctl output
+mount_point=$(udisksctl mount -b "$device_path" | awk '{print $4}' | sed 's/\.$//')
+
+# Wait for device to fully mount
+sleep $sleep_time
+
+# CRITICAL: Abort if the device mounted read-only to prevent script failure
+# We use findmnt to strictly check for the exact 'ro' option
+if findmnt -n -o OPTIONS "$device_path" | grep -E -q '(^|,)ro(,|$)'; then
+    echo "Error: Device mounted read-only! Filesystem requires repair."
+    udisksctl unmount -b "$device_path"
+    exit 1
+fi
+
+# mount_output=$(udisksctl mount -b "$(blkid -L $device_name)" 2>&1)
+# sleep $sleep_time
+# if [ $? -ne 0 ]; then
+#     echo "Error: Failed to mount iPod. Output: $mount_output"
+#     exit 1
 # fi
 
-# Mount iPod
-echo "Mounting iPod..."
-mount_output=$(udisksctl mount -b "$(blkid -L $name)" 2>&1)
-sleep $sleep_time
-if [ $? -ne 0 ]; then
-    echo "Error: Failed to mount iPod. Output: $mount_output"
+# # Extract mount point cleanly
+# mount_point=$(echo "$mount_output" | grep -oE '/run/media/[^ ]+')
+# echo "Mounted at $mount_point"
+
+# Check if the target queue file exists
+if [ ! -f "$mount_point$queue_location" ]; then
+    echo "Error: Queue file not found at $queue_location."
+    udisksctl unmount -b "$(blkid -L $device_name)"
     exit 1
 fi
 
-# Extract mount point cleanly
-mount_point=$(echo "$mount_output" | grep -oE '/run/media/[^ ]+')
-echo "Mounted at $mount_point"
-
-# Check if the target log file exists
-if [ ! -f "$mount_point$QUEUE_LOCATION" ]; then
-    echo "Error: Queue file not found at $QUEUE_LOCATION."
-    udisksctl unmount -b "$(blkid -L $name)"
-    exit 1
-fi
-
-nvim "$mount_point$QUEUE_LOCATION"
+nvim "$mount_point$queue_location"
 
 # Unmount iPod safely
-echo "Unmounting iPod..."
-udisksctl unmount -b "$(blkid -L $name)"
+echo "Unmounting device..."
+udisksctl unmount -b "$(blkid -L $device_name)"
 echo "Safe to unplug."
