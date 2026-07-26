@@ -89,11 +89,39 @@ ssh_port="$MEDIASERVER_SSH_PORT"
 ### SCRIPT ###
 
 # Mount the drive
-mount_point=$(udisksctl mount -b "$(blkid -L $name)" | cut -d" " -f 4 | tr -d '\n')
-# mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
-# mount | grep "$mount_point" | grep 'ro,' && echo "Device mounted read-only!" && exit 1
-# Wait for a specified period of time (e.g., 5 seconds)
+# mount_point=$(udisksctl mount -b "$(blkid -L $name)" | cut -d" " -f 4 | tr -d '\n')
+# # mount_point=$(udisksctl mount -b /dev/disk/by-uuid/$uuid | cut -d" " -f 4 | tr -d '\n')
+# # mount | grep "$mount_point" | grep 'ro,' && echo "Device mounted read-only!" && exit 1
+# # Wait for a specified period of time (e.g., 5 seconds)
+# sleep $sleep_time
+# Get the block device path
+device_path=$(blkid -L "$name")
+
+if [ -z "$device_path" ]; then
+    echo "Error: Device label '$name' not found."
+    exit 1
+fi
+
+# Mount the drive
+mount_point=$(udisksctl mount -b "$device_path" | cut -d" " -f 4 | tr -d '\n')
+
+# Wait for Rockbox file transfer to initialize
 sleep $sleep_time
+
+# CRITICAL: Abort if the device mounted read-only to prevent script failure
+if mount | grep -q "$mount_point.*ro,"; then
+    echo "Error: Device mounted read-only! Filesystem requires repair."
+    udisksctl unmount -b "$device_path"
+    exit 1
+fi
+
+
+
+
+
+
+
+
 
 # Create a temporary directory for syncing
 mkdir -p "$mount_point$device_sync_path/.tmp"
