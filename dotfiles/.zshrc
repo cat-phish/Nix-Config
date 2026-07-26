@@ -253,10 +253,13 @@ function start() {
    tmux a -t main
 }
 
-# Run scripts with completion
+# Run scripts with completion and pass through all flags/arguments
 run() {
-  "$HOME/.scripts/$1"
+  local script="$1"
+  shift  # Remove the script name from positional parameters
+  "$HOME/.scripts/$script" "$@"  # Pass remaining arguments ($@) to the script
 }
+
 _run_completion() {
   local -a scripts
   scripts=(${(f)"$(ls $HOME/.scripts/)"})
