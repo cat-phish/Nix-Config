@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+IPOD_LOG="/run/media/jordan/JPOD/.scrobbler.log"
+BACKUP_LOG="/run/media/jordan/JPOD/.scrobbler.log.bak"
+TEMP_LOG="/tmp/ipod_scotty_scorbbler.log"
+MALOJA_NAME="mediaserver-maloja"
+SCROBBLER_NAME="scrobbler-log"
+
+QUEUE_LOCATION="/Podcasts/Queue.m3u8"
+name="JPOD"
+sleep_time=10
+
+#
+# # Parse command line flags
+# while [[ "$#" -gt 0 ]]; do
+#     case $1 in
+#         -b|--bak) USE_BAK=true ;;
+#         *) echo "Unknown parameter: $1"; exit 1 ;;
+#     esac
+#     shift
+# done
+#
+# # Determine which log file to process
+# if [ "$USE_BAK" = true ]; then
+#     SOURCE_LOG="$BACKUP_LOG"
+#     echo "Running in BACKUP mode (-b). Using $SOURCE_LOG"
+# else
+#     SOURCE_LOG="$IPOD_LOG"
+#     echo "Running in NORMAL mode. Using live $SOURCE_LOG"
+# fi
+
+# Mount iPod
+echo "Mounting iPod..."
+mount_output=$(udisksctl mount -b "$(blkid -L $name)" 2>&1)
+sleep $sleep_time
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to mount iPod. Output: $mount_output"
+    exit 1
+fi
+
+# Extract mount point cleanly
+mount_point=$(echo "$mount_output" | grep -oE '/run/media/[^ ]+')
+echo "Mounted at $mount_point"
+
+# Check if the target log file exists
+if [ ! -f "$mount_point$QUEUE_LOCATION" ]; then
+    echo "Error: Queue file not found at $QUEUE_LOCATION."
+    udisksctl unmount -b "$(blkid -L $name)"
+    exit 1
+fi
+
+nvim "$mount_point$QUEUE_LOCATION"
+
+# Unmount iPod safely
+echo "Unmounting iPod..."
+udisksctl unmount -b "$(blkid -L $name)"
+echo "Safe to unplug."

@@ -124,57 +124,128 @@ fi
 
 
 
-# Create a temporary directory for syncing
-mkdir -p "$mount_point$device_sync_path/.tmp"
+# # Create a temporary directory for syncing
+# mkdir -p "$mount_point$device_sync_path/.tmp"
+#
+# if [ "$remote_sync" = "yes" ]; then
+#    # Sync the podcasts from the remote source to the temporary directory
+#    rsync -avz -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$mount_point$device_sync_path/.tmp/"
+#
+#    # Delete the source mp3 files after syncing
+#    ssh -p $ssh_port $remote_user@$remote_host "find $source_podcast_path/ -type f -name '*.mp3' -exec rm -f {} \;"
+# else
+#    # Sync the podcasts from the local source to the temporary directory
+#    rsync -av --progress --times "$source_podcast_path/" "$mount_point$device_sync_path/.tmp/"
+#
+#    # Delete the source mp3 files after syncing
+#    find "$source_podcast_path/" -type f -name '*.mp3' -exec rm -f {} \;
+# fi
+#
+# # Rename each file to include the parent folder name
+# if [ "$append_podcast_name" = "yes" ]; then
+#    find "$mount_point$device_sync_path/.tmp" -type f -name '*.mp3' -print0 | while IFS= read -r -d $'\0' file; do
+#       dir=$(dirname "$file")
+#       base=$(basename "$file")
+#       parent=$(basename "$dir")
+#       mv "$file" "$dir/${base%.*} - $parent.mp3"
+#    done
+# fi
+#
+# # Create a sorted list of files based on modified date, only for podcasts in the auto_queue_shows array
+# for podcast in "${auto_queue_shows[@]}"; do
+#    find "$mount_point$device_sync_path/.tmp/$podcast" -type f -name '*.mp3' -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- >>sorted_files.txt
+# done
+#
+# # Append the newly synced auto-queue episodes to the m3u8 playlist queue
+# while IFS= read -r -d $'\0' line; do
+#    playlist_path="${line/$mount_point\$device_sync_path\/.tmp$device_sync_path}"
+#    echo "$playlist_path" >>"$mount_point/$device_queue_location/Queue.m3u8"
+# done <sorted_files.txt
+#
+# # Move the synced files to the device path
+# rsync -av --remove-source-files "$mount_point$device_sync_path/.tmp/" "$mount_point$device_sync_path/"
+#
+# # Clean up
+# rm sorted_files.txt
+# if [ "$mount_point$device_sync_path/.tmp" == "$mount_point$device_sync_path/.tmp" ]; then
+#    rm -rf "$mount_point$device_sync_path/.tmp"
+# fi
+#
+# # Auto-cleanup old files based on max_age
+# if [ "$max_age" -gt 0 ]; then
+#    find "$mount_point$device_sync_path" -type f -name '*.mp3' -mtime +$max_age -exec rm -f {} \;
+# fi
+
+# Create a local temporary directory on the PC, NOT the iPod
+local_tmp="/tmp/pmrb_sync"
+mkdir -p "$local_tmp"
+
+# Helper variable for audio file extensions
+audio_exts="\( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \)"
 
 if [ "$remote_sync" = "yes" ]; then
-   # Sync the podcasts from the remote source to the temporary directory
-   rsync -avz -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$mount_point$device_sync_path/.tmp/"
+   # Sync from remote source to the local temp directory
+   rsync -avz -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$local_tmp/"
 
-   # Delete the source mp3 files after syncing
-   ssh -p $ssh_port $remote_user@$remote_host "find $source_podcast_path/ -type f -name '*.mp3' -exec rm -f {} \;"
+   # Delete the source audio files from the server after syncing (now supports all audio types)
+   ssh -p $ssh_port $remote_user@$remote_host "find $source_podcast_path/ -type f $audio_exts -exec rm -f {} \;"
 else
-   # Sync the podcasts from the local source to the temporary directory
-   rsync -av --progress --times "$source_podcast_path/" "$mount_point$device_sync_path/.tmp/"
+   # Sync from local source to local temp directory
+   rsync -av --progress --times "$source_podcast_path/" "$local_tmp/"
 
-   # Delete the source mp3 files after syncing
-   find "$source_podcast_path/" -type f -name '*.mp3' -exec rm -f {} \;
+   # Delete the source audio files locally
+   find "$source_podcast_path/" -type f -eval $audio_exts -exec rm -f {} \;
 fi
 
 # Rename each file to include the parent folder name
 if [ "$append_podcast_name" = "yes" ]; then
-   find "$mount_point$device_sync_path/.tmp" -type f -name '*.mp3' -print0 | while IFS= read -r -d $'\0' file; do
+   find "$local_tmp" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -print0 | while IFS= read -r -d $'\0' file; do
       dir=$(dirname "$file")
       base=$(basename "$file")
       parent=$(basename "$dir")
-      mv "$file" "$dir/${base%.*} - $parent.mp3"
+      # Maintain original extension during rename
+      mv "$file" "$dir/${base%.*} - $parent.${file##*.}"
    done
 fi
 
-# Create a sorted list of files based on modified date, only for podcasts in the auto_queue_shows array
+# Create a sorted list of files based on modified date
+> sorted_files.txt # Clear or create the file safely
 for podcast in "${auto_queue_shows[@]}"; do
-   find "$mount_point$device_sync_path/.tmp/$podcast" -type f -name '*.mp3' -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- >>sorted_files.txt
+   # Only run find if the directory actually exists, killing the annoying error messages
+   if [ -d "$local_tmp/$podcast" ]; then
+       find "$local_tmp/$podcast" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- >>sorted_files.txt
+   fi
 done
 
 # Append the newly synced auto-queue episodes to the m3u8 playlist queue
-while IFS= read -r -d $'\0' line; do
-   playlist_path="${line/$mount_point\$device_sync_path\/.tmp$device_sync_path}"
-   echo "$playlist_path" >>"$mount_point/$device_queue_location/Queue.m3u8"
-done <sorted_files.txt
-
-# Move the synced files to the device path
-rsync -av --remove-source-files "$mount_point$device_sync_path/.tmp/" "$mount_point$device_sync_path/"
-
-# Clean up
-rm sorted_files.txt
-if [ "$mount_point$device_sync_path/.tmp" == "$mount_point$device_sync_path/.tmp" ]; then
-   rm -rf "$mount_point$device_sync_path/.tmp"
+if [ -s sorted_files.txt ]; then
+    while IFS= read -r -d $'\0' line; do
+       # Swap the PC's temp path for Rockbox's sync path
+       playlist_path="${line/$local_tmp/$device_sync_path}"
+       echo "$playlist_path" >>"$mount_point/$device_queue_location/Queue.m3u8"
+    done <sorted_files.txt
 fi
+rm -f sorted_files.txt
 
-# Auto-cleanup old files based on max_age
+# Now execute ONE clean transfer directly to the iPod folders
+rsync -av "$local_tmp/" "$mount_point$device_sync_path/"
+
+# Clean up the PC temp directory
+rm -rf "$local_tmp"
+
+# Auto-cleanup old files based on max_age (now supports all audio types)
 if [ "$max_age" -gt 0 ]; then
-   find "$mount_point$device_sync_path" -type f -name '*.mp3' -mtime +$max_age -exec rm -f {} \;
+   find "$mount_point$device_sync_path" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -mtime +$max_age -exec rm -f {} \;
 fi
+
+
+
+
+
+
+
+
+
 
 # Check if auto_clean_queue is set to yes
 if [ "$auto_clean_queue" == "yes" ]; then
