@@ -32,7 +32,7 @@
 
 set -euo pipefail
 
-NC_PATH="$HOME/source/nixCats"
+NC_PATH="$HOME/code/nixCats"
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)
 
