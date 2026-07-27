@@ -37,6 +37,13 @@
 #################      CONFIG      #################
 ####################################################
 
+
+
+### BASIC SETUP ###
+
+# Device name
+name="JPOD"
+
 # Podcast path for your downloader
 # (No trailing slash!)
 source_podcast_path="/mnt/user/drives/downloads/gpodder-ipod"
@@ -47,34 +54,100 @@ source_podcast_path="/mnt/user/drives/downloads/gpodder-ipod"
 # (No trailing slash!)
 device_sync_path="/Podcasts/Shows"
 
-# Set the location you would like to sync your Queue.m3u8 to)
+# Set the device location you would like to sync your Queue.m3u8 to)
 # (No trailing slash!)
 device_queue_location="/Podcasts"
 
 # Set the max age for auto-cleanup in days, 0 to disable (based on file modified time)
 max_age=60
 
+
+
+### QUEUE MGMT ###
+
 # Define the array of podcasts to auto queue
 # (this should match case-sensitive to the folder names of each podcast)
-auto_queue_shows=("Chapo Trap House" "TRUE ANON TRUTH FEED" "Box of Neutrals F1 Podcast" "Pendejo Time" "WFYM Premium" "Podcast About List Premium")
+auto_queue_shows=(
+  "Chapo Trap House"
+  "TRUE ANON TRUTH FEED"
+  "Box of Neutrals F1 Podcast"
+  "Pendejo Time"
+  "WFYM Premium"
+  "Podcast About List Premium"
+  "The Late-Round Fantasy Football Podcast"
+  "The Secret Patreon"
+  "Seeking Derangements Patreon"
+)
 
 # Auto clean the Queue.m3u8 file based on the most recent bookmark from Queue.m3u8.bmark
 # (Recommended: "yes")
 auto_clean_queue="yes"
 
 # Set how many recent bookmarks to keep in the Queue
-bookmarks_to_keep=6
+# These will be adjusted to their proper spot in your
+# updated and saved queue from the device. Unless they
+# are removed/truncated frim the queue, in which case
+# they will be deleted.
+bookmarks_to_keep=10
 
-# Device name
-name="JPOD"
+
+
+
+### ADVANCED FILTERING ###
+
+# Use keywords to filter specific podcasts (case-insensitive).
+# Separate multiple keywords with a pipe (|). Leave empty/commented if unused.
+# To add multiple podcasts to a list, simply add a new line for each show.
+#
+# PRECEDENCE RULE: If a podcast uses both a Queue Blacklist and a Queue Whitelist,
+# the Blacklist takes priority. If an episode matches both, it will NOT be queued.
+
+# MATCHING RULES:
+# 1. Partial Matches: Keywords match anywhere in the filename (case-insensitive).
+# 2. Spaces: Spaces work normally. "live show" matches "Show - 01 Live Show.mp3".
+# 3. Multiple Keywords: Separate with a pipe (|). e.g., "promo|teaser|trailer"
+# 4. Whole Words Only (\b): To prevent short keywords from matching inside longer
+#    words (e.g. stopping "art" from matching "Part 1"), wrap the word in '\b'.
+#    Example: "\bart\b|\btour\b"
+
+# NOTE: There is no "Sync Whitelist" by design. Because source files are purged
+# during sync, a strict sync whitelist would permanently delete non-matching
+# episodes off your server/PC if a show slightly changes its episode naming
+# format. To safely filter episodes without risking permanent data loss, use
+# 'queue_whitelist' instead—this keeps the files on your device while keeping
+# them off your main queue.
+
+# Sync Blacklist: Files matching these keywords are DELETED entirely.
+# They will not be queued and will never touch your device.
+declare -A sync_blacklist
+# sync_blacklist["Chapo Trap House"]="teaser|promo|trailer"
+# sync_blacklist["TRUE ANON TRUTH FEED"]="tour announcement"
+# sync_blacklist["Podcast About List Premium"]="live show"
+
+# Queue Blacklist: Files matching these keywords WILL sync to your device,
+# but they will NOT be automatically added to the queue.
+declare -A queue_blacklist
+# queue_blacklist["WFYM Premium"]="live|announcement"
+# queue_blacklist["Pendejo Time"]="bonus clip|update"
+queue_blacklist["The Late-Round Fantasy Football Podcast"]="Late-Round Perspectives|Becoming a Best Ball Bro"
+
+# Queue Whitelist: If set for a podcast, ONLY files matching these keywords
+# will be added to the queue. Everything else is skipped.
+declare -A queue_whitelist
+# queue_whitelist["Box of Neutrals F1 Podcast"]="Grand Prix"
+# queue_whitelist["TRUE ANON TRUTH FEED"]="Interview"
 
 # Preferred text editor for manual queue editing (falls back to $EDITOR, then nano)
 queue_editor="${queue_editor:-${EDITOR:-nano}}"
 
+
+
+### TWEAKS ###
+
 # Amount of time to sleep in seconds after mounting the drive in seconds
 # (prevents the script from moving on too fast before your system can
 # mount your device)
-# At least 5 seconds is recommended here
+# About 10 seconds is recommended here
 sleep_time=10
 
 # Append podcast name to end of the episode file name? (yes or no)
@@ -82,11 +155,15 @@ sleep_time=10
 # confusion when viewing the queue
 append_podcast_name="no"
 
+
+
 ### REMOTE SYNC CONFIGURATION ###
 
 # Remote Sync? (yes or no)
 remote_sync="yes"
 
+# Login info for your remote host. Environment variables will work
+# here if desired.
 # Remote User
 remote_user="$MEDIASERVER_SSH_USER"
 
@@ -109,19 +186,19 @@ ssh_port="$MEDIASERVER_SSH_PORT"
 scrobble_on_sync="yes"
 
 # Name of the scrobbler log file on your device
-# Should be ".scrobbler.log" in almost any case
+# Should be ".scrobbler.log" in almost every case
 scrobbler_log=".scrobbler.log"
 
-# Location on this device for the tmp scrobbler.log
+# Location on the syncing device for the tmp scrobbler.log
 # Scotty currently has a parsing bug with Rockbox's
 # .scrobbler.log header that this script fixes
-temp_log_location="/tmp/ipod_scotty_scrobbler.log"
+tmp_log_location="/tmp/ipod_scotty_scrobbler.log"
 
 # Name of your scrobbling service defined in Scotty config
 scrobbler_name="mediaserver-maloja"
 
 # Name of your scorbbler-log service defined in Scotty config
-scrobbler_log="scrobbler-log"
+scrobblerlog_name="scrobbler-log"
 
 #####################################################
 ###############      END CONFIG      ################
@@ -135,7 +212,29 @@ scrobbler_log="scrobbler-log"
 ##############  Edit at your own risk  ##############
 #####################################################
 
-### ARGUMENT PARSING ###
+### FUNCTIONS ###
+
+show_help() {
+    cat << EOF
+Usage: $(basename "$0") [OPTION]
+
+Podcast Manager for Rockbox (pmrb) - Sync podcasts, auto-queue, and manage Rockbox playlists.
+
+Options:
+  -h, --help        Show this help message and exit.
+  -m, --mount       Mount your device
+  -u, --unmount     Unmount your device
+  -q, --queue       Mount the iPod, open Queue.m3u8 in \$queue_editor for manual editing,
+                    and unmount upon closing.
+  -f, --fix         Run an automated fsck repair on the iPod filesystem to clear
+                    the dirty bit and fix path corruption (requires sudo).
+  -s, --scrobble    Run a manual scrobble using the Scotty scrobbler. (Does not run
+                    a podcast sync).
+
+Without options, the script performs a standard podcast sync.
+EOF
+    exit 0
+}
 
 mount_device() {
   # Get the block device path
@@ -143,6 +242,14 @@ mount_device() {
 
   if [ -z "$device_path" ]; then
       echo "Error: Device label '$name' not found."
+      exit 1
+  fi
+
+  # Verify the device isn't already mounted
+  existing_mount=$(findmnt -n -o TARGET "$device_path")
+  if [ -n "$existing_mount" ]; then
+      echo "Warning: Device '$name' is already mounted at $existing_mount."
+      echo "Please unmount it first (run 'pmrb -u') to ensure a clean sync state."
       exit 1
   fi
 
@@ -161,107 +268,125 @@ mount_device() {
 }
 
 unmount_device() {
-  # Unmount device safely
-  echo "Unmounting device..."
-  udisksctl unmount -b "$(blkid -L $name)"
-  echo "Safe to unplug."
-}
+   echo "Syncing data to disk..."
+   sync
 
-show_help() {
-    cat << EOF
-Usage: $(basename "$0") [OPTION]
+   echo "Unmounting device..."
+   local dev_path=$(blkid -L "$name")
 
-Podcast Manager for Rockbox (pmrb) - Sync podcasts, auto-queue, and manage Rockbox playlists.
+   # Retry loop to wait out background indexers
+   local max_retries=5
+   local count=0
 
-Options:
-  -h, --help        Show this help message and exit.
-  -q, --queue       Mount the iPod, open Queue.m3u8 in \$queue_editor for manual editing,
-                    and unmount upon closing.
-  -f, --fix         Run an automated fsck repair on the iPod filesystem to clear
-                    the dirty bit and fix path corruption (requires sudo).
-  -s, --scrobble    Run a manual scrobble using the Scotty scrobbler. (Does not run
-                    a podcast sync).
+   while ! udisksctl unmount -b "$dev_path" 2>/dev/null; do
+      count=$((count + 1))
+      if [ $count -ge $max_retries ]; then
+         echo "Error: Device is stubbornly busy. The following processes are holding it:"
+         lsof +f -- "$dev_path"
+         echo "Please close them and unmount manually."
+         exit 1
+      fi
+      echo "Device is busy (likely being scanned). Retrying in 2 seconds... ($count/$max_retries)"
+      sleep 5
+   done
 
-Without options, the script performs a standard podcast sync.
-EOF
-    exit 0
+   echo "Safe to unplug."
 }
 
 run_fix() {
-    echo "================================================================="
-    echo "                      WARNING: DISK REPAIR                       "
-    echo "================================================================="
-    echo "This will unmount device '$name' and run 'fsck.fat -a -w' to repair"
-    echo "filesystem corruption, truncate orphaned files, and clear dirty bits."
-    echo ""
-    read -p "Are you sure you want to proceed? (y/N): " confirm
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
-        dev_to_fix=$(blkid -L "$name")
-        if [ -z "$dev_to_fix" ]; then
-            echo "Error: Device with label '$name' not found."
-            exit 1
-        fi
+  echo "================================================================="
+  echo "                      WARNING: DISK REPAIR                       "
+  echo "================================================================="
+  echo "This will unmount device '$name' and run 'fsck.fat -a -w' to repair"
+  echo "filesystem corruption, truncate orphaned files, and clear dirty bits."
+  echo ""
+  read -p "Are you sure you want to proceed? (y/N): " confirm
+  if [[ "$confirm" =~ ^[Yy]$ ]]; then
+      dev_to_fix=$(blkid -L "$name")
+      if [ -z "$dev_to_fix" ]; then
+          echo "Error: Device with label '$name' not found."
+          exit 1
+      fi
 
-        echo "Ensuring $dev_to_fix is unmounted..."
-        udisksctl unmount -b "$dev_to_fix" 2>/dev/null
+      echo "Ensuring $dev_to_fix is unmounted..."
+      udisksctl unmount -b "$dev_to_fix" 2>/dev/null
 
-        echo "Running fsck.fat..."
-        sudo fsck.fat -a -w "$dev_to_fix"
-        echo "Repair complete."
-    else
-        echo "Operation canceled."
-    fi
-    exit 0
+      echo "Running fsck.fat..."
+      sudo fsck.fat -a -w "$dev_to_fix"
+      echo "Repair complete."
+  else
+      echo "Operation canceled."
+  fi
+  exit 0
 }
 
-run_queue_editor() {
-    dev_path=$(blkid -L "$name")
-    if [ -z "$dev_path" ]; then
-        echo "Error: Device label '$name' not found."
-        exit 1
-    fi
-
-    echo "Mounting $name for manual editing..."
-    m_point=$(udisksctl mount -b "$dev_path" | awk '{print $4}' | sed 's/\.$//')
-    sleep 2
-
-    queue_file="$m_point$device_queue_location/Queue.m3u8"
-
-    if [ -f "$queue_file" ]; then
-        echo "Opening $queue_file with $queue_editor..."
-        "$queue_editor" "$queue_file"
-        echo "Saved changes."
-    else
-        echo "Error: Queue file not found at $queue_file"
-    fi
-
-    unmount_device
-    exit 0
-}
-
-scrobble() {
-  # Check if the target log file exists
-  if [ ! -f "$scrobbler_log" ]; then
-      echo "Error: Log file not found at $scrobbler_log."
-      udisksctl unmount -b "$(blkid -L $name)"
+edit_queue() {
+  # Check for device
+  dev_path=$(blkid -L "$name")
+  if [ -z "$dev_path" ]; then
+      echo "Error: Device label '$name' not found."
       exit 1
   fi
 
+  echo "Mounting $name for manual editing..."
+  m_point=$(udisksctl mount -b "$dev_path" | awk '{print $4}' | sed 's/\.$//')
+  sleep 2
+
+  queue_file="$m_point$device_queue_location/Queue.m3u8"
+
+  # Open queue for editing
+  if [ -f "$queue_file" ]; then
+    echo "Opening $queue_file with $queue_editor..."
+    "$queue_editor" "$queue_file"
+    echo "Saved changes."
+  else
+    echo "Error: Queue file not found at $queue_file"
+  fi
+
+  # Unmount device
+  sleep $sleep_time
+  unmount_device
+  exit 0
+}
+
+scrobble() {
+  # Dynamically find the mount point if it wasn't set by mount_device()
+  if [ -z "$mount_point" ]; then
+    local dev_path=$(blkid -L "$name")
+    mount_point=$(findmnt -n -o TARGET "$dev_path")
+  fi
+
+  # Failsafe check
+  if [ -z "$mount_point" ]; then
+    echo "Error: Device '$name' is not mounted. Cannot scrobble."
+    exit 1
+  fi
+
+  # Define path using the verified mount point
+  scrobbler_log_path="$mount_point/$scrobbler_log"
+
+  # Check if the target log file exists and exit cleanly if it doesn't
+  if [ ! -f "$scrobbler_log_path" ]; then
+    echo "Notice: No .scrobbler.log found on device. Skipping scrobble."
+    unmount_device
+    exit 0
+  fi
+
   # Strip line 4 (#TRACKNUM) to prevent Scotty's parser from crashing
-  sed '4d' "$scrobbler_log" > "$temp_log_location"
+  sed '4d' "$scrobbler_log_path" > "$tmp_log_location"
 
   # Run Scotty to beam the listens to scrobbler
   echo "Beaming scrobbles to $scrobbler_name via Scotty..."
-  scotty beam listens "$scrobbler_log" "$scrobbler_name"
+  scotty beam listens "$scrobblerlog_name" "$scrobbler_name"
   SCOTTY_EXIT=$?
 
   # Clean up the temp file
-  rm -f "$temp_log_location"
+  rm -f "$tmp_log_location"
 
   # Handle success/failure based on mode
   if [ $SCOTTY_EXIT -eq 0 ]; then
       echo "Sync successful! Rotating live log to backup (.bak)..."
-      mv -f "$scrobbler_log" "$scrobbler_log.bak"
+      mv -f "$scrobbler_log_path" "$scrobbler_log_path.bak"
       echo "Done! .scrobbler.log has been moved to .scrobbler.log.bak."
   else
       echo "------------------------------------------------------------------"
@@ -275,6 +400,10 @@ scrobble() {
   # Exit script to avoid double unmount when called at end of script
   exit 0
 }
+
+
+
+### ARGUMENT PARSING ###
 
 # Parse options
 case "$1" in
@@ -293,11 +422,11 @@ case "$1" in
         run_fix
         ;;
     -q|--queue)
-        run_queue_editor
+        edit_queue
         ;;
     -s|--scrobble)
         mount_device
-        run_queue_editor
+        scrobble
         ;;
     -*)
         echo "Unknown option: $1"
@@ -312,14 +441,13 @@ esac
 mount_device
 
 # Abort if the device mounted read-only to prevent script failure
-# We use findmnt to strictly check for the 'ro' option
 if findmnt -n -o OPTIONS "$device_path" | grep -E -q '(^|,)ro(,|$)'; then
     echo "Error: Device mounted read-only! Filesystem requires repair."
     udisksctl unmount -b "$device_path"
     exit 1
 fi
 
-# Create a local temporary directory on this PC
+# Create a local temporary directory on syncing device
 local_tmp="/tmp/pmrb_sync"
 mkdir -p "$local_tmp"
 
@@ -330,42 +458,68 @@ if [ "$remote_sync" = "yes" ]; then
    # Sync from remote source to the local temp directory
    rsync -avz --exclude='.tmp*' -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$local_tmp/"
 
-   # Delete the source audio files from the server after syncing
-   ssh -p $ssh_port $remote_user@$remote_host "find $source_podcast_path/ -type f $audio_exts -exec rm -f {} \;"
+   # Delete source audio files (including extensionless audio) from the server
+   ssh -p $ssh_port $remote_user@$remote_host "
+      find '$source_podcast_path/' -type f $audio_exts -exec rm -f {} +
+      find '$source_podcast_path/' -type f ! -name '*.jpg' ! -name '*.png' ! -name '*.json' ! -name '*.xml' | while read -r f; do
+         mime=\$(file -b --mime-type \"\$f\")
+         case \"\$mime\" in
+            audio/*|video/mp4) rm -f \"\$f\" ;;
+         esac
+      done
+   "
 else
    # Sync from local source to local temp directory
    rsync -av --exclude='.tmp*' --progress --times "$source_podcast_path/" "$local_tmp/"
 
-   # Delete the source audio files locally
-   find "$source_podcast_path/" -type f -eval $audio_exts -exec rm -f {} \;
+   # Delete source audio files (including extensionless audio) locally
+   find "$source_podcast_path/" -type f -eval $audio_exts -exec rm -f {} +
+   find "$source_podcast_path/" -type f ! -name "*.jpg" ! -name "*.png" ! -name "*.json" ! -name "*.xml" -print0 | while IFS= read -r -d $'\0' f; do
+      mime=$(file -b --mime-type "$f")
+      case "$mime" in
+         audio/*|video/mp4) rm -f "$f" ;;
+      esac
+   done
 fi
 
 # Automatically detect and fix extensionless audio files in local_tmp
-# Fix for known issue where gpodder (and possibly other downloaders)
-# download files without extension type causing issues with Rockbox
-# and this script
-find "$local_tmp" -type f ! -name "*.*" -print0 | while IFS= read -r -d $'\0' f; do
+find "$local_tmp" -type f ! -name "*.mp3" ! -name "*.m4a" ! -name "*.wav" ! -name "*.ogg" ! -name "*.jpg" ! -name "*.png" -print0 | while IFS= read -r -d $'\0' f; do
    mime=$(file -b --mime-type "$f")
    case "$mime" in
       audio/mpeg) mv "$f" "$f.mp3" ;;
-      audio/mp4|audio/x-m4a) mv "$f" "$f.m4a" ;;
+      audio/mp4|audio/x-m4a|video/mp4) mv "$f" "$f.m4a" ;;
       audio/x-wav|audio/wav) mv "$f" "$f.wav" ;;
       audio/ogg|application/ogg) mv "$f" "$f.ogg" ;;
    esac
 done
 
 # Rename each file to include the parent folder name (if enabled)
-# Fix for podgrab not adding podcast name to filename causing
-# readability issues in queue
 if [ "$append_podcast_name" = "yes" ]; then
    find "$local_tmp" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -print0 | while IFS= read -r -d $'\0' file; do
       dir=$(dirname "$file")
       base=$(basename "$file")
       parent=$(basename "$dir")
-      # Maintain original extension during rename
       mv "$file" "$dir/${base%.*} - $parent.${file##*.}"
    done
 fi
+
+# ---------------------------------------------------------
+# FILTER: Sync Blacklist (Delete files before syncing to iPod)
+# ---------------------------------------------------------
+if [ ${#sync_blacklist[@]} -gt 0 ]; then
+   for podcast in "${!sync_blacklist[@]}"; do
+      if [ -d "$local_tmp/$podcast" ]; then
+         find "$local_tmp/$podcast" -type f -print0 | while IFS= read -r -d $'\0' file; do
+            filename=$(basename "$file")
+            if echo "$filename" | grep -qEi "${sync_blacklist[$podcast]}"; then
+               echo "Deleting (Sync Blacklist): $filename"
+               rm -f "$file"
+            fi
+         done
+      fi
+   done
+fi
+# ---------------------------------------------------------
 
 # Create a sorted list of files based on modified date
 > sorted_files.txt # Clear or create the file safely
@@ -389,6 +543,25 @@ if [ -s sorted_files.txt ]; then
     sed -i -e '$a\' "$mount_point$device_queue_location/Queue.m3u8" 2>/dev/null
 
     while IFS= read -r -d $'\0' line; do
+       podcast_name=$(basename "$(dirname "$line")")
+       filename=$(basename "$line")
+
+       # ---------------------------------------------------------
+       # FILTER: Queue Blacklist & Whitelist
+       # ---------------------------------------------------------
+       # Check Queue Blacklist
+       if [[ -n "${queue_blacklist[$podcast_name]}" ]] && echo "$filename" | grep -qEi "${queue_blacklist[$podcast_name]}"; then
+           echo "Skipping Queue (Queue Blacklist): $filename"
+           continue
+       fi
+
+       # Check Queue Whitelist
+       if [[ -n "${queue_whitelist[$podcast_name]}" ]] && ! echo "$filename" | grep -qEi "${queue_whitelist[$podcast_name]}"; then
+           echo "Skipping Queue (Queue Whitelist): $filename"
+           continue
+       fi
+       # ---------------------------------------------------------
+
        # Swap local tmp path for Rockbox's sync path
        playlist_path="${line/$local_tmp/$device_sync_path}"
        echo "$playlist_path" >>"$mount_point$device_queue_location/Queue.m3u8"
