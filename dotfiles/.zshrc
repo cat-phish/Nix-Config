@@ -84,7 +84,7 @@ alias v="nvim"
 alias vv="nvim ."
 alias vf='nvim $(fzf -m --preview="bat --color=always {}")'
 alias nvim-ssh="$HOME/.scripts/nvim-ssh"
-alias nixcats="$HOME/home/nixCats/result/bin/nvim"
+alias nixcats="$HOME/code/nixCats/result/bin/nvim"
 alias uv="nvim-unstable"
 alias uvv="nvim-unstable ."
 
