@@ -106,7 +106,7 @@ cd "$FLAKE_PATH"
 
 echo "Updating 'mynvim' input in system flake..."
 # This specifically updates only the nixCats input (mynvim) in your main flake
-nix flake lock --update-input mynvim
+nix flake lock update mynvim
 
 handle_git_workflow "$FLAKE_PATH" "System Flake (nvim pointer)" "nvim update"
 
