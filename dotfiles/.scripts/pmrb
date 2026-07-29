@@ -592,9 +592,11 @@ if [ "$auto_clean_queue" == "yes" ]; then
       # Deduplicate bookmarks, keep only most recent occurrence of each episode
       > "${bmark_file}.dedup"
       declare -A seen_bmarks
-      while IFS= read -r bmark_line; do
+
+      while IFS= read -r bmark_line || [ -n "$bmark_line" ]; do
           [ -z "$bmark_line" ] && continue
-          clean_line=$(echo "$bmark_line" | tr -d '\r')
+          # Safely strip \r using bash string manipulation
+          clean_line="${bmark_line//$'\r'/}"
           IFS=';' read -ra line_parts <<< "$clean_line"
           path_key="${line_parts[-1]}"
 
@@ -607,7 +609,8 @@ if [ "$auto_clean_queue" == "yes" ]; then
       mv "${bmark_file}.dedup" "$bmark_file"
 
       # Identify the most recent episode to safely truncate the queue
-      first_line=$(head -n 1 "$bmark_file")
+      # NOTE: Added tr to strip the carriage return here to ensure clean string matching!
+      first_line=$(head -n 1 "$bmark_file" | tr -d '\r')
       IFS=';' read -ra first_parts <<<"$first_line"
       recent_podcast_path="${first_parts[-1]}"
 
@@ -631,12 +634,12 @@ if [ "$auto_clean_queue" == "yes" ]; then
 
          # Process up to $bookmarks_to_keep
          > "${bmark_file}.new"
-         head -n "$bookmarks_to_keep" "$bmark_file" | while IFS= read -r bmark_line; do
+         while IFS= read -r bmark_line || [ -n "$bmark_line" ]; do
              # Skip empty lines just in case
              [ -z "$bmark_line" ] && continue
 
              # Strip \r from the bookmark line to avoid fat32/linux fs compatibility errors
-             bmark_line=$(echo "$bmark_line" | tr -d '\r')
+             bmark_line="${bmark_line//$'\r'/}"
 
              # Break the Rockbox bookmark format into an array
              IFS=';' read -ra parts <<<"$bmark_line"
@@ -660,7 +663,7 @@ if [ "$auto_clean_queue" == "yes" ]; then
                  # Save with Rockbox's expected fat32 formatting
                  printf "%s\r\n" "$modified_line" >> "${bmark_file}.new"
              fi
-         done
+         done < <(head -n "$bookmarks_to_keep" "$bmark_file")
 
          # Overwrite the old bookmark file with the recalculated ones
          mv "${bmark_file}.new" "$bmark_file"
@@ -672,6 +675,7 @@ if [ "$auto_clean_queue" == "yes" ]; then
       echo "$bmark_file does not exist. Skipping queue cleanup."
    fi
 fi
+
 # Run scrobble post_sync if set
 if [ "$scrobble_on_sync" = "yes" ]; then
    scrobble
