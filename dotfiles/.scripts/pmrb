@@ -504,7 +504,7 @@ if [ "$append_podcast_name" = "yes" ]; then
 fi
 
 # ---------------------------------------------------------
-# FILTER: Sync Blacklist (Delete files before syncing to iPod)
+# Sync Blacklist (Delete files before syncing to iPod)
 # ---------------------------------------------------------
 if [ ${#sync_blacklist[@]} -gt 0 ]; then
    for podcast in "${!sync_blacklist[@]}"; do
@@ -589,6 +589,23 @@ if [ "$auto_clean_queue" == "yes" ]; then
    queue_file="$mount_point$device_queue_location/Queue.m3u8"
 
    if [ -f "$bmark_file" ]; then
+      # Deduplicate bookmarks, keep only most recent occurrence of each episode
+      > "${bmark_file}.dedup"
+      declare -A seen_bmarks
+      while IFS= read -r bmark_line; do
+          [ -z "$bmark_line" ] && continue
+          clean_line=$(echo "$bmark_line" | tr -d '\r')
+          IFS=';' read -ra line_parts <<< "$clean_line"
+          path_key="${line_parts[-1]}"
+
+          # If we haven't seen this file path yet, keep it
+          if [ -z "${seen_bmarks[$path_key]}" ]; then
+              seen_bmarks["$path_key"]=1
+              printf "%s\r\n" "$clean_line" >> "${bmark_file}.dedup"
+          fi
+      done < "$bmark_file"
+      mv "${bmark_file}.dedup" "$bmark_file"
+
       # Identify the most recent episode to safely truncate the queue
       first_line=$(head -n 1 "$bmark_file")
       IFS=';' read -ra first_parts <<<"$first_line"
@@ -655,7 +672,6 @@ if [ "$auto_clean_queue" == "yes" ]; then
       echo "$bmark_file does not exist. Skipping queue cleanup."
    fi
 fi
-
 # Run scrobble post_sync if set
 if [ "$scrobble_on_sync" = "yes" ]; then
    scrobble
