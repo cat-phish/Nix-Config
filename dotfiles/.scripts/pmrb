@@ -458,7 +458,7 @@ if [ "$remote_sync" = "yes" ]; then
    # Sync from remote source to the local temp directory
    rsync -avz --exclude='.tmp*' -e "ssh -p $ssh_port" --progress --times "$remote_user@$remote_host:$source_podcast_path/" "$local_tmp/"
 
-   # Delete source audio files (including extensionless audio) from the server
+   # Delete source audio files from the server (including extensionless audio)
    ssh -p $ssh_port $remote_user@$remote_host "
       find '$source_podcast_path/' -type f $audio_exts -exec rm -f {} +
       find '$source_podcast_path/' -type f ! -name '*.jpg' ! -name '*.png' ! -name '*.json' ! -name '*.xml' | while read -r f; do
@@ -539,7 +539,7 @@ fi
 
 # Append the newly synced auto-queue episodes to the m3u8 playlist queue
 if [ -s sorted_files.txt ]; then
-    # Failsafe: Ensure the Queue file has a clean line break before we append
+    # Failsafe: Ensure the Queue file has a clean line break before appending
     sed -i -e '$a\' "$mount_point$device_queue_location/Queue.m3u8" 2>/dev/null
 
     while IFS= read -r -d $'\0' line; do
@@ -651,8 +651,8 @@ if [ "$auto_clean_queue" == "yes" ]; then
                  fi
              done
 
-             # If the file survived the cleanup and is still in the queue,
-             # update its playlist index and save it.
+             # If the file survived the cleanup and is still in queue,
+             # update its playlist index and save it
              if [ $new_index -ne -1 ]; then
                  parts[1]=$new_index
                  modified_line=$(IFS=';'; echo "${parts[*]}")
@@ -662,7 +662,7 @@ if [ "$auto_clean_queue" == "yes" ]; then
              fi
          done
 
-         # Overwrite the old bookmark file with our recalculated ones
+         # Overwrite the old bookmark file with the recalculated ones
          mv "${bmark_file}.new" "$bmark_file"
          echo "Updated bookmarks successfully."
       else
