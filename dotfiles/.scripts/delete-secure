@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+# Exit if no arguments are provided
+if [ $# -eq 0 ]; then
+    echo "Usage: $(basename "$0") <file_or_directory_1> [file_or_directory_2 ...]"
+    exit 1
+fi
+
+# Loop through all arguments passed to the script
+for target in "$@"; do
+    if [ -f "$target" ]; then
+        echo "Shredding file: $target"
+        shred -uvz -n 5 "$target"
+    elif [ -d "$target" ]; then
+        echo "Shredding files inside directory: $target"
+        # shred cannot take directories directly, so find all files inside and shred them
+        find "$target" -type f -exec shred -uvz -n 5 {} +
+        # Remove empty directories after files are shredded
+        rm -rf "$target"
+    else
+        echo "Warning: '$target' does not exist or is not a regular file/directory. Skipping."
+    fi
+done
