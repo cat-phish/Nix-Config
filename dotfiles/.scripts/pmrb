@@ -155,6 +155,12 @@ sleep_time=10
 # confusion when viewing the queue
 append_podcast_name="no"
 
+# Whether or not to retry the mount if the device is not found immediately
+retry_mount="yes"
+
+# Number of times to retry of the mount
+max_mount_retries=5
+
 
 
 ### REMOTE SYNC CONFIGURATION ###
@@ -237,13 +243,24 @@ EOF
 }
 
 mount_device() {
-  # Get the block device path
-  device_path=$(blkid -L "$name")
+  local attempt=1
+  local device_path=""
 
-  if [ -z "$device_path" ]; then
-      echo "Error: Device label '$name' not found."
-      exit 1
-  fi
+  # Try to find the device, respecting retry settings
+  while [ -z "$device_path" ]; do
+      device_path=$(blkid -L "$name")
+
+      if [ -z "$device_path" ]; then
+          if [ "$retry_mount" = "yes" ] && [ "$attempt" -le "$max_mount_retries" ]; then
+              echo "Warning: Device label '$name' not found. Retrying in 3 seconds (Attempt $attempt of $max_mount_retries)..."
+              sleep 3
+              attempt=$((attempt + 1))
+          else
+              echo "Error: Device label '$name' not found."
+              exit 1
+          fi
+      fi
+  done
 
   # Verify the device isn't already mounted
   existing_mount=$(findmnt -n -o TARGET "$device_path")
@@ -264,7 +281,7 @@ mount_device() {
   fi
 
   # Wait for device to fully mount
-  sleep $sleep_time
+  sleep "$sleep_time"
 }
 
 unmount_device() {
