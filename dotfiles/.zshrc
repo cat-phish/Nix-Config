@@ -254,7 +254,6 @@ function start() {
 }
 
 # Run scripts with completion and pass through all flags/arguments
-# Run scripts with completion and pass through all flags/arguments
 run() {
   local script="$1"
   shift  # Remove the script name from positional parameters
