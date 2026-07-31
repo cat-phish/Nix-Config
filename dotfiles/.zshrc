@@ -687,5 +687,8 @@ alias lsl="eza --color=always --long --icons=always"
 # Navi
 # eval "$(navi widget zsh)"
 
+# Completion for delete-secure
+compdef _files delete-secure
+
 # Zoxide
 eval "$(zoxide init --cmd cd zsh)"
