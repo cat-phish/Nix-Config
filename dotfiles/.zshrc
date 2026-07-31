@@ -254,6 +254,7 @@ function start() {
 }
 
 # Run scripts with completion and pass through all flags/arguments
+# Run scripts with completion and pass through all flags/arguments
 run() {
   local script="$1"
   shift  # Remove the script name from positional parameters
@@ -261,10 +262,17 @@ run() {
 }
 
 _run_completion() {
-  local -a scripts
-  scripts=(${(f)"$(ls $HOME/.scripts/)"})
-  _describe 'script' scripts
+  # If we are completing the first argument after 'run'
+  if (( CURRENT == 2 )); then
+    local -a scripts
+    scripts=(${(f)"$(ls $HOME/.scripts/)"})
+    _describe 'script' scripts
+  else
+    # For 2nd, 3rd, etc. arguments, fall back to default file/directory completion
+    _files
+  fi
 }
+
 compdef _run_completion run
 
 # Kmonad
@@ -686,9 +694,6 @@ alias lsl="eza --color=always --long --icons=always"
 
 # Navi
 # eval "$(navi widget zsh)"
-
-# Completion for delete-secure
-compdef _files delete-secure
 
 # Zoxide
 eval "$(zoxide init --cmd cd zsh)"
