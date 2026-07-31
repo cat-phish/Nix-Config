@@ -159,19 +159,27 @@ case "$OS_ID" in
     fi
     rebuild_home || true
     gc_nix || true
+
+    echo "Updating Zsh Zinit and its Plugins..."
     zinit self-update
     zinit update
+
+    echo "Cleaning up stale Zsh completions..."
+    find "$HOME/.local/share/zinit/completions" -xtype l -delete 2>/dev/null || true
+    rm -f "$HOME"/.zcompdump* || true
     ;;
 
   fedora)
     echo "Applying Fedora DNF Upgrade..."
     sudo dnf upgrade --refresh -y
 
-    echo "Updating Zsh Zinit and it's Plugins..."
-sudo -u "$ACTUAL_USER" zsh <<-EOF
-    source "$USER_HOME/.local/share/zinit/zinit.git/zinit.zsh"
-    zinit self-update
-    zinit update
+    echo "Updating Zsh Zinit and its Plugins..."
+    sudo -u "$ACTUAL_USER" zsh <<-EOF
+        source "$USER_HOME/.local/share/zinit/zinit.git/zinit.zsh"
+        zinit self-update
+        zinit update
+        find "$USER_HOME/.local/share/zinit/completions" -xtype l -delete 2>/dev/null || true
+        rm -f "$USER_HOME"/.zcompdump* || true
 EOF
 
     rebuild_home || true

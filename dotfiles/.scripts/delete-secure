@@ -6,18 +6,61 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-# Loop through all arguments passed to the script
+# Filter out invalid paths first
+valid_targets=()
 for target in "$@"; do
+    if [ -e "$target" ]; then
+        valid_targets+=("$target")
+    else
+        echo "Warning: '$target' does not exist. Skipping."
+    fi
+done
+
+# Exit if no valid files or directories were passed
+if [ ${#valid_targets[@]} -eq 0 ]; then
+    echo "Error: No valid files or directories specified."
+    exit 1
+fi
+
+# Display a prominent warning and list the targets
+echo ""
+echo -e "\033[1;31m════════════════════════════════════════════════════════════\033[0m"
+echo -e "\033[1;31m WARNING: PERMANENT DATA DESTRUCTION\033[0m"
+echo -e "\033[1;31m════════════════════════════════════════════════════════════\033[0m"
+echo "The following paths will be shredded (5 passes) and deleted:"
+echo ""
+for target in "${valid_targets[@]}"; do
+    echo "  • $target"
+done
+echo ""
+
+# Ask for user confirmation
+read -r -p "Are you sure you want to proceed? [y/N]: " response
+
+# Default to "no" unless explicitly answered 'y' or 'Y'
+case "$response" in
+    [yY][eE][sS]|[yY])
+        echo ""
+        echo "Proceeding with shred..."
+        echo ""
+        ;;
+    *)
+        echo "Operation canceled. No files were modified."
+        exit 0
+        ;;
+esac
+
+# Execute shredding on confirmed targets
+for target in "${valid_targets[@]}"; do
     if [ -f "$target" ]; then
         echo "Shredding file: $target"
         shred -uvz -n 5 "$target"
     elif [ -d "$target" ]; then
-        echo "Shredding files inside directory: $target"
-        # shred cannot take directories directly, so find all files inside and shred them
+        echo "Shredding contents of directory: $target"
         find "$target" -type f -exec shred -uvz -n 5 {} +
-        # Remove empty directories after files are shredded
         rm -rf "$target"
-    else
-        echo "Warning: '$target' does not exist or is not a regular file/directory. Skipping."
     fi
 done
+
+echo ""
+echo "Shred operation complete."
