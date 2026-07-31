@@ -71,12 +71,13 @@ auto_queue_shows=(
   "Chapo Trap House"
   "TRUE ANON TRUTH FEED"
   "Box of Neutrals F1 Podcast"
-  "Pendejo Time"
+  "pendejotime"
   "WFYM Premium"
   "Podcast About List Premium"
+  "Seeking Derangements Patreon"
   "The Late-Round Fantasy Football Podcast"
   "The Secret Patreon"
-  "Seeking Derangements Patreon"
+  "The Standup with ThePrimeagen"
 )
 
 # Auto clean the Queue.m3u8 file based on the most recent bookmark from Queue.m3u8.bmark
@@ -245,6 +246,7 @@ EOF
 mount_device() {
   local attempt=1
   local device_path=""
+  mount_sleeptime=5
 
   # Try to find the device, respecting retry settings
   while [ -z "$device_path" ]; do
@@ -252,8 +254,8 @@ mount_device() {
 
       if [ -z "$device_path" ]; then
           if [ "$retry_mount" = "yes" ] && [ "$attempt" -le "$max_mount_retries" ]; then
-              echo "Warning: Device label '$name' not found. Retrying in 3 seconds (Attempt $attempt of $max_mount_retries)..."
-              sleep 3
+              echo "Warning: Device label '$name' not found. Retrying in $mount_sleeptime seconds (Attempt $attempt of $max_mount_retries)..."
+              sleep $mount_sleeptime
               attempt=$((attempt + 1))
           else
               echo "Error: Device label '$name' not found."
