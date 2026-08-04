@@ -18,6 +18,7 @@ spawn-at-startup "kitty"
 spawn-sh-at-startup "syncthingtray --wait"
 spawn-sh-at-startup "emacs ~/org/main/Tasks.org"
 spawn-at-startup "dcal"
+spawn-at-startup "nheko"
 
 
 // Input device configuration.
