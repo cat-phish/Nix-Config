@@ -602,8 +602,20 @@ zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # zstyle ':completion:*' menu no
 
 # history-substring-search mappings
-bindkey -M viins "$terminfo[kcuu1]" history-substring-search-up
-bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
+# Bind standard arrow escape codes as a fallback
+bindkey -M viins '^[[A' history-substring-search-up
+bindkey -M vicmd '^[[A' history-substring-search-up
+bindkey -M viins '^[[B' history-substring-search-down
+bindkey -M vicmd '^[[B' history-substring-search-down
+# Bind terminfo codes for terminal-specific accuracy
+if [[ -n "$terminfo[kcuu1]" ]]; then
+  bindkey -M viins "$terminfo[kcuu1]" history-substring-search-up
+  bindkey -M vicmd "$terminfo[kcuu1]" history-substring-search-up
+fi
+if [[ -n "$terminfo[kcud1]" ]]; then
+  bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
+  bindkey -M vicmd "$terminfo[kcud1]" history-substring-search-down
+fi
 
 
 # Set up fzf key bindings and fuzzy completion
