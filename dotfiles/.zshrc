@@ -601,20 +601,50 @@ zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 # zstyle ':completion:*' menu no
 
-# history-substring-search mappings
-# Bind standard arrow escape codes as a fallback
-bindkey -M viins '^[[A' history-substring-search-up
-bindkey -M vicmd '^[[A' history-substring-search-up
-bindkey -M viins '^[[B' history-substring-search-down
-bindkey -M vicmd '^[[B' history-substring-search-down
-# Bind terminfo codes for terminal-specific accuracy
+# # history-substring-search plugin mappings
+# # This plugin will match substrings anywhere in the line
+# # (Comment out if using built in below)
+# # Bind standard arrow escape codes as a fallback
+# bindkey -M viins '^[[A' history-substring-search-up
+# bindkey -M vicmd '^[[A' history-substring-search-up
+# bindkey -M viins '^[[B' history-substring-search-down
+# bindkey -M vicmd '^[[B' history-substring-search-down
+# # Bind terminfo codes for terminal-specific accuracy
+# if [[ -n "$terminfo[kcuu1]" ]]; then
+#   bindkey -M viins "$terminfo[kcuu1]" history-substring-search-up
+#   bindkey -M vicmd "$terminfo[kcuu1]" history-substring-search-up
+# fi
+# if [[ -n "$terminfo[kcud1]" ]]; then
+#   bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
+#   bindkey -M vicmd "$terminfo[kcud1]" history-substring-search-down
+# fi
+
+# Built in zsh line history search
+# This will only match the beginning of the line
+# (Comment out if using history-substring-search above)
+# Load the built-in prefix search functions
+autoload -U up-line-or-beginning-search
+autoload -U down-line-or-beginning-search
+zle -N up-line-or-beginning-search
+zle -N down-line-or-beginning-search
+# Bind standard arrow escape codes (fallback)
+bindkey -M viins '^[[A' up-line-or-beginning-search
+bindkey -M vicmd '^[[A' up-line-or-beginning-search
+bindkey -M viins '^[[B' down-line-or-beginning-search
+bindkey -M vicmd '^[[B' down-line-or-beginning-search
+# Bind application mode arrows (useful for some terminal emulators)
+bindkey -M viins '^[OA' up-line-or-beginning-search
+bindkey -M vicmd '^[OA' up-line-or-beginning-search
+bindkey -M viins '^[OB' down-line-or-beginning-search
+bindkey -M vicmd '^[OB' down-line-or-beginning-search
+# Bind terminfo codes (primary)
 if [[ -n "$terminfo[kcuu1]" ]]; then
-  bindkey -M viins "$terminfo[kcuu1]" history-substring-search-up
-  bindkey -M vicmd "$terminfo[kcuu1]" history-substring-search-up
+  bindkey -M viins "$terminfo[kcuu1]" up-line-or-beginning-search
+  bindkey -M vicmd "$terminfo[kcuu1]" up-line-or-beginning-search
 fi
 if [[ -n "$terminfo[kcud1]" ]]; then
-  bindkey -M viins "$terminfo[kcud1]" history-substring-search-down
-  bindkey -M vicmd "$terminfo[kcud1]" history-substring-search-down
+  bindkey -M viins "$terminfo[kcud1]" down-line-or-beginning-search
+  bindkey -M vicmd "$terminfo[kcud1]" down-line-or-beginning-search
 fi
 
 
