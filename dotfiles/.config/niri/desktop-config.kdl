@@ -65,6 +65,9 @@ workspace "terminal" {
 workspace "org-mode" {
   open-on-output "DP-2"
 }
+workspace "calendar" {
+  open-on-output "DP-2"
+}
 workspace "passwords" {
   open-on-output "DP-2"
 }
@@ -94,6 +97,11 @@ window-rule {
 window-rule {
   match at-startup=true app-id=r#"Emacs$"#
   open-on-workspace "org-mode"
+  open-maximized true
+}
+window-rule {
+  match at-startup=true app-id=r#"dcal$"#
+  open-on-workspace "calendar"
   open-maximized true
 }
 window-rule {

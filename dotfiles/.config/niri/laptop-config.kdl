@@ -61,6 +61,11 @@ window-rule {
     open-maximized true
 }
 window-rule {
+    match at-startup=true app-id=r#"dcal$"#
+    open-on-workspace "org-mode"
+    open-maximized true
+}
+window-rule {
     match at-startup=true app-id=r#"firefox$"#
     open-on-workspace "browser"
     open-maximized true

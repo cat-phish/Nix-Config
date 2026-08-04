@@ -160,7 +160,7 @@ append_podcast_name="no"
 retry_mount="yes"
 
 # Number of times to retry of the mount
-max_mount_retries=5
+max_mount_retries=10
 
 
 
