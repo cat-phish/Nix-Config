@@ -100,7 +100,7 @@ window-rule {
   open-maximized true
 }
 window-rule {
-  match at-startup=true app-id=r#"Dank Calendar$"#
+  match at-startup=true app-id=r#"^com\.danklinux\.dankcalendar$"#
   open-on-workspace "calendar"
   open-maximized true
 }
