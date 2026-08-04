@@ -14,12 +14,10 @@ spawn-at-startup "discord"
 spawn-at-startup "konversation"
 spawn-at-startup "firefox"
 spawn-at-startup "kitty"
-spawn-at-startup "dcal"
 // spawn-at-startup "syncthingtray --wait"
 spawn-sh-at-startup "syncthingtray --wait"
-// spawn-sh-at-startup "~/.config/niri/scripts/syncthingtray_startup_delay.sh"
-// spawn-sh-at-startup "python ~/.python-scripts/wireguard-tray.py"
 spawn-sh-at-startup "emacs ~/org/main/Tasks.org"
+spawn-at-startup "dcal"
 
 
 // Input device configuration.
