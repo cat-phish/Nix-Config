@@ -100,7 +100,7 @@ window-rule {
   open-maximized true
 }
 window-rule {
-  match at-startup=true app-id=r#"dcal$"#
+  match at-startup=true app-id=r#"Calendar$"#
   open-on-workspace "calendar"
   open-maximized true
 }
