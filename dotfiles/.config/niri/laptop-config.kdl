@@ -42,12 +42,14 @@ window-rule {
   match at-startup=true app-id=r#"xwaylandvideobridge$"#
   open-on-workspace "utilities"
   open-maximized false
+  open-focused false
 }
 window-rule {
   match at-startup=true app-id=r#"konsole$"#
   open-on-workspace "utilities"
   open-maximized false
   default-column-width { proportion 0.50; }
+  open-focused false
 }
 window-rule {
   match at-startup=true app-id=r#"^org\.keepassxc\.KeePassXC$"#
@@ -59,21 +61,25 @@ window-rule {
     match at-startup=true app-id=r#"Emacs$"#
     open-on-workspace "org-mode"
     open-maximized true
+    open-focused false
 }
 window-rule {
     match at-startup=true app-id=r#"^com\.danklinux\.dankcalendar$"#
     open-on-workspace "org-mode"
     open-maximized true
+    open-focused false
 }
 window-rule {
     match at-startup=true app-id=r#"firefox$"#
     open-on-workspace "browser"
     open-maximized true
+    // open-focused false
 }
 window-rule {
     match at-startup=true app-id=r#"kitty$"#
     open-on-workspace "terminal"
     open-maximized true
+    open-focused false
 }
 window-rule {
   match at-startup=true app-id=r#"discord$"#
@@ -86,12 +92,14 @@ window-rule {
   open-on-workspace "chat"
   open-maximized true
   // default-column-width { proportion 0.50; }
+  open-focused false
 }
 window-rule {
   match at-startup=true app-id=r#"nheko$"#
   open-on-workspace "chat"
   open-maximized true
   // default-column-width { proportion 0.50; }
+  open-focused false
 }
 window-rule {
     match app-id=r#"foobar2000$"#
