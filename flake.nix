@@ -7,7 +7,7 @@
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
-    nvim-config.url = "github:cat-phish/Neovim";
+    nvim-config.url = "git+ssh://git@github:cat-phish/Neovim";
     emacs-config = {
       url = "git+ssh://git@github.com/cat-phish/Emacs.git";
       flake = false; # Treat as a source repo, not a flake
