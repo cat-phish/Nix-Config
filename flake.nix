@@ -9,7 +9,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     nvim-config.url = "github:cat-phish/Neovim";
     emacs-config = {
-      url = "github:cat-phish/Emacs";
+      url = "git+ssh://git@github.com/cat-phish/Emacs.git";
       flake = false; # Treat as a source repo, not a flake
     };
     kmonad = {

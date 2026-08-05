@@ -67,17 +67,17 @@
     "emacs-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1785893834,
-        "narHash": "sha256-tfJQNBsndQ/HJz49mU0Zd9oclRAASQK7BZyc8SDx53E=",
-        "owner": "cat-phish",
-        "repo": "Emacs",
-        "rev": "fcc79bf19d029ceb1898b88d2296d6682b14a8af",
-        "type": "github"
+        "lastModified": 1785894069,
+        "narHash": "sha256-osBYRrG2y6gahx8D0NipxcgIHotXIzphwY8WtQm7pCg=",
+        "ref": "refs/heads/master",
+        "rev": "a8f507f6f2664db9d914c36bdafe6609a5e490e5",
+        "revCount": 87,
+        "type": "git",
+        "url": "ssh://git@github.com/cat-phish/Emacs.git"
       },
       "original": {
-        "owner": "cat-phish",
-        "repo": "Emacs",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@github.com/cat-phish/Emacs.git"
       }
     },
     "flake-compat": {
