@@ -41,9 +41,11 @@
       #librewolf
       localsend
       lshw # list detailed hardware information
+      mkcert # manually generates local https certs, needs nss
       ncdu
       # nheko # matrix client # has cve in dependency
       noto-fonts-color-emoji
+      nss # allows trusting of mkcert certs
       nurl # fetching nix package options from git, maybe others
       # obs-studio # driver issue on fedora
       pastel # cli color picker
