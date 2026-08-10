@@ -91,7 +91,7 @@ alias uvv="nvim-unstable ."
 # Emacs
 alias org="emacs ~/org/Tasks.org"
 alias emacs-doom="emacs --init-directory=~/.config/emacs-doom"
-alias emacs-dev='emacs --init-directory ~/source/emacs-config'
+alias emacs-dev='emacs --init-directory ~/code/emacs-config'
 
 # Yazi
 function y() {
@@ -200,7 +200,7 @@ nixconf() {
   # Set target dir
   local TARGET="$HOME/.nix"
   if [[ "$1" == "nvim" ]]; then
-    TARGET="$HOME/source/nixCats"
+    TARGET="$HOME/code/nixCats"
   fi
 
   cd "$TARGET" || return 1
