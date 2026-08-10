@@ -16,6 +16,7 @@
   home.packages =
     (with pkgs; [
       steam
+      zenity
     ])
     ++ (with pkgs-stable; [
       ]);
