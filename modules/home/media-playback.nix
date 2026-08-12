@@ -18,6 +18,7 @@
       fcast-client
       fcast-receiver
       grayjay
+      iptvnator
       lsp-plugins # a collection of open source audio plugins
       mpv
       vlc
