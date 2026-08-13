@@ -161,7 +161,7 @@ window-rule {
     open-fullscreen true
 }
 window-rule {
-    match app-id="^steam_app_\d+$"
+    match app-id="^steam_app_\\d+$"
     open-fullscreen true
 }
 
