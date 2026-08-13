@@ -156,6 +156,10 @@ window-rule {
     match app-id="^steam$"
     open-maximized true
 }
+window-rule {
+    match app-id="^steam$" title="^Steam Big Picture Mode$"
+    open-fullscreen true
+}
 // Example: enable rounded corners for all windows.
 // (This example rule is commented out with a "/-" in front.)
 /-window-rule {
