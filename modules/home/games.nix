@@ -24,16 +24,16 @@
       rpcs3
 
       # RetroArch with specific libretro cores baked in
-      (retroarch.override {
-        cores = with libretro; [
-          snes9x
-          mupen64plus
-          nestopia
-          pcsx-rearmed
-          genesis-plus-gx
-        ];
-      })
-    ])
+    #   (retroarch.override {
+    #     cores = with libretro; [
+    #       snes9x
+    #       mupen64plus
+    #       nestopia
+    #       pcsx-rearmed
+    #       genesis-plus-gx
+    #     ];
+    #   })
+    # ])
     ++ (with pkgs-stable; [
       ]);
 
