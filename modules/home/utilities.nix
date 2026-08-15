@@ -142,8 +142,8 @@
       ExecStart = ''
         ${pkgs.coreutils}/bin/env "NTFY_AUTH=Bearer ''${NTFY_AUTH_TOKEN}" \
           ${pkgs.ntfy-sh}/bin/ntfy sub \
-          "http://''${MEDIASERVER_HOST}/Tracearr" \
-          '${pkgs.libnotify}/bin/notify-send "$$NTFY_TITLE" "$$NTFY_MESSAGE"'
+          "http://''${MEDIASERVER_HOST}:3924/Tracearr" \
+          '${pkgs.libnotify}/bin/notify-send "[$$NTFY_TOPIC] $$NTFY_TITLE" "$$NTFY_MESSAGE"'
       '';
 
       Restart = "always";
