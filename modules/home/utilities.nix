@@ -38,7 +38,7 @@
       # htop
       htop-vim
       keepassxc
-      #librewolf
+      librewolf
       localsend
       lshw # list detailed hardware information
       mkcert # manually generates local https certs, needs nss
