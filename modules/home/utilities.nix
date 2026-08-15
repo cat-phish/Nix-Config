@@ -142,7 +142,7 @@
       ExecStart = ''
         ${pkgs.coreutils}/bin/env "NTFY_AUTH=Bearer ''${NTFY_AUTH_TOKEN}" \
           ${pkgs.ntfy-sh}/bin/ntfy sub \
-          "https://''${MEDIASERVER_HOST}/your_topic" \
+          "https://''${MEDIASERVER_HOST}/Tracearr" \
           '${pkgs.libnotify}/bin/notify-send "$$NTFY_TITLE" "$$NTFY_MESSAGE"'
       '';
 
