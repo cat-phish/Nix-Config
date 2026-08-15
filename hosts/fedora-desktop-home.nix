@@ -82,6 +82,33 @@
     Install. WantedBy = ["graphical-session.target"];
   };
 
+  systemd.user.services.ntfy-listener = {
+    Unit = {
+      Description = "ntfy Desktop Notifications";
+      After = ["graphical-session.target"];
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
+
+    Service = {
+      # It is safer to pass the token as an environment variable
+      # Environment = ["NTFY_AUTH=Bearer tk_your_token_here"];
+      EnvironmentFile = "%h/.ssh/.env";
+
+      ExecStart = ''
+        ${pkgs.ntfy-sh}/bin/ntfy sub \
+          --token "''${NTFY_AUTH_TOKEN}" \
+          "http://''${MEDIASERVER_HOST}:3924/Tracearr" \
+          '${pkgs.libnotify}/bin/notify-send "[$$NTFY_TOPIC] $$NTFY_TITLE" "$$NTFY_MESSAGE"'
+      '';
+
+      Restart = "always";
+      RestartSec = "10";
+    };
+  };
+
   services.flatpak = {
     enable = true;
 

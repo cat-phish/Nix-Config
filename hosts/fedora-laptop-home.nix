@@ -60,6 +60,40 @@
     };
   };
 
+  systemd.user.services.ntfy-listener = {
+    Unit = {
+      Description = "ntfy Desktop Notifications";
+      After = ["graphical-session.target"];
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
+
+    Service = {
+      EnvironmentFile = "%h/.ssh/.env";
+
+      # Bash checks the ping. If successful, it hands the process over to ntfy (via exec).
+      # If it fails, it sleeps for 60s and exits cleanly, prompting systemd to loop it.
+      ExecStart = ''
+        ${pkgs.bash}/bin/bash -c ' \
+          if ${pkgs.iputils}/bin/ping -c 1 -W 2 "''${MEDIASERVER_HOST}" >/dev/null 2>&1; then \
+            exec ${pkgs.ntfy-sh}/bin/ntfy sub \
+              --token "''${NTFY_AUTH_TOKEN}" \
+              "http://''${MEDIASERVER_HOST}:3924/Tracearr" \
+              "${pkgs.libnotify}/bin/notify-send \"[\$$NTFY_TOPIC] \$$NTFY_TITLE\" \"\$$NTFY_MESSAGE\""; \
+          else \
+            sleep 60; \
+          fi \
+        '
+      '';
+
+      Restart = "always";
+      # Total wait time when away: 60s sleep + 10s RestartSec = 70 seconds between checks
+      RestartSec = "10";
+    };
+  };
+
   services.flatpak = {
     enable = true;
 
