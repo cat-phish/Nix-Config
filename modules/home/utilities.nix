@@ -123,4 +123,31 @@
       '';
     };
   };
+
+  systemd.user.services.ntfy-listener = {
+    Unit = {
+      Description = "ntfy Desktop Notifications";
+      After = ["graphical-session.target"];
+    };
+
+    Install = {
+      WantedBy = ["graphical-session.target"];
+    };
+
+    Service = {
+      # It is safer to pass the token as an environment variable
+      # Environment = ["NTFY_AUTH=Bearer tk_your_token_here"];
+      EnvironmentFile = "%h/.ssh/.env";
+
+      ExecStart = ''
+        ${pkgs.coreutils}/bin/env "NTFY_AUTH=Bearer ''${NTFY_AUTH_TOKEN}" \
+          ${pkgs.ntfy-sh}/bin/ntfy sub \
+          "https://''${MEDIASERVER_HOST}/your_topic" \
+          '${pkgs.libnotify}/bin/notify-send "$$NTFY_TITLE" "$$NTFY_MESSAGE"'
+      '';
+
+      Restart = "always";
+      RestartSec = "10";
+    };
+  };
 }
