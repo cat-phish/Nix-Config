@@ -140,8 +140,8 @@
       EnvironmentFile = "%h/.ssh/.env";
 
       ExecStart = ''
-        ${pkgs.coreutils}/bin/env "NTFY_AUTH=Bearer ''${NTFY_AUTH_TOKEN}" \
-          ${pkgs.ntfy-sh}/bin/ntfy sub \
+        ${pkgs.ntfy-sh}/bin/ntfy sub \
+          --token "''${NTFY_AUTH_TOKEN}" \
           "http://''${MEDIASERVER_HOST}:3924/Tracearr" \
           '${pkgs.libnotify}/bin/notify-send "[$$NTFY_TOPIC] $$NTFY_TITLE" "$$NTFY_MESSAGE"'
       '';
