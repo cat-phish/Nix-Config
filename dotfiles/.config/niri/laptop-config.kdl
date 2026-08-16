@@ -18,10 +18,10 @@ output "eDP-1" {
   }
 }
 
-workspace "utilities" {
+workspace "chat" {
   open-on-output "eDP-1"
 }
-workspace "chat" {
+workspace "utilities" {
   open-on-output "eDP-1"
 }
 workspace "browser" {
