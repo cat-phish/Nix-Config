@@ -23,6 +23,7 @@
       bat # cat replacement with syntax highlighting
       # clang
       clang-tools
+      claude-code
       llvm
       eza # ls replacement
       gtest
