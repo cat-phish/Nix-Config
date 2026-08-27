@@ -391,10 +391,8 @@ scrobble() {
     exit 0
   fi
 
-  # Strip line 4 (#TRACKNUM) to prevent Scotty's parser from crashing
-  # sed '4d' "$scrobbler_log_path" > "$tmp_log_location"
   # Strip line 4 (#TRACKNUM) and replace double quotes with single quotes
-  # to prevent Scotty's strict TSV parser from crashing on "bare quotes"
+  # to prevent Scotty's strict parser from crashing on "bare quotes"
   sed "4d; s/\"/'/g" "$scrobbler_log_path" > "$tmp_log_location"
 
   # Run Scotty to beam the listens to scrobbler
