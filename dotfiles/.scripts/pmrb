@@ -427,6 +427,9 @@ scrobble() {
 
 # Parse options
 case "$1" in
+    "")
+        # No argument: fall through to full sync below.
+        ;;
     -h|--help)
         show_help
         ;;
@@ -440,15 +443,18 @@ case "$1" in
         ;;
     -f|--fix)
         run_fix
+        exit 0
         ;;
     -q|--queue)
         edit_queue
+        exit 0
         ;;
     -s|--scrobble)
         mount_device
         scrobble
+        exit 0
         ;;
-    -*)
+    *)
         echo "Unknown option: $1"
         echo "Use -h or --help for usage information."
         exit 1
