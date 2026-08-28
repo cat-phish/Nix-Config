@@ -19,7 +19,9 @@
 # Author: cat-phish
 # Date: 2026-07-26
 # Usage: Dependencies - udisks2, rsync, ssh (if remote sync is enabled), Scotty
-#                       (if scrobbling is desired)
+#                       (if scrobbling is desired), curl (if any remote
+#                       notification service is enabled), notify-send/libnotify
+#                       (if Linux desktop notifications are enabled)
 #        Also Required - A podcast downloading utility like Gpodder
 #                        (recommended) or Podgrab, and a Rockbox device.
 #        1) Set the configuration options and optionally remote configuration
@@ -207,6 +209,43 @@ scrobbler_name="mediaserver-maloja"
 # Name of your scorbbler-log service defined in Scotty config
 scrobblerlog_name="scrobbler-log"
 
+
+
+### NOTIFICATION SETTINGS ###
+
+# Master switch. Must be "yes" for any service below to fire. (yes or no)
+notifications_enabled="no"
+
+# Each service below has its own on/off switch, so you can enable
+# any combination of them at once.
+
+# --- ntfy (https://ntfy.sh, or a self-hosted instance) ---
+ntfy_enabled="no"
+ntfy_server="https://ntfy.sh"
+ntfy_topic="YOUR_TOPIC"
+# Optional bearer token, for authenticated topics / self-hosted servers. Leave empty if unused.
+ntfy_token=""
+
+# --- Gotify (self-hosted) ---
+gotify_enabled="no"
+gotify_url="https://YOUR_GOTIFY_SERVER"
+gotify_token="YOUR_APP_TOKEN"
+
+# --- Pushover ---
+pushover_enabled="no"
+pushover_token="YOUR_APP_TOKEN"
+pushover_user="YOUR_USER_KEY"
+
+# --- Discord (incoming webhook) ---
+discord_enabled="no"
+discord_webhook_url="YOUR_WEBHOOK_URL"
+
+# --- Linux desktop notification (notify-send / libnotify) ---
+# Only useful if this script is run from a logged-in desktop session,
+# not headless/cron on a server.
+linux_notify_enabled="no"
+linux_notify_urgency="normal" # low, normal, or critical
+
 #####################################################
 ###############      END CONFIG      ################
 #####################################################
@@ -220,6 +259,80 @@ scrobblerlog_name="scrobbler-log"
 #####################################################
 
 ### FUNCTIONS ###
+
+# Internal state (do not edit) - tracks whether the running command is a full
+# sync, so mount/unmount failures during -m/-q/-f/-s don't spam notifications
+# meant for the sync flow, and the last known scrobble outcome for the summary.
+notify_sync_active="no"
+scrobble_result="Scrobbling disabled."
+
+# Escapes a string for safe embedding inside a JSON string value.
+json_escape() {
+  local s="$1"
+  s="${s//\\/\\\\}"
+  s="${s//\"/\\\"}"
+  s="${s//$'\r'/}"
+  s="${s//$'\n'/\\n}"
+  printf '%s' "$s"
+}
+
+# Fans a notification out to every enabled service. Silently no-ops if
+# notifications_enabled is not "yes". Priority is "default" or "high".
+send_notification() {
+  local title="$1"
+  local message="$2"
+  local priority="${3:-default}"
+
+  [ "$notifications_enabled" != "yes" ] && return 0
+
+  if [ "$ntfy_enabled" = "yes" ]; then
+    local ntfy_priority="default"
+    [ "$priority" = "high" ] && ntfy_priority="urgent"
+    if [ -n "$ntfy_token" ]; then
+      curl -fsS -H "Title: $title" -H "Priority: $ntfy_priority" \
+        -H "Authorization: Bearer $ntfy_token" -d "$message" \
+        "$ntfy_server/$ntfy_topic" >/dev/null \
+        || echo "Warning: ntfy notification failed."
+    else
+      curl -fsS -H "Title: $title" -H "Priority: $ntfy_priority" \
+        -d "$message" "$ntfy_server/$ntfy_topic" >/dev/null \
+        || echo "Warning: ntfy notification failed."
+    fi
+  fi
+
+  if [ "$gotify_enabled" = "yes" ]; then
+    local gotify_priority=5
+    [ "$priority" = "high" ] && gotify_priority=8
+    curl -fsS -X POST "$gotify_url/message?token=$gotify_token" \
+      -F "title=$title" -F "message=$message" -F "priority=$gotify_priority" >/dev/null \
+      || echo "Warning: Gotify notification failed."
+  fi
+
+  if [ "$pushover_enabled" = "yes" ]; then
+    local pushover_priority=0
+    [ "$priority" = "high" ] && pushover_priority=1
+    curl -fsS --form-string "token=$pushover_token" --form-string "user=$pushover_user" \
+      --form-string "title=$title" --form-string "message=$message" \
+      --form-string "priority=$pushover_priority" \
+      https://api.pushover.net/1/messages.json >/dev/null \
+      || echo "Warning: Pushover notification failed."
+  fi
+
+  if [ "$discord_enabled" = "yes" ]; then
+    local body escaped
+    body=$(printf '**%s**\n%s' "$title" "$message")
+    escaped=$(json_escape "$body")
+    curl -fsS -H "Content-Type: application/json" \
+      -d "{\"content\": \"$escaped\"}" "$discord_webhook_url" >/dev/null \
+      || echo "Warning: Discord notification failed."
+  fi
+
+  if [ "$linux_notify_enabled" = "yes" ] && command -v notify-send >/dev/null 2>&1; then
+    local urgency="${linux_notify_urgency:-normal}"
+    [ "$priority" = "high" ] && urgency="critical"
+    notify-send -u "$urgency" "$title" "$message"
+  fi
+}
 
 show_help() {
     cat << EOF
@@ -245,7 +358,9 @@ EOF
 
 mount_device() {
   local attempt=1
-  local device_path=""
+  # Not local: the read-only check in the SYNCING section below relies on
+  # this being set as a global by the time mount_device() returns.
+  device_path=""
   mount_sleeptime=5
 
   # Try to find the device, respecting retry settings
@@ -259,6 +374,7 @@ mount_device() {
               attempt=$((attempt + 1))
           else
               echo "Error: Device label '$name' not found."
+              [ "$notify_sync_active" = "yes" ] && send_notification "pmrb: Sync Failed" "Device label '$name' not found." "high"
               exit 1
           fi
       fi
@@ -269,6 +385,7 @@ mount_device() {
   if [ -n "$existing_mount" ]; then
       echo "Warning: Device '$name' is already mounted at $existing_mount."
       echo "Please unmount it first (run 'pmrb -u') to ensure a clean sync state."
+      [ "$notify_sync_active" = "yes" ] && send_notification "pmrb: Sync Failed" "Device '$name' was already mounted at $existing_mount." "high"
       exit 1
   fi
 
@@ -279,6 +396,7 @@ mount_device() {
       echo "Mounted $name ($device_path) at: $mount_point"
   else
       echo "Error: Failed to mount device $device_path."
+      [ "$notify_sync_active" = "yes" ] && send_notification "pmrb: Sync Failed" "Failed to mount device $device_path." "high"
       exit 1
   fi
 
@@ -303,6 +421,7 @@ unmount_device() {
          echo "Error: Device is stubbornly busy. The following processes are holding it:"
          lsof +f -- "$dev_path"
          echo "Please close them and unmount manually."
+         [ "$notify_sync_active" = "yes" ] && send_notification "pmrb: Unmount Failed" "Device '$name' is stubbornly busy and could not be unmounted. Please unmount manually." "high"
          exit 1
       fi
       echo "Device is busy (likely being scanned). Retrying in 2 seconds... ($count/$max_retries)"
@@ -369,6 +488,12 @@ edit_queue() {
 }
 
 scrobble() {
+  # mode "manual" (default): called via -s/--scrobble, unmounts and exits itself.
+  # mode "sync": called from the end of a full sync; sets $scrobble_result and
+  # returns so the caller can fold it into the sync summary notification and
+  # handle its own unmount.
+  local mode="${1:-manual}"
+
   # Dynamically find the mount point if it wasn't set by mount_device()
   if [ -z "$mount_point" ]; then
     local dev_path=$(blkid -L "$name")
@@ -387,8 +512,13 @@ scrobble() {
   # Check if the target log file exists and exit cleanly if it doesn't
   if [ ! -f "$scrobbler_log_path" ]; then
     echo "Notice: No .scrobbler.log found on device. Skipping scrobble."
-    unmount_device
-    exit 0
+    scrobble_result="Scrobble: No .scrobbler.log found on device."
+    if [ "$mode" = "manual" ]; then
+      send_notification "pmrb: Scrobble" "$scrobble_result"
+      unmount_device
+      exit 0
+    fi
+    return 0
   fi
 
   # Strip line 4 (#TRACKNUM) and replace double quotes with single quotes
@@ -397,8 +527,10 @@ scrobble() {
 
   # Run Scotty to beam the listens to scrobbler
   echo "Beaming scrobbles to $scrobbler_name via Scotty..."
-  scotty beam listens "$scrobblerlog_name" "$scrobbler_name"
+  local scotty_output
+  scotty_output=$(scotty beam listens "$scrobblerlog_name" "$scrobbler_name" 2>&1)
   SCOTTY_EXIT=$?
+  echo "$scotty_output"
 
   # Clean up the temp file
   rm -f "$tmp_log_location"
@@ -408,17 +540,25 @@ scrobble() {
       echo "Sync successful! Rotating live log to backup (.bak)..."
       mv -f "$scrobbler_log_path" "$scrobbler_log_path.bak"
       echo "Done! .scrobbler.log has been moved to .scrobbler.log.bak."
+      scrobble_result="Scrobble: Success."
   else
       echo "------------------------------------------------------------------"
       echo "Error: Scotty sync failed (Exit code: $SCOTTY_EXIT)."
       echo "No log files were modified, so you can safely retry."
       echo "------------------------------------------------------------------"
+      if echo "$scotty_output" | grep -qEi "syntax|parse error"; then
+        scrobble_result="Scrobble: Failed - syntax error in .scrobbler.log (exit $SCOTTY_EXIT)."
+      else
+        scrobble_result="Scrobble: Failed (exit $SCOTTY_EXIT)."
+      fi
   fi
 
-  unmount_device
-
-  # Exit script to avoid double unmount when called at end of script
-  exit 0
+  if [ "$mode" = "manual" ]; then
+    send_notification "pmrb: Scrobble" "$scrobble_result" "$([ $SCOTTY_EXIT -ne 0 ] && echo high || echo default)"
+    unmount_device
+    # Exit script to avoid double unmount when called at end of script
+    exit 0
+  fi
 }
 
 
@@ -463,12 +603,16 @@ esac
 
 ### SYNCING ###
 
+# Mark this as a full sync run so mount/unmount failures below trigger notifications.
+notify_sync_active="yes"
+
 # Attempt to mount the defined device
 mount_device
 
 # Abort if the device mounted read-only to prevent script failure
 if findmnt -n -o OPTIONS "$device_path" | grep -E -q '(^|,)ro(,|$)'; then
     echo "Error: Device mounted read-only! Filesystem requires repair."
+    send_notification "pmrb: Sync Failed" "Device '$name' mounted read-only. Filesystem requires repair (see -f/--fix)." "high"
     udisksctl unmount -b "$device_path"
     exit 1
 fi
@@ -564,6 +708,10 @@ if [ ${#search_dirs[@]} -gt 0 ]; then
 fi
 
 # Append the newly synced auto-queue episodes to the m3u8 playlist queue
+# Tracks which local_tmp paths actually got appended to Queue.m3u8, so the
+# sync summary notification can mark them "(Queued)".
+declare -A queued_lookup=()
+
 if [ -s sorted_files.txt ]; then
     # Failsafe: Ensure the Queue file has a clean line break before appending
     sed -i -e '$a\' "$mount_point$device_queue_location/Queue.m3u8" 2>/dev/null
@@ -588,6 +736,8 @@ if [ -s sorted_files.txt ]; then
        fi
        # ---------------------------------------------------------
 
+       queued_lookup["$line"]=1
+
        # Swap local tmp path for Rockbox's sync path
        playlist_path="${line/$local_tmp/$device_sync_path}"
        echo "$playlist_path" >>"$mount_point$device_queue_location/Queue.m3u8"
@@ -597,6 +747,19 @@ if [ -s sorted_files.txt ]; then
     sed -i '/^$/d' "$mount_point$device_queue_location/Queue.m3u8"
 fi
 rm -f sorted_files.txt
+
+# ---------------------------------------------------------
+# Record podcast/episode names actually being synced to the device
+# (used for both the end-of-run summary and the sync notification)
+# ---------------------------------------------------------
+synced_items=()
+while IFS= read -r -d $'\0' f; do
+   ep_podcast=$(basename "$(dirname "$f")")
+   ep_name=$(basename "$f")
+   suffix=""
+   [ -n "${queued_lookup[$f]}" ] && suffix=" (Queued)"
+   synced_items+=("$ep_podcast - $ep_name$suffix")
+done < <(find "$local_tmp" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -print0)
 
 # Transfer from local tmp to the device folders
 rsync -av "$local_tmp/" "$mount_point$device_sync_path/"
@@ -704,7 +867,27 @@ fi
 
 # Run scrobble post_sync if set
 if [ "$scrobble_on_sync" = "yes" ]; then
-   scrobble
+   scrobble "sync"
+fi
+
+# ---------------------------------------------------------
+# Build and show the sync summary (always), and notify (if enabled)
+# ---------------------------------------------------------
+if [ ${#synced_items[@]} -gt 0 ]; then
+   episode_summary=$(printf '%s\n' "${synced_items[@]}")
+else
+   episode_summary="No new episodes synced."
+fi
+summary_message=$(printf '%s\n\n%s' "$episode_summary" "$scrobble_result")
+
+echo "==================================================================="
+echo "pmrb: Sync Complete"
+echo "==================================================================="
+echo "$summary_message"
+echo "==================================================================="
+
+if [ "$notifications_enabled" = "yes" ]; then
+   send_notification "pmrb: Sync Complete" "$summary_message"
 fi
 
 unmount_device
