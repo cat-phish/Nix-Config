@@ -220,11 +220,11 @@ notifications_enabled="no"
 # any combination of them at once.
 
 # --- ntfy (https://ntfy.sh, or a self-hosted instance) ---
-ntfy_enabled="no"
-ntfy_server="https://ntfy.sh"
-ntfy_topic="YOUR_TOPIC"
+ntfy_enabled="yes"
+ntfy_server="$MEDIASERVER_NTFY_HOST"
+ntfy_topic="PMRB"
 # Optional bearer token, for authenticated topics / self-hosted servers. Leave empty if unused.
-ntfy_token=""
+ntfy_token="$MEDIASERVER_NTFY_AUTH_TOKEN"
 
 # --- Gotify (self-hosted) ---
 gotify_enabled="no"
