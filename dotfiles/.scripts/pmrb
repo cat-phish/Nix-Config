@@ -214,7 +214,7 @@ scrobblerlog_name="scrobbler-log"
 ### NOTIFICATION SETTINGS ###
 
 # Master switch. Must be "yes" for any service below to fire. (yes or no)
-notifications_enabled="no"
+notifications_enabled="yes"
 
 # Each service below has its own on/off switch, so you can enable
 # any combination of them at once.
