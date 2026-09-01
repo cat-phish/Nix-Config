@@ -54,7 +54,7 @@
       qdirstat
       rclone
       rofi
-      rpi-imager
+      # rpi-imager # crashes
       sl
       strace # stack racer for linux system calls
       sqlite
