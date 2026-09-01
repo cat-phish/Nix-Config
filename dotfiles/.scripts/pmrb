@@ -221,7 +221,7 @@ notifications_enabled="yes"
 
 # --- ntfy (https://ntfy.sh, or a self-hosted instance) ---
 ntfy_enabled="yes"
-ntfy_server="$MEDIASERVER_NTFY_HOST"
+ntfy_server="$MEDIASERVER_NTFY_SERVER"
 ntfy_topic="PMRB"
 # Optional bearer token, for authenticated topics / self-hosted servers. Leave empty if unused.
 ntfy_token="$MEDIASERVER_NTFY_AUTH_TOKEN"
