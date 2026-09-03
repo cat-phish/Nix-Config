@@ -24,6 +24,7 @@
     ../modules/home/app-numen.nix
     ../modules/home/app-foobar2000-wine-dependencies.nix
     ../modules/home/c-sharp-dev.nix
+    ../modules/home/robosub.nix
     # ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops
   ];
