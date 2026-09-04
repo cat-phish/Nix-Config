@@ -699,6 +699,8 @@ search_dirs=()
 for podcast in "${auto_queue_shows[@]}"; do
    if [ -d "$local_tmp/$podcast" ]; then
        search_dirs+=("$local_tmp/$podcast")
+   else
+       echo "Warning: auto_queue_shows entry '$podcast' has no matching folder in $local_tmp (check exact spelling/case against the downloader's folder name) - it will not be queued."
    fi
 done
 
@@ -754,11 +756,10 @@ rm -f sorted_files.txt
 # ---------------------------------------------------------
 synced_items=()
 while IFS= read -r -d $'\0' f; do
-   ep_podcast=$(basename "$(dirname "$f")")
    ep_name=$(basename "$f")
    suffix=""
    [ -n "${queued_lookup[$f]}" ] && suffix=" (Queued)"
-   synced_items+=("$ep_podcast - $ep_name$suffix")
+   synced_items+=("$ep_name$suffix")
 done < <(find "$local_tmp" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -print0)
 
 # Transfer from local tmp to the device folders
