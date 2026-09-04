@@ -692,7 +692,10 @@ fi
 # ---------------------------------------------------------
 
 # Create a sorted list of files based on modified date
-> sorted_files.txt # Clear or create the file safely
+# (uses local_tmp, not CWD - CWD is not guaranteed to be writable
+# depending on how/where this script is invoked from)
+sorted_files_path="/tmp/pmrb_sorted_files.txt"
+> "$sorted_files_path" # Clear or create the file safely
 search_dirs=()
 
 # Build a list of valid directories to search based on the array
@@ -706,7 +709,7 @@ done
 
 # Find new episodes across tracked shows and sort them together globally by date
 if [ ${#search_dirs[@]} -gt 0 ]; then
-   find "${search_dirs[@]}" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- > sorted_files.txt
+   find "${search_dirs[@]}" -type f \( -name '*.mp3' -o -name '*.m4a' -o -name '*.wav' -o -name '*.ogg' \) -printf '%T@ %p\0' | sort -z -n | cut -z -d ' ' -f2- > "$sorted_files_path"
 fi
 
 # Append the newly synced auto-queue episodes to the m3u8 playlist queue
@@ -714,7 +717,7 @@ fi
 # sync summary notification can mark them "(Queued)".
 declare -A queued_lookup=()
 
-if [ -s sorted_files.txt ]; then
+if [ -s "$sorted_files_path" ]; then
     # Failsafe: Ensure the Queue file has a clean line break before appending
     sed -i -e '$a\' "$mount_point$device_queue_location/Queue.m3u8" 2>/dev/null
 
@@ -743,12 +746,12 @@ if [ -s sorted_files.txt ]; then
        # Swap local tmp path for Rockbox's sync path
        playlist_path="${line/$local_tmp/$device_sync_path}"
        echo "$playlist_path" >>"$mount_point$device_queue_location/Queue.m3u8"
-    done <sorted_files.txt
+    done <"$sorted_files_path"
 
     # Strip any blank lines from the queue that the previous commands might have created
     sed -i '/^$/d' "$mount_point$device_queue_location/Queue.m3u8"
 fi
-rm -f sorted_files.txt
+rm -f "$sorted_files_path"
 
 # ---------------------------------------------------------
 # Record podcast/episode names actually being synced to the device
