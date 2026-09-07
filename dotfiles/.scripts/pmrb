@@ -718,6 +718,9 @@ fi
 declare -A queued_lookup=()
 
 if [ -s "$sorted_files_path" ]; then
+    echo "Debug: candidate episodes for queueing (from tracked auto_queue_shows folders):"
+    tr '\0' '\n' <"$sorted_files_path" | sed 's/^/  - /'
+
     # Failsafe: Ensure the Queue file has a clean line break before appending
     sed -i -e '$a\' "$mount_point$device_queue_location/Queue.m3u8" 2>/dev/null
 
@@ -746,10 +749,14 @@ if [ -s "$sorted_files_path" ]; then
        # Swap local tmp path for Rockbox's sync path
        playlist_path="${line/$local_tmp/$device_sync_path}"
        echo "$playlist_path" >>"$mount_point$device_queue_location/Queue.m3u8"
+       echo "Debug: appended to Queue.m3u8: $playlist_path"
     done <"$sorted_files_path"
 
     # Strip any blank lines from the queue that the previous commands might have created
     sed -i '/^$/d' "$mount_point$device_queue_location/Queue.m3u8"
+    echo "Debug: queued ${#queued_lookup[@]} episode(s) this run."
+else
+    echo "Debug: no candidate episodes found (sorted_files_path was empty) - nothing to queue this run."
 fi
 rm -f "$sorted_files_path"
 
@@ -810,6 +817,7 @@ if [ "$auto_clean_queue" == "yes" ]; then
       # Read the current queue into an array, stripping Rockbox's Windows \r carriage returns
       mapfile -t queue_lines < <(tr -d '\r' < "$queue_file")
       matched_index=-1
+      echo "Debug: queue has ${#queue_lines[@]} line(s) before bookmark truncation; most recent bookmark path: $recent_podcast_path"
 
       # Find where the most recent podcast is in the current queue
       for i in "${!queue_lines[@]}"; do
@@ -823,7 +831,7 @@ if [ "$auto_clean_queue" == "yes" ]; then
          # Create the new queue by dropping everything before the most recent podcast
          new_queue_lines=("${queue_lines[@]:$matched_index}")
          printf "%s\n" "${new_queue_lines[@]}" >"$queue_file"
-         echo "Updated $queue_file successfully."
+         echo "Updated $queue_file successfully. Matched at index $matched_index; ${#new_queue_lines[@]} line(s) remain."
 
          # Process up to $bookmarks_to_keep
          > "${bmark_file}.new"
