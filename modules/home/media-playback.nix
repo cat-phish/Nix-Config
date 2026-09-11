@@ -44,4 +44,11 @@
       # }
       "tv.plex.PlexDesktop"
     ];
+    update.auto = {
+      enable = true;
+      onCalendar = "weekly";
+    };
+
+    uninstallUnmanaged = false;
+  };
 }
