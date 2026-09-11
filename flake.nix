@@ -28,6 +28,8 @@
     nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
     talon-nix.url = "github:nix-community/talon-nix";
     agenix.url = "github:ryantm/agenix";
+    # ROS packages for palouse-robosub (kept on its own pinned nixpkgs, per upstream flake)
+    nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
     # numennix.url = "github:anpandey/numen-nix";
     # numen = {
     #   url = "github:anpandey/numen-nix"; # or wherever the flake is

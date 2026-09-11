@@ -1,82 +1,69 @@
-# This file helps set up all the dependencies for running on your computer!
+# ROS 2 (jazzy) toolchain for palouse-robosub development, mirroring
+# https://github.com/palouse-robosub/onboarding/blob/main/flake.nix
 {
-  inputs = {
-    nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
-    nixpkgs.follows = "nix-ros-overlay/nixpkgs"; # IMPORTANT!!!
-
-    nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs,
+  pkgs,
+  ...
+}: let
+  # nix-ros-overlay pins its own nixpkgs revision; import it separately
+  # rather than overlaying the shared `pkgs` so ROS package builds stay
+  # matched to the versions upstream actually tests against.
+  rosNixpkgs = inputs.nix-ros-overlay.inputs.nixpkgs;
+  ros-pkgs = import rosNixpkgs {
+    inherit (pkgs.stdenv.hostPlatform) system;
+    overlays = [inputs.nix-ros-overlay.overlays.default];
   };
-  outputs = {
-    self,
-    nix-ros-overlay,
-    nixpkgs,
-    nixpkgs-unstable,
-  }:
-    nix-ros-overlay.inputs.flake-utils.lib.eachDefaultSystem (system: let
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [nix-ros-overlay.overlays.default];
-      };
 
-      unstable = import nixpkgs-unstable {inherit system;};
-    in {
-      devShells.default = pkgs.mkShell {
-        name = "onboarding_ros";
-        packages = [
-          # non ros
+  ros-jazzy = with ros-pkgs.rosPackages.jazzy;
+    buildEnv {
+      paths = [
+        # ros base
+        ros-core
+        ros-base
+        rclcpp
+        rclpy
 
-          # build
-          pkgs.colcon
-          pkgs.cmake
-          pkgs.clang-tools
+        # ros msgs
+        std-msgs
+        geometry-msgs
+        sensor-msgs
+        nav-msgs
 
-          # deps
-          (unstable.python3.withPackages (ps:
-            with ps; [
-              pip
-            ]))
+        # build
+        ament-cmake
+        ament-cmake-core # vectornav_msgs
+        ament-cmake-python
+        ament-lint-auto
+        python-cmake-module
 
-          # extra
-          pkgs.fastfetch
-          pkgs.can-utils
+        # launch
+        launch
+        launch-ros
+        launch-xml
+      ];
+    };
+in {
+  home.packages = with pkgs; [
+    # build
+    colcon
+    cmake
+    clang-tools
 
-          (with pkgs.rosPackages.jazzy;
-            buildEnv {
-              # ros packages
-              paths = [
-                # ros base
-                ros-core
-                ros-base
-                rclcpp
-                rclpy
+    # deps
+    (python3.withPackages (ps: with ps; [pip]))
 
-                # ros msgs
-                std-msgs
-                geometry-msgs
-                sensor-msgs
-                nav-msgs
+    # extra
+    fastfetch
+    can-utils
 
-                # build
-                ament-cmake
-                ament-cmake-core # vectornav_msgs
-                ament-cmake-python
-                ament-lint-auto
-                python-cmake-module
+    ros-jazzy
+  ];
 
-                # launch
-                launch
-                launch-ros
-                launch-xml
-              ];
-            })
-        ];
-        # shellHook = ''
-        #   fastfetch -l ./.github/onboarding.txt
-        # '';
-      };
-    });
-  nixConfig = {
-    extra-substituters = ["https://ros.cachix.org" "https://palouse-robosub.cachix.org"];
-    extra-trusted-public-keys = ["ros.cachix.org-1:dSyZxI8geDCJrwgvCOHDoAfOm5sV1wCPjBkKL+38Rvo=" "palouse-robosub.cachix.org-1:r2KNmfNGOZB+IhqEqDIMDaEWMYZv8ct1tdSg7n7fNKw="];
-  };
+  # NOTE: upstream also declares ros.cachix.org and palouse-robosub.cachix.org
+  # as substituters (see the flake's `nixConfig`) so ROS builds are fetched
+  # instead of compiled from source. Home Manager can't add those on a
+  # non-NixOS host without `nix.package` also being set, so add them manually
+  # to /etc/nix/nix.conf (as root) if you want the speedup:
+  #   extra-substituters = https://ros.cachix.org https://palouse-robosub.cachix.org
+  #   extra-trusted-public-keys = ros.cachix.org-1:dSyZxI8geDCJrwgvCOHDoAfOm5sV1wCPjBkKL+38Rvo= palouse-robosub.cachix.org-1:r2KNmfNGOZB+IhqEqDIMDaEWMYZv8ct1tdSg7n7fNKw=
 }

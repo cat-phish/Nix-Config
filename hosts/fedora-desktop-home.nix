@@ -32,6 +32,7 @@
     ../modules/home/app-numen.nix
     ../modules/home/app-talon.nix
     ../modules/home/app-wireguard-tray.nix
+    # ../modules/home/robosub.nix
     # ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops
     # inputs.sops-nix.homeManagerModules.sops
