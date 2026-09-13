@@ -9,11 +9,10 @@ output "DP-2" {
         left 16
         right 16
     }
-    preset-column-widths {
+    preset-window-heights {
         proportion 0.5
         proportion 1.0
     }
-    // preset-window-heights { }
   }
 }
 
@@ -49,7 +48,7 @@ output "HDMI-A-1" {
         left 16
         right 16
     }
-    preset-column-widths {
+    preset-window-heights {
         proportion 0.5
         proportion 1.0
     }
