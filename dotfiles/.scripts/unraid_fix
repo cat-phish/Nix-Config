@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TARGET_HOST="mediaserver"
+
+echo "=== Unraid Remote Service Manager (${TARGET_HOST}) ==="
+echo ""
+echo "--- Unraid System & WebUI ---"
+echo "1) Restart Nginx (WebUI only)"
+echo "2) Restart Nginx + PHP-FPM (Full WebUI stack restart)"
+echo "3) Restart Network Stack (rc.inet1 restart)"
+echo "4) Show System / Docker Status"
+echo ""
+echo "--- Bar-Assistant ---"
+echo "5) Reset Bar-Assistant User Password"
+echo "6) Clear Bar-Assistant SQLite Lock (WAL / SHM files)"
+echo ""
+echo "--- Other ---"
+echo "7) Exit"
+echo "====================================================="
+
+read -rp "Select an option [1-7]: " choice
+
+case "$choice" in
+  1)
+    echo "Restarting Nginx on ${TARGET_HOST}..."
+    ssh -t "${TARGET_HOST}" "/etc/rc.d/rc.nginx restart"
+    ;;
+  2)
+    echo "Restarting Nginx and PHP-FPM on ${TARGET_HOST}..."
+    ssh -t "${TARGET_HOST}" "/etc/rc.d/rc.php-fpm restart && /etc/rc.d/rc.nginx restart"
+    ;;
+  3)
+    echo "Restarting network daemon on ${TARGET_HOST}..."
+    echo "Note: The SSH session will likely hang or disconnect as the interface cycles."
+    ssh -t "${TARGET_HOST}" "/etc/rc.d/rc.inet1 restart"
+    ;;
+  4)
+    echo "Fetching service status on ${TARGET_HOST}..."
+    ssh -t "${TARGET_HOST}" "uptime; echo '--- Docker Containers ---'; docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+    ;;
+  5)
+    echo "--- Reset Bar-Assistant User Password ---"
+    target_email=""
+    while [[ -z "${target_email}" ]]; do
+      read -rp "Enter target email address: " target_email
+      if [[ -z "${target_email}" ]]; then
+        echo "Error: Email address is required."
+      fi
+    done
+
+    read -rsp "Enter new password: " new_pass
+    echo ""
+    read -rsp "Confirm new password: " confirm_pass
+    echo ""
+
+    if [[ "$new_pass" != "$confirm_pass" ]]; then
+      echo "Error: Passwords do not match."
+      exit 1
+    fi
+
+    if [[ -z "$new_pass" ]]; then
+      echo "Error: Password cannot be empty."
+      exit 1
+    fi
+
+    echo "Resetting password for ${target_email} on ${TARGET_HOST}..."
+    ssh -t "${TARGET_HOST}" bash -s <<EOF
+      set -euo pipefail
+      TARGET_EMAIL="${target_email}"
+      NEW_PASS="${new_pass}"
+
+      USER_QUERY="\\\$user = \\Kami\\Cocktail\\Models\\User::where('email', '\${TARGET_EMAIL}')->first();"
+
+      PHP_CODE="require 'vendor/autoload.php'; \\\$app = require_once 'bootstrap/app.php'; \\\$app->make(Illuminate\\Contracts\\Console\\Kernel::class)->bootstrap(); \${USER_QUERY} if (!\\\$user) { echo 'Error: User with email \${TARGET_EMAIL} not found!\\n'; exit(1); } \\\$user->password = \\Illuminate\\Support\\Facades\\Hash::make('\${NEW_PASS}'); \\\$user->save(); echo 'Password reset successfully for ' . \\\$user->email . '\\n';"
+
+      docker exec -i bar-assistant-compose php -r "\${PHP_CODE}"
+EOF
+    ;;
+  6)
+    echo "Clearing SQLite locks for Bar-Assistant on ${TARGET_HOST}..."
+    ssh -t "${TARGET_HOST}" bash -s <<'EOF'
+      set -euo pipefail
+      echo "Stopping bar-assistant-compose..."
+      docker stop bar-assistant-compose
+      echo "Removing WAL and SHM lock files..."
+      rm -vf /mnt/user/appdata/bar-assistant-compose/bar_data/database.sqlite-wal
+      rm -vf /mnt/user/appdata/bar-assistant-compose/bar_data/database.sqlite-shm
+      echo "Starting bar-assistant-compose..."
+      docker start bar-assistant-compose
+EOF
+    ;;
+  7)
+    echo "Exiting."
+    exit 0
+    ;;
+  *)
+    echo "Invalid option. Exiting."
+    exit 1
+    ;;
+esac
+
+echo "Done."
