@@ -18,6 +18,8 @@ output "eDP-1" {
   }
 }
 
+spawn-at-startup "dbus-update-activation-environment" "--systemd" "WAYLAND_DISPLAY" "XDG_CURRENT_DESKTOP" "XDG_SESSION_TYPE"
+
 workspace "chat" {
   open-on-output "eDP-1"
 }
