@@ -129,6 +129,14 @@
   # #Enable Talon Voice Control
   # programs.talon.enable = true;
 
+  xdg.portal = {
+    enable = true;
+    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+    config.niri = {
+      default = ["gtk"];
+    };
+  };
+
   home.file = {
     ".scripts" = {
       source = ../dotfiles/.scripts;
