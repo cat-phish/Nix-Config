@@ -3,9 +3,13 @@
   pkgs,
   ...
 }: let
-  # Define your SDK version here (e.g., sdk_8_0, sdk_7_0)
-  # You can also use dotnetCorePackages.combinePackages to bundle multiple SDKs
-  dotnetPkg = pkgs.dotnetCorePackages.sdk_8_0;
+  # SDK 10 for the Roslyn version Avalonia 12's source generators need,
+  # plus the .NET 8 runtime so net8.0 projects still run.
+  dotnetPkg = with pkgs.dotnetCorePackages;
+    combinePackages [
+      sdk_10_0
+      runtime_8_0
+    ];
 in {
   home.packages = with pkgs; [
     dotnetPkg
@@ -13,11 +17,9 @@ in {
   ];
 
   home.sessionVariables = {
-    # Required for Rider and dotnet tools to locate the runtime in the Nix store
     DOTNET_ROOT = "${dotnetPkg}/share/dotnet";
   };
 
-  # Optional: Add the global tools directory to your PATH if you use `dotnet tool install -g`
   home.sessionPath = [
     "$HOME/.dotnet/tools"
   ];
