@@ -17,6 +17,7 @@
     (with pkgs; [
       fcast-client
       fcast-receiver
+      feishin
       grayjay
       iptvnator
       lsp-plugins # a collection of open source audio plugins

@@ -18,7 +18,7 @@ export PATH="$HOME/go/bin:$PATH"
 # export ZSH="$HOME/.oh-my-zsh"
 
 # Add AppImages to path
-echo 'export PATH="$HOME/.apps/appimages:$PATH"' >> ~/.zshrc
+export PATH="$HOME/.apps/appimages:$PATH"
 
 # Source Home Manager session variables
 if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
