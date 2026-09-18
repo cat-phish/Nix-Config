@@ -17,7 +17,7 @@ in {
   ];
 
   home.sessionVariables = {
-    DOTNET_ROOT = "${pkgs.dotnet-sdk_8}";
+    DOTNET_ROOT = "${dotnetPkg}/share/dotnet";
   };
 
   home.sessionPath = [
