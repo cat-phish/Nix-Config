@@ -1,27 +1,69 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 # Stop the script immediately if any command fails
-set -e
+set -euo pipefail
+
+# --- Helper Functions ---
+
+# Keep sudo timestamp updated while the script runs
+keep_sudo_alive() {
+  # Update the timestamp immediately
+  sudo -v
+
+  # Run a background loop to refresh the timestamp every 60 seconds
+  while true; do
+    sudo -n true
+    sleep 60
+    # Exit the loop if the parent script finishes
+    kill -0 "$$" || exit
+  done 2>/dev/null &
+}
+
+# --- Main Execution ---
+
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Please run this script as your regular user (not as root)."
+  exit 1
+fi
+
+# Start sudo loop right at the beginning
+echo "This script requires sudo for SnapRAID. Please authenticate now:"
+keep_sudo_alive
+SUDO_LOOP_PID=$! # Capture the PID of the background loop
+
+# Clean up the background loop and clear sudo access when the script exits
+trap 'kill "$SUDO_LOOP_PID" 2>/dev/null; sudo -k; echo "Cleaned up sudo and exited."' EXIT
 
 echo "========================================"
 echo "🎵 STEP 1: Converting Windows Playlists"
 echo "========================================"
 # Execute the conversion script we made earlier
-/home/jordan/convert_playlists.sh
+"$HOME/.scripts/music-convert_playlists"
 echo ""
 
 echo "========================================"
-echo "🔄 STEP 2: Syncing to Unraid"
+echo "🔄 STEP 2: Syncing to Unraid via SFTP"
 echo "========================================"
-# Sync the entire music folder (including the new playlists) to Unraid.
-# Change 'unraid_remote:/music/' to your actual rclone remote or mount point!
-rclone sync /home/jordan/music/ unraid_remote:/music/ --progress --transfers 4
+# Sync using the high-speed SFTP remote defined in Nix
+rclone sync "$HOME/music/" "mediaserver-sftp:/mnt/user/music/" \
+  --config="$HOME/.config/rclone/rclone-mediaserver-sftp.conf" \
+  --progress --transfers 4
 echo ""
 
 echo "========================================"
-echo "🛡️ STEP 3: Updating SnapRAID Parity"
+echo "🔧 STEP 3: Fixing Unraid Permissions"
 echo "========================================"
-# This will prompt for your sudo password if it hasn't been entered recently
+# Because SFTP writes as 'root', we tell Unraid to reset the ownership
+# to 'nobody:users' so your Docker containers can still read the files.
+ssh mediaserver "chown -R nobody:users /mnt/user/music/"
+echo "Permissions successfully reset on Unraid."
+echo ""
+
+echo "========================================"
+echo "🛡️ STEP 4: Updating SnapRAID Parity"
+echo "========================================"
+# The background loop has kept our sudo session alive, so this runs seamlessly
 sudo snapraid sync
 echo ""
 
-echo "✅ Complete! Playlists converted, Unraid backed up, and local parity updated."
+echo "✅ Complete! Playlists converted, Unraid backed up, permissions fixed, and local parity updated."

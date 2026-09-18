@@ -3,7 +3,16 @@
   pkgs-stable,
   ...
 }: {
-  xdg.configFile."rclone/rclone-mediaserversmb.conf".text = ''
+  # SFTP config for large transfers
+  xdg.configFile."rclone/rclone-mediaserver-sftp.conf".text = ''
+    [mediaserver-sftp]
+    type = sftp
+    host = mediaserver
+    use_insecure_cipher = false
+  '';
+
+  # SMB config for mounting
+  xdg.configFile."rclone/rclone-mediaserver-smb.conf".text = ''
     [mediaserversmb]
     type = smb
   '';
@@ -31,7 +40,7 @@
         ];
         ExecStart = ''
           ${pkgs.rclone}/bin/rclone mount mediaserversmb:/ ${mediaserverDir} \
-            --config=%h/.config/rclone/rclone-mediaserversmb.conf \
+            --config=%h/.config/rclone/rclone-mediaserver-smb.conf \
             --vfs-cache-mode full \
             --vfs-cache-max-age 72h \
             --cache-dir=${cacheDir} \
