@@ -1,0 +1,27 @@
+#!/bin/bash
+# Stop the script immediately if any command fails
+set -e
+
+echo "========================================"
+echo "🎵 STEP 1: Converting Windows Playlists"
+echo "========================================"
+# Execute the conversion script we made earlier
+/home/jordan/convert_playlists.sh
+echo ""
+
+echo "========================================"
+echo "🔄 STEP 2: Syncing to Unraid"
+echo "========================================"
+# Sync the entire music folder (including the new playlists) to Unraid.
+# Change 'unraid_remote:/music/' to your actual rclone remote or mount point!
+rclone sync /home/jordan/music/ unraid_remote:/music/ --progress --transfers 4
+echo ""
+
+echo "========================================"
+echo "🛡️ STEP 3: Updating SnapRAID Parity"
+echo "========================================"
+# This will prompt for your sudo password if it hasn't been entered recently
+sudo snapraid sync
+echo ""
+
+echo "✅ Complete! Playlists converted, Unraid backed up, and local parity updated."
