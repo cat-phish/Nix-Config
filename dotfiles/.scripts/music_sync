@@ -27,7 +27,7 @@ do_convert() {
   echo "========================================"
   echo "🎵 STEP: Converting Windows Playlists"
   echo "========================================"
-  "$HOME/.scripts/music-convert_playlists"
+  "$HOME/.scripts/music-convert-playlists"
   echo ""
 }
 
