@@ -35,7 +35,7 @@ do_check() {
   echo "========================================"
   echo "🔎 STEP: Rclone Check (Dry Run)"
   echo "========================================"
-  rclone check "$HOME/music/" "$RCLONE_DEST" \
+  rclone check "$HOME/music/library/" "$RCLONE_DEST/library/" \
     --missing-on-src "$HOME/rclone_would_delete.txt" \
     --missing-on-dst "$HOME/rclone_would_copy.txt" \
     --differ "$HOME/rclone_differ.txt" \
@@ -48,7 +48,8 @@ do_sync() {
   echo "========================================"
   echo "🔄 STEP: Syncing to Unraid via SFTP"
   echo "========================================"
-  rclone sync "$HOME/music/" "$RCLONE_DEST" --progress --transfers 4
+  rclone sync "$HOME/music/library/" "$RCLONE_DEST/library/" --progress --transfers 4
+  rclone sync "$HOME/music/playlists/" "$RCLONE_DEST/playlists/" --progress --transfers 4
   echo ""
 
   echo "========================================"
