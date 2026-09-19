@@ -3,20 +3,68 @@
 # Stop the script immediately if any command fails
 set -euo pipefail
 
+# Source your SSH port variable (so background systemd timers can read it)
+if [ -f "$HOME/.ssh/.env" ]; then
+  source "$HOME/.ssh/.env"
+fi
+
+# Define the bulletproof Nix-safe connection string
+SSH_PORT="${MEDIASERVER_SSH_PORT:-22}"
+RCLONE_DEST=":sftp,host=mediaserver,user=$MEDIASERVER_SSH_USER,port=$SSH_PORT,key_file=$HOME/.ssh/id_ed25519,use_insecure_cipher=false,known_hosts_file=none:/mnt/user/music/"
+
 # --- Helper Functions ---
 
-# Keep sudo timestamp updated while the script runs
 keep_sudo_alive() {
-  # Update the timestamp immediately
   sudo -v
-
-  # Run a background loop to refresh the timestamp every 60 seconds
   while true; do
     sudo -n true
     sleep 60
-    # Exit the loop if the parent script finishes
     kill -0 "$$" || exit
   done 2>/dev/null &
+}
+
+do_convert() {
+  echo "========================================"
+  echo "🎵 STEP: Converting Windows Playlists"
+  echo "========================================"
+  "$HOME/.scripts/music-convert_playlists"
+  echo ""
+}
+
+do_check() {
+  echo "========================================"
+  echo "🔎 STEP: Rclone Check (Dry Run)"
+  echo "========================================"
+  rclone check "$HOME/music/" "$RCLONE_DEST" \
+    --missing-on-src "$HOME/rclone_would_delete.txt" \
+    --missing-on-dst "$HOME/rclone_would_copy.txt" \
+    --differ "$HOME/rclone_differ.txt" \
+    --progress
+  echo "Check complete. Review the text files in your home directory."
+  echo ""
+}
+
+do_sync() {
+  echo "========================================"
+  echo "🔄 STEP: Syncing to Unraid via SFTP"
+  echo "========================================"
+  rclone sync "$HOME/music/" "$RCLONE_DEST" --progress --transfers 4
+  echo ""
+
+  echo "========================================"
+  echo "🔧 STEP: Fixing Unraid Permissions"
+  echo "========================================"
+  ssh mediaserver "chown -R nobody:users /mnt/user/music/"
+  echo "Permissions successfully reset on Unraid."
+  echo ""
+}
+
+do_snapraid() {
+  echo "========================================"
+  echo "🛡️ STEP: Updating SnapRAID Parity"
+  echo "========================================"
+  sudo snapraid sync
+  echo ""
 }
 
 # --- Main Execution ---
@@ -26,44 +74,53 @@ if [ "$(id -u)" -eq 0 ]; then
   exit 1
 fi
 
-# Start sudo loop right at the beginning
-echo "This script requires sudo for SnapRAID. Please authenticate now:"
-keep_sudo_alive
-SUDO_LOOP_PID=$! # Capture the PID of the background loop
-
-# Clean up the background loop and clear sudo access when the script exits
-trap 'kill "$SUDO_LOOP_PID" 2>/dev/null; sudo -k; echo "Cleaned up sudo and exited."' EXIT
-
-echo "========================================"
-echo "🎵 STEP 1: Converting Windows Playlists"
-echo "========================================"
-# Execute the conversion script we made earlier
-"$HOME/.scripts/music-convert_playlists"
+# Interactive Menu
+echo "What would you like to do?"
+echo "  1) Full Pipeline: Convert Playlists -> Sync to Server -> Sync SnapRAID (Default)"
+echo "  2) Rclone Check Only (Generate diff text files)"
+echo "  3) Sync to Server Only"
+echo "  4) Sync to Server + Sync SnapRAID"
+echo "  5) Convert Playlists Only"
+read -p "Enter choice [1-5] (Default: 1): " choice
 echo ""
 
-echo "========================================"
-echo "🔄 STEP 2: Syncing to Unraid via SFTP"
-echo "========================================"
-# Sync using the high-speed SFTP remote defined in Nix
-rclone sync "$HOME/music/" "mediaserver-sftp:/mnt/user/music/" \
-  --config="$HOME/.config/rclone/rclone-mediaserver-sftp.conf" \
-  --progress --transfers 4
-echo ""
+# Default to option 1 if the user just presses Enter (or if run by systemd)
+choice=${choice:-1}
 
-echo "========================================"
-echo "🔧 STEP 3: Fixing Unraid Permissions"
-echo "========================================"
-# Because SFTP writes as 'root', we tell Unraid to reset the ownership
-# to 'nobody:users' so your Docker containers can still read the files.
-ssh mediaserver "chown -R nobody:users /mnt/user/music/"
-echo "Permissions successfully reset on Unraid."
-echo ""
+# Start the sudo loop ONLY if SnapRAID is going to be run
+if [[ "$choice" == "1" || "$choice" == "4" ]]; then
+  echo "This operation requires sudo for SnapRAID. Please authenticate now:"
+  keep_sudo_alive
+  SUDO_LOOP_PID=$!
+  trap 'kill "$SUDO_LOOP_PID" 2>/dev/null; sudo -k; echo "Cleaned up sudo and exited."' EXIT
+fi
 
-echo "========================================"
-echo "🛡️ STEP 4: Updating SnapRAID Parity"
-echo "========================================"
-# The background loop has kept our sudo session alive, so this runs seamlessly
-sudo snapraid sync
-echo ""
-
-echo "✅ Complete! Playlists converted, Unraid backed up, permissions fixed, and local parity updated."
+# Execute based on selection
+case "$choice" in
+  1)
+    do_convert
+    do_sync
+    do_snapraid
+    echo "✅ Full pipeline complete!"
+    ;;
+  2)
+    do_check
+    ;;
+  3)
+    do_sync
+    echo "✅ Server sync complete!"
+    ;;
+  4)
+    do_sync
+    do_snapraid
+    echo "✅ Server & SnapRAID sync complete!"
+    ;;
+  5)
+    do_convert
+    echo "✅ Playlist conversion complete!"
+    ;;
+  *)
+    echo "Invalid choice. Exiting."
+    exit 1
+    ;;
+esac
