@@ -8,6 +8,7 @@
     [mediaserver-sftp]
     type = sftp
     host = mediaserver
+    key_file = ~/.ssh/id_ed25519
     use_insecure_cipher = false
   '';
 
