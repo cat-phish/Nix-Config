@@ -48,8 +48,8 @@ do_sync() {
   echo "========================================"
   echo "🔄 STEP: Syncing to Unraid via SFTP"
   echo "========================================"
-  rclone sync "$HOME/music/library/" "$RCLONE_DEST/library/" --progress --transfers 4
   rclone sync "$HOME/music/playlists/" "$RCLONE_DEST/playlists/" --progress --transfers 4
+  rclone sync "$HOME/music/library/" "$RCLONE_DEST/library/" --progress --transfers 4
   echo ""
 
   echo "========================================"
