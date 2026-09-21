@@ -43,10 +43,10 @@
       };
     };
     settings = {
-      directory = "~/music/New/2 - Beets Sorted";
-      library = "~/music/New/2 - Beets Sorted/musiclibrary.blb";
+      directory = "~/music/new/2 - Beets Sorted";
+      library = "~/music/new/2 - Beets Sorted/musiclibrary.blb";
       import.move = true;
-      import.log = "~/music/New/beets.log";
+      import.log = "~/music/new/beets.log";
 
       plugins = ["chroma" "lastgenre" "fetchart" "discogs" "copyartifacts" "ftintitle" "fromfilename" "inline" "rewrite" "export" "unimported"];
       # TODO: temp not working, removed: "lyrics" "spotify"
