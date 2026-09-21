@@ -1,8 +1,8 @@
-directory: /mnt/music_hdd/New/2 - Beets Sorted
-library: /mnt/music_hdd/New/2 - Beets Sorted/musiclibrary.blb
+directory: /home/jordan/music/new/2 - Beets Sorted
+library: /home/jordan/music/new/2 - Beets Sorted/musiclibrary.blb
 import:
   move: yes
-  log: /mnt/music_hdd/New/beets.log
+  log: /home/jordan/music/new/beets.log
 
 plugins:
   - lyrics
