@@ -22,6 +22,7 @@
       iptvnator
       lsp-plugins # a collection of open source audio plugins
       mpv
+      plezy
       vlc
     ])
     ++ (with pkgs-stable; [
