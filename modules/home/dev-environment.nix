@@ -25,6 +25,7 @@
       clang-tools
       claude-code
       llvm
+      gh
       eza # ls replacement
       gtest
       fd
