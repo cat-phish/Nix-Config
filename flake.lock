@@ -185,26 +185,6 @@
         "type": "github"
       }
     },
-    "navibeat": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791756551,
-        "narHash": "sha256-exAlLbD2Y4wHtIbsDu3UOGY6q4tGEemgmI1EjltRRYg=",
-        "owner": "dmnc98",
-        "repo": "navibeat-flake",
-        "rev": "634020ae68481ab6e291b8e91ebcbac82608eb10",
-        "type": "github"
-      },
-      "original": {
-        "owner": "dmnc98",
-        "repo": "navibeat-flake",
-        "type": "github"
-      }
-    },
     "neovim-nightly-overlay": {
       "inputs": {
         "flake-parts": "flake-parts_2",
@@ -561,7 +541,6 @@
         "emacs-config": "emacs-config",
         "home-manager": "home-manager",
         "kmonad": "kmonad",
-        "navibeat": "navibeat",
         "nix-flatpak": "nix-flatpak",
         "nix-ros-overlay": "nix-ros-overlay",
         "nix-snapd": "nix-snapd",
