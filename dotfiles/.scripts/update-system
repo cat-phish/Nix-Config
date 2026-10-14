@@ -106,31 +106,36 @@ update_appimages() {
 
   mkdir -p "$app_dir" "$icon_dir" "$desktop_dir"
 
-  # Format: "binary_name|Display Name|github_owner/repo|asset_regex|categories|env_prefix"
+  # Format: "binary_name|Display Name|github_owner/repo|url_template|categories|env_prefix"
+  # {TAG} = full release tag (e.g. v1.0.34), {VER} = tag without leading 'v' (e.g. 1.0.34)
   local apps=(
-    "navibeat|NaviBeat|nenadjokic/navibeat-linux|NaviBeat-linux-x86_64\\.AppImage$|AudioVideo;Audio;Player;|env _JAVA_AWT_WM_NONREPARENTING=1 "
-    "artcraft-launcher|ArtCraft Launcher|storytold/craft-launcher|artcraft-launcher-.*-linux-x86_64\\.AppImage$|Graphics;Office;Utility;|"
+    "navibeat|NaviBeat|nenadjokic/navibeat-linux|https://github.com/nenadjokic/navibeat-linux/releases/download/{TAG}/NaviBeat-linux-x86_64.AppImage|AudioVideo;Audio;Player;|env _JAVA_AWT_WM_NONREPARENTING=1 "
+    "artcraft-launcher|ArtCraft Launcher|storytold/craft-launcher|https://github.com/storytold/craft-launcher/releases/download/{TAG}/artcraft-launcher-{VER}-linux-x86_64.AppImage|Graphics;Office;Utility;|"
   )
 
   for entry in "${apps[@]}"; do
-    IFS='|' read -r bin_name display_name repo asset_regex categories env_prefix <<< "$entry"
+    IFS='|' read -r bin_name display_name repo url_template categories env_prefix <<< "$entry"
     echo "Checking $display_name ($repo) for updates..."
 
-    local release_json
-    release_json=$(curl -fsSL "https://api.github.com/repos/${repo}/releases/latest") || {
-      echo "[!] Failed to fetch release info for $repo"
+    # Resolve latest tag via web redirect (bypasses api.github.com 403 rate limits)
+    local redirect_url latest_tag latest_ver
+    redirect_url=$(curl -fsSLI -o /dev/null -w '%{url_effective}' "https://github.com/${repo}/releases/latest") || {
+      echo "[!] Failed to resolve latest release for $repo"
       continue
     }
 
-    local latest_tag download_url version_file="$app_dir/.${bin_name}.version"
-    latest_tag=$(echo "$release_json" | jq -r '.tag_name')
-    download_url=$(echo "$release_json" | jq -r --arg re "$asset_regex" '.assets[] | select(.name | test($re)) | .browser_download_url' | head -n1)
+    latest_tag="${redirect_url##*/}"
+    latest_ver="${latest_tag#v}"
 
-    if [ -z "$download_url" ] || [ "$download_url" = "null" ]; then
-      echo "[!] Could not find matching AppImage asset for $repo"
+    if [ -z "$latest_tag" ] || [ "$latest_tag" = "latest" ]; then
+      echo "[!] Could not determine latest tag for $repo"
       continue
     fi
 
+    local download_url="${url_template//\{TAG\}/$latest_tag}"
+    download_url="${download_url//\{VER\}/$latest_ver}"
+
+    local version_file="$app_dir/.${bin_name}.version"
     local current_tag=""
     [ -f "$version_file" ] && current_tag=$(cat "$version_file")
 
@@ -138,26 +143,31 @@ update_appimages() {
 
     if [ "$latest_tag" != "$current_tag" ] || [ ! -f "$target_bin" ]; then
       echo "Downloading $display_name ($latest_tag)..."
-      curl -fL "$download_url" -o "${target_bin}.tmp"
-      chmod +x "${target_bin}.tmp"
-      mv "${target_bin}.tmp" "$target_bin"
-      echo "$latest_tag" > "$version_file"
+      if curl -fL "$download_url" -o "${target_bin}.tmp"; then
+        chmod +x "${target_bin}.tmp"
+        mv "${target_bin}.tmp" "$target_bin"
+        echo "$latest_tag" > "$version_file"
 
-      # Extract icon from the AppImage
-      local tmp_extract
-      tmp_extract=$(mktemp -d)
-      (
-        cd "$tmp_extract"
-        "$target_bin" --appimage-extract "*.png" >/dev/null 2>&1 || true
-        "$target_bin" --appimage-extract "usr/share/icons/**/*.png" >/dev/null 2>&1 || true
-        local found_icon
-        found_icon=$(find squashfs-root -name "*.png" -type f 2>/dev/null | head -n1)
-        if [ -n "$found_icon" ]; then
-          cp "$found_icon" "$icon_dir/${bin_name}.png"
-        fi
-      )
-      rm -rf "$tmp_extract"
-      echo "[✓] Updated $display_name to $latest_tag"
+        # Extract icon from the AppImage
+        local tmp_extract
+        tmp_extract=$(mktemp -d)
+        (
+          cd "$tmp_extract"
+          "$target_bin" --appimage-extract "*.png" >/dev/null 2>&1 || true
+          "$target_bin" --appimage-extract "usr/share/icons/**/*.png" >/dev/null 2>&1 || true
+          local found_icon
+          found_icon=$(find squashfs-root -name "*.png" -type f 2>/dev/null | head -n1)
+          if [ -n "$found_icon" ]; then
+            cp "$found_icon" "$icon_dir/${bin_name}.png"
+          fi
+        )
+        rm -rf "$tmp_extract"
+        echo "[✓] Updated $display_name to $latest_tag"
+      else
+        echo "[!] Failed to download $download_url"
+        rm -f "${target_bin}.tmp"
+        continue
+      fi
     else
       echo "[-] $display_name is already up to date ($current_tag)"
     fi
