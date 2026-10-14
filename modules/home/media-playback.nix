@@ -26,7 +26,10 @@
       vlc
     ])
     ++ (with pkgs-stable; [
-      ]);
+      ])
+    ++ [
+      inputs.navibeat.packages.${pkgs.stdenv.hostPlatform.system}.default
+    ];
 
   home.file = {
   };

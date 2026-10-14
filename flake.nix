@@ -30,6 +30,10 @@
     agenix.url = "github:ryantm/agenix";
     # ROS packages for palouse-robosub (kept on its own pinned nixpkgs, per upstream flake)
     nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
+    navibeat = {
+      url = "github:dmnc98/navibeat-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     # numennix.url = "github:anpandey/numen-nix";
     # numen = {
     #   url = "github:anpandey/numen-nix"; # or wherever the flake is
