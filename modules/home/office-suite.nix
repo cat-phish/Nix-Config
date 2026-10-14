@@ -14,34 +14,59 @@
 # 4. Run your `update-system` script (or `home-manager switch --flake ~/.nix`).
 # ==============================================================================
 # --- OPTION B (ACTIVE): ArtCraft Launcher AppImage Wrapper ---
+# --- OPTION B (ACTIVE): ArtCraft Launcher AppImage Wrapper (Fedora + NixOS) ---
 let
   pname = "artcraft-launcher";
   version = "0.3.2";
 
   src = pkgs.fetchurl {
     url = "https://github.com/storytold/craft-launcher/releases/download/v${version}/artcraft-launcher-${version}-linux-x86_64.AppImage";
-    # Upstream SHA-256 for v0.3.2. If bumping `version` later, get the new hash with:
-    # nix-prefetch-url https://github.com/storytold/craft-launcher/releases/download/v<VERSION>/artcraft-launcher-<VERSION>-linux-x86_64.AppImage
     sha256 = "7edc70da35bf214a2215287948b8fda620b3dfe55076aec56e8d76be1a68a8b5";
   };
 
   appimageContents = pkgs.appimageTools.extractType2 {inherit pname version src;};
 
-  artcraft-launcher = pkgs.appimageTools.wrapType2 {
+  # Used only when running on NixOS
+  nixosWrapped = pkgs.appimageTools.wrapType2 {
     inherit pname version src;
-    extraInstallCommands = ''
-      mkdir -p $out/share/applications
-      for desktopFile in ${appimageContents}/*.desktop; do
-        if [ -f "$desktopFile" ]; then
-          install -m 444 -D "$desktopFile" "$out/share/applications/artcraft-launcher.desktop"
-          substituteInPlace "$out/share/applications/artcraft-launcher.desktop" \
-            --replace-quiet 'Exec=artcraft-launcher' "Exec=$out/bin/artcraft-launcher" \
-            --replace-quiet 'Exec=AppRun' "Exec=$out/bin/artcraft-launcher"
-        fi
-      done
-      if [ -d "${appimageContents}/usr/share/icons" ]; then
-        cp -r "${appimageContents}/usr/share/icons" "$out/share/"
+  };
+
+  artcraft-launcher = pkgs.stdenv.mkDerivation {
+    inherit pname version;
+    dontUnpack = true;
+
+    installPhase = ''
+      mkdir -p $out/bin $out/share/applications $out/share/pixmaps
+
+      # Smart launcher: uses Nix FHS wrapper on NixOS, runs natively on Fedora
+      cat > $out/bin/artcraft-launcher <<EOF
+      #!/usr/bin/env bash
+      if [ -e /etc/NIXOS ]; then
+        exec "${nixosWrapped}/bin/artcraft-launcher" "\$@"
+      else
+        export APPIMAGE_EXTRACT_AND_RUN=1
+        exec "${src}" "\$@"
       fi
+      EOF
+      chmod +x $out/bin/artcraft-launcher
+
+      # Copy icon from extracted AppImage
+      icon_file=$(find "${appimageContents}" -maxdepth 3 -name "*.png" -o -name "*.svg" | head -n1)
+      if [ -n "$icon_file" ]; then
+        cp "$icon_file" "$out/share/pixmaps/artcraft-launcher.''${icon_file##*.}"
+      fi
+
+      # Write a clean .desktop file guaranteed to point to $out/bin/artcraft-launcher
+      cat > $out/share/applications/artcraft-launcher.desktop <<EOF
+      [Desktop Entry]
+      Type=Application
+      Name=ArtCraft Launcher
+      Comment=Install and update the ArtCraft Suite
+      Exec=$out/bin/artcraft-launcher
+      Icon=artcraft-launcher
+      Terminal=false
+      Categories=Graphics;Office;Utility;
+      EOF
     '';
   };
 in
@@ -56,7 +81,7 @@ in
 
     home.packages =
       (with pkgs; [
-        libreoffice-fresh
+        libreoffice
         onlyoffice-desktopeditors
         artcraft-launcher # <--- OPTION B: Comment this line out if switching to Option A
       ])
