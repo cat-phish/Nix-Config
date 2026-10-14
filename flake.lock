@@ -150,11 +150,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791642191,
-        "narHash": "sha256-0bK0A59rVUn1SRZzo4cNi4VSqAe7vR1gL2/MZl53Frw=",
+        "lastModified": 1791940130,
+        "narHash": "sha256-hRCCi4fp5IjLz4cA8+RkUsaYAHzbd7M5FSAjKOq4E+k=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c58f54c733a7894d84fa2fdff26cc12088c4b78c",
+        "rev": "92a0ed1be12f1e20093faf8af63bae2c74ad521e",
         "type": "github"
       },
       "original": {
@@ -182,6 +182,26 @@
         "dir": "nix",
         "owner": "kmonad",
         "repo": "kmonad",
+        "type": "github"
+      }
+    },
+    "navibeat": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791756551,
+        "narHash": "sha256-exAlLbD2Y4wHtIbsDu3UOGY6q4tGEemgmI1EjltRRYg=",
+        "owner": "dmnc98",
+        "repo": "navibeat-flake",
+        "rev": "634020ae68481ab6e291b8e91ebcbac82608eb10",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dmnc98",
+        "repo": "navibeat-flake",
         "type": "github"
       }
     },
@@ -541,6 +561,7 @@
         "emacs-config": "emacs-config",
         "home-manager": "home-manager",
         "kmonad": "kmonad",
+        "navibeat": "navibeat",
         "nix-flatpak": "nix-flatpak",
         "nix-ros-overlay": "nix-ros-overlay",
         "nix-snapd": "nix-snapd",
