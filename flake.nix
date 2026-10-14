@@ -74,6 +74,18 @@
           "ventoy-1.1.07"
         ];
       };
+      # Add the overlay here so it applies to the globally passed pkgs
+      overlays = [
+        (final: prev: {
+          python312Packages = prev.python312Packages.override {
+            overrides = pyFinal: pyPrev: {
+              anyio = pyPrev.anyio.overridePythonAttrs (oldAttrs: {
+                doCheck = false;
+              });
+            };
+          };
+        })
+      ];
     };
     pkgs-stable = import nixpkgs-stable {
       inherit system;
