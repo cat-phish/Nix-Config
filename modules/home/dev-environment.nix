@@ -33,6 +33,7 @@
       # gcc
       jq
       # libgcc
+      mongodb
       navi
       oh-my-zsh
       opencode
