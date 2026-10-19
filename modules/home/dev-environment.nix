@@ -35,6 +35,7 @@
       # libgcc
       mongodb
       navi
+      nodejs_22
       oh-my-zsh
       opencode
       ripgrep
