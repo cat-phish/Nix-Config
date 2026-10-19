@@ -28,6 +28,7 @@
       llvm
       gh
       eza # ls replacement
+      gitleaks
       gtest
       fd
       fzf
