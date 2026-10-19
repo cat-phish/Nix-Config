@@ -24,6 +24,7 @@
       # clang
       clang-tools
       claude-code
+      docker-compose
       llvm
       gh
       eza # ls replacement
@@ -33,7 +34,7 @@
       # gcc
       jq
       # libgcc
-      mongodb
+      # mongodb #takes too long to build from source
       navi
       nodejs_22
       oh-my-zsh
