@@ -20,6 +20,7 @@
   home.packages =
     (with pkgs; [
       aspell
+      antigravity-cli
       bat # cat replacement with syntax highlighting
       # clang
       clang-tools
