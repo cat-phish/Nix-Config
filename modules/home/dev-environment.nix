@@ -28,7 +28,7 @@
       llvm
       gh
       eza # ls replacement
-      gemeni-cli
+      gemini-cli
       gitleaks
       gtest
       fd
