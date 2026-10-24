@@ -173,6 +173,10 @@
       source = ../dotfiles/.config/kmonad;
       recursive = true;
     };
+    "${config.xdg.configHome}/xdg-desktop-portal" = {
+      source = ../dotfiles/.config/xdg-desktop-portal;
+      recursive = true;
+    };
   };
 
   home.sessionVariables = {
