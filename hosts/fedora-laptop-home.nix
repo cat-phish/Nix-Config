@@ -129,13 +129,13 @@
   # #Enable Talon Voice Control
   # programs.talon.enable = true;
 
-  xdg.portal = {
-    enable = true;
-    extraPortals = [pkgs.xdg-desktop-portal-gtk];
-    config.niri = {
-      default = ["gtk"];
-    };
-  };
+  # xdg.portal = {
+  #   enable = true;
+  #   extraPortals = [pkgs.xdg-desktop-portal-gtk];
+  #   config.niri = {
+  #     default = ["gtk"];
+  #   };
+  # };
 
   home.file = {
     ".scripts" = {
@@ -165,6 +165,10 @@
     };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;
+      recursive = true;
+    };
+    "${config.xdg.configHome}/xdg-desktop-portal" = {
+      source = ../dotfiles/.config/xdg-desktop-portal;
       recursive = true;
     };
     # "${config.xdg.configHome}/systemd/user/kmonad.service" = {

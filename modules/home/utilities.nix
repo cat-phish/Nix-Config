@@ -17,7 +17,6 @@
     (with pkgs; [
       aerc
       appimage-run
-      audacity
       browsh
       cargo
       caligula # iso to disk burning, dd alternative
@@ -71,6 +70,7 @@
       # cage
     ])
     ++ (with pkgs-stable; [
+      audacity
       rssguard
     ]);
 

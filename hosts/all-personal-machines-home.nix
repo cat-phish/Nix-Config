@@ -13,7 +13,7 @@
       activate-linux
       appimage-run
       asciiquarium-transparent # an aquarium, duh
-      audacity
+      # audacity
       bat # cat replacement with syntax highlighting
       chirp
       chromium
