@@ -21,7 +21,6 @@
       # Standalone Emulators
       dolphin-emu
       pcsx2
-      rpcs3
 
       # RetroArch with specific libretro cores baked in
       #   (retroarch.override {
@@ -35,7 +34,8 @@
       #   })
     ])
     ++ (with pkgs-stable; [
-      ]);
+      rpcs3
+    ]);
 
   services.flatpak = {
     enable = true;

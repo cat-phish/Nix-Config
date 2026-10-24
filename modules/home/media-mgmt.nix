@@ -15,13 +15,13 @@
 
   home.packages =
     (with pkgs; [
-      calibre
       kid3-kde
       qbittorrent
       yt-dlp
     ])
     ++ (with pkgs-stable; [
-      ]);
+      calibre
+    ]);
 
   home.file = {
   };

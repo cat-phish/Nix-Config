@@ -50,7 +50,6 @@
 
   home.packages =
     (with pkgs; [
-      calibre
       dotool
       chromaprint
       kid3-kde
