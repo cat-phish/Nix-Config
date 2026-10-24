@@ -71,6 +71,21 @@
   #   ];
   # };
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      pythonPackagesExtensions =
+        prev.pythonPackagesExtensions
+        ++ [
+          (python-final: python-prev: {
+            pyopenjtalk-plus = python-prev.pyopenjtalk-plus.overridePythonAttrs (oldAttrs: {
+              # Bypass the regex mismatch on Python 3.14 / updated pybind11
+              doCheck = false;
+            });
+          })
+        ];
+    })
+  ];
+
   # The home.packages option allows you to install Nix packages into your
   # environment.
   home.packages =
