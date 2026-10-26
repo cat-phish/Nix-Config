@@ -25,6 +25,7 @@
       # clang
       clang-tools
       claude-code
+      codex
       docker-compose
       llvm
       gh
