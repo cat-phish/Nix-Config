@@ -186,8 +186,18 @@ update_one_appimage() {
     echo "[-] $display_name is already up to date ($current_tag)"
   fi
 
-  # Ensure .desktop file exists (skipped for apps that create their own)
-  [ "$make_desktop" = true ] || return 0
+  # Apps that create their own .desktop file: remove the one this script made
+  # earlier (identified by our Icon= path) so the app isn't listed twice
+  if [ "$make_desktop" != true ]; then
+    local old_desktop="$desktop_dir/${bin_name}.desktop"
+    if [ -f "$old_desktop" ] && grep -qxF "Icon=$icon_dir/${bin_name}.png" "$old_desktop"; then
+      rm -f "$old_desktop" "$icon_dir/${bin_name}.png"
+      echo "[✓] Removed duplicate launcher for $display_name"
+    fi
+    return 0
+  fi
+
+  # Ensure .desktop file exists
   cat > "$desktop_dir/${bin_name}.desktop" <<EOF
 [Desktop Entry]
 Type=Application
