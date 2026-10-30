@@ -144,6 +144,7 @@
   # programs.talon.enable = true;
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
+    ".apps/appimages/appimages.conf".source = ../dotfiles/.apps/appimages/appimages.conf;
     ".scripts" = {
       source = ../dotfiles/.scripts;
       recursive = true;

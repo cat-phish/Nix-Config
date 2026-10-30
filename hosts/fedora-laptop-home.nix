@@ -138,6 +138,7 @@
   # };
 
   home.file = {
+    ".apps/appimages/appimages.conf".source = ../dotfiles/.apps/appimages/appimages.conf;
     ".scripts" = {
       source = ../dotfiles/.scripts;
       recursive = true;
