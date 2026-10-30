@@ -554,7 +554,6 @@ zinit light-mode for \
 zinit ice depth=1; zinit light romkatv/powerlevel10k
 zinit ice depth=1
 zinit light jeffreytse/zsh-vi-mode
-zinit ice wait"1" lucid
 zinit light zsh-users/zsh-autosuggestions
 zinit light zsh-users/zsh-syntax-highlighting
 zinit light zsh-users/zsh-completions
@@ -571,16 +570,16 @@ zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/fzf/fzf.pl
 # zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git/git.plugin.zsh' # way too many aliases
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/git-auto-fetch/git-auto-fetch.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/gitignore/gitignore.plugin.zsh'
-zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/github/github.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/rsync/rsync.plugin.zsh'
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/sudo/sudo.plugin.zsh' # press esc twice to prepend sudo to last command
 zinit snippet 'https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/zsh-interactive-cd/zsh-interactive-cd.plugin.zsh'
+zinit ice wait lucid
 zinit light 'zsh-users/zsh-history-substring-search'
-zinit ice wait atload'_history_substring_search_config'
 
 ### End of Zinit's installer chunk
 
-# Load zsh-completions
+# Load zsh-completions (incl. ones shipped by nix packages, e.g. gh)
+fpath+=("$HOME/.nix-profile/share/zsh/site-functions")
 autoload -U compinit && compinit
 zinit cdreplay -q
 
