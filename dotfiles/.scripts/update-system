@@ -98,11 +98,23 @@ update_flake() {
   fi
 }
 
+# Print the X-AppImage-Version embedded in an AppImage's .desktop file (empty if none)
+appimage_embedded_version() {
+  local tmp ver=""
+  tmp=$(mktemp -d)
+  ver=$(cd "$tmp" && "$1" --appimage-extract '*.desktop' >/dev/null 2>&1;
+    grep -h '^X-AppImage-Version=' squashfs-root/*.desktop 2>/dev/null | head -n1 | cut -d= -f2- | tr -d '\r') || true
+  rm -rf "$tmp"
+  echo "$ver"
+}
+
 # Download/update one AppImage in $app_dir and create its .desktop launcher
-# Args: bin_name display_name repo url_template categories env_vars latest_url
+# Args: bin_name display_name repo url_template categories env_vars latest_url desktop
 # Expects app_dir, icon_dir and desktop_dir to be set by update_appimages
 update_one_appimage() {
   local bin_name="$1" display_name="$2" repo="$3" url_template="$4" categories="$5" env_vars="$6" latest_url="$7"
+  local make_desktop=true
+  case "${8:-yes}" in no|false|0) make_desktop=false ;; esac
   echo "Checking $display_name ($repo) for updates..."
 
   # Resolve latest tag via web redirect (bypasses api.github.com 403 rate limits);
@@ -130,6 +142,17 @@ update_one_appimage() {
 
   local target_bin="$app_dir/$bin_name"
 
+  # Self-updating apps replace the AppImage without touching the version note,
+  # so trust the version embedded in the AppImage when it matches the latest release
+  if [ -f "$target_bin" ] && [ "$latest_tag" != "$current_tag" ]; then
+    local embedded_ver
+    embedded_ver=$(appimage_embedded_version "$target_bin")
+    if [ -n "$embedded_ver" ] && { [ "$embedded_ver" = "$latest_ver" ] || [ "$embedded_ver" = "$latest_tag" ]; }; then
+      echo "$latest_tag" > "$version_file"
+      current_tag="$latest_tag"
+    fi
+  fi
+
   if [ "$latest_tag" != "$current_tag" ] || [ ! -f "$target_bin" ]; then
     echo "Downloading $display_name ($latest_tag)..."
     if curl -fL "$download_url" -o "${target_bin}.tmp"; then
@@ -137,20 +160,22 @@ update_one_appimage() {
       mv "${target_bin}.tmp" "$target_bin"
       echo "$latest_tag" > "$version_file"
 
-      # Extract icon from the AppImage
-      local tmp_extract
-      tmp_extract=$(mktemp -d)
-      (
-        cd "$tmp_extract"
-        "$target_bin" --appimage-extract "*.png" >/dev/null 2>&1 || true
-        "$target_bin" --appimage-extract "usr/share/icons/**/*.png" >/dev/null 2>&1 || true
-        local found_icon
-        found_icon=$(find squashfs-root -name "*.png" -type f 2>/dev/null | head -n1)
-        if [ -n "$found_icon" ]; then
-          cp "$found_icon" "$icon_dir/${bin_name}.png"
-        fi
-      )
-      rm -rf "$tmp_extract"
+      # Extract icon from the AppImage (only used by our .desktop launcher)
+      if [ "$make_desktop" = true ]; then
+        local tmp_extract
+        tmp_extract=$(mktemp -d)
+        (
+          cd "$tmp_extract"
+          "$target_bin" --appimage-extract "*.png" >/dev/null 2>&1 || true
+          "$target_bin" --appimage-extract "usr/share/icons/**/*.png" >/dev/null 2>&1 || true
+          local found_icon
+          found_icon=$(find squashfs-root -name "*.png" -type f 2>/dev/null | head -n1)
+          if [ -n "$found_icon" ]; then
+            cp "$found_icon" "$icon_dir/${bin_name}.png"
+          fi
+        )
+        rm -rf "$tmp_extract"
+      fi
       echo "[✓] Updated $display_name to $latest_tag"
     else
       echo "[!] Failed to download $download_url"
@@ -161,7 +186,8 @@ update_one_appimage() {
     echo "[-] $display_name is already up to date ($current_tag)"
   fi
 
-  # Ensure .desktop file exists
+  # Ensure .desktop file exists (skipped for apps that create their own)
+  [ "$make_desktop" = true ] || return 0
   cat > "$desktop_dir/${bin_name}.desktop" <<EOF
 [Desktop Entry]
 Type=Application
@@ -189,7 +215,7 @@ update_appimages() {
     return 0
   fi
 
-  local section="" name="" repo="" asset="" url="" latest="" categories="" env=""
+  local section="" name="" repo="" asset="" url="" latest="" categories="" env="" desktop=""
 
   # Validate the current [section] and update it
   flush_appimage() {
@@ -202,7 +228,7 @@ update_appimages() {
     [ -z "$url_template" ] && url_template="https://github.com/${repo}/releases/download/{TAG}/${asset}"
     local latest_url="$latest"
     [ -z "$latest_url" ] && latest_url="https://github.com/${repo}/releases/latest"
-    update_one_appimage "$section" "$name" "$repo" "$url_template" "$categories" "$env" "$latest_url"
+    update_one_appimage "$section" "$name" "$repo" "$url_template" "$categories" "$env" "$latest_url" "$desktop"
   }
 
   local line key value
@@ -214,7 +240,7 @@ update_appimages() {
     if [[ "$line" =~ ^\[(.+)\]$ ]]; then
       flush_appimage
       section="${BASH_REMATCH[1]}"
-      name="" repo="" asset="" url="" latest="" categories="" env=""
+      name="" repo="" asset="" url="" latest="" categories="" env="" desktop=""
       continue
     fi
 
@@ -236,6 +262,7 @@ update_appimages() {
       latest) latest="$value" ;;
       categories) categories="$value" ;;
       env) env="$value" ;;
+      desktop) desktop="$value" ;;
       *) echo "[!] Unknown key '$key' in [$section]" ;;
     esac
   done < "$config_file"
