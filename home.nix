@@ -30,6 +30,10 @@
   nixpkgs.config.permittedInsecurePackages = [
     "electron-40.10.5"
   ];
+  # gtk2 is marked broken (EOL) but onlyoffice-desktopeditors' FHS env still needs it
+  nixpkgs.config.problems.handlers = {
+    "gtk+".broken = "warn";
+  };
   nixpkgs.config.home-manager.useGlobalPkgs = true;
 
   # sops = {
