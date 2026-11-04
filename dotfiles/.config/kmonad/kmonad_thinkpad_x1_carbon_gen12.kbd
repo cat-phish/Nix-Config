@@ -165,7 +165,7 @@
    ;; main layer letter shortcuts, these should each have corresponding delay layer shortcuts
    d (tap-hold 200 d (layer-toggle d-cuts)) ;; s on short press, toggle shortcuts layer on hold
    s (tap-hold 200 s (layer-toggle s-cuts))  ;; f on short press, alt on hold
-   k (tap-hold 200 k (layer-toggle k-cuts)) ;; k on short press, toggle shortcuts layer on hold
+   k (tap-hold-next 500 k (layer-toggle k-cuts) :timeout-button k) ;; tap k; press another key within 500ms = k-cuts layer; hold alone = repeating k
    a (tap-hold 200 a (layer-toggle altcuts))  ;; a on short press, toggle altcuts layer on hold
 
    ;; ctrl layer mappings
