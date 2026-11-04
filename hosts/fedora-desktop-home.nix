@@ -163,6 +163,10 @@
     ".config/niri/device-config.kdl" = {
       source = ../dotfiles/.config/niri/desktop-config.kdl;
     };
+    ".config/niri/scripts/arrange-columns.sh" = {
+      source = ../dotfiles/.config/niri/scripts/arrange-columns.sh;
+      executable = true;
+    };
     ".config/niri/scripts/focus_keepassxc.sh" = {
       source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
     };

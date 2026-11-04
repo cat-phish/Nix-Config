@@ -39,6 +39,9 @@ workspace "org-mode" {
 // workspace "browser"
 // workspace "terminal"
 
+// Fix column order on the org-mode workspace once its apps have loaded (any order).
+spawn-sh-at-startup "~/.config/niri/scripts/arrange-columns.sh org-mode futo-notes-tauri Emacs dev.duxlabs.calendar"
+
 // Named Workspace Rules
 window-rule {
   match at-startup=true app-id=r#"xwaylandvideobridge$"#
@@ -60,13 +63,19 @@ window-rule {
   default-column-width { proportion 0.50; }
 }
 window-rule {
+    match at-startup=true app-id=r#"^futo-notes-tauri$"#
+    open-on-workspace "org-mode"
+    open-maximized true
+    open-focused false
+}
+window-rule {
     match at-startup=true app-id=r#"Emacs$"#
     open-on-workspace "org-mode"
     open-maximized true
     open-focused false
 }
 window-rule {
-    match at-startup=true app-id=r#"^com\.danklinux\.dankcalendar$"#
+    match at-startup=true app-id=r#"^(dev\.duxlabs\.calendar|com\.danklinux\.dankcalendar)$"#
     open-on-workspace "org-mode"
     open-maximized true
     open-focused false
