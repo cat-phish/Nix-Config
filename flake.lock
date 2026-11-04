@@ -42,11 +42,11 @@
     "emacs-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1793679679,
-        "narHash": "sha256-QFOPNJS8HwVh5ZuukK24CPM/UkF+UGscrwogYLWld4A=",
+        "lastModified": 1793785606,
+        "narHash": "sha256-nRinQFHN/VsdMkiDGGeQU4vc6oELSsKV5CskcrR7cUw=",
         "ref": "refs/heads/master",
-        "rev": "0336224136ea5620b8c0ba663b85ae5dc0079c06",
-        "revCount": 115,
+        "rev": "5d47184211e4ea899c13d760dbc82d6cf8ec7589",
+        "revCount": 116,
         "type": "git",
         "url": "ssh://git@github.com/cat-phish/Emacs.git"
       },
@@ -380,11 +380,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793540411,
-        "narHash": "sha256-us2GRWGXbOQpN1blyJGvmdx+g4bv9GoFYq5iiOHRiZ8=",
-        "rev": "0bb2eedc20e4739f29e8045034f2828ad7054f8f",
+        "lastModified": 1793726008,
+        "narHash": "sha256-iNjybNORi/2+shilhMlkNr01UHWKOHRGzQyIyvobs9o=",
+        "rev": "1d060086d60cb76a40cf37109f979d88a5bd6396",
         "type": "tarball",
-        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1106360.0bb2eedc20e4/nixexprs.tar.zst"
+        "url": "https://releases.nixos.org/nixos/unstable/nixos-26.11pre1107793.1d060086d60c/nixexprs.tar.zst"
       },
       "original": {
         "id": "nixpkgs",
@@ -465,11 +465,11 @@
         "plugins-snacks": "plugins-snacks"
       },
       "locked": {
-        "lastModified": 1793781183,
-        "narHash": "sha256-56mb2vJBWyhgidmSKa7FCiiPi5fW+uAlWq3GmGdpjVI=",
+        "lastModified": 1793784724,
+        "narHash": "sha256-biUr42IC7cbiXVfjhXdAuEEAebQPQ0BsoW9UGchs3SE=",
         "owner": "cat-phish",
         "repo": "Neovim",
-        "rev": "8ed6ed1abef4c95112830401801d9dba5eb06e17",
+        "rev": "ed152bc32df9e860e5849c7aac0bb563795747ff",
         "type": "github"
       },
       "original": {
