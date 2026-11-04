@@ -34,6 +34,7 @@
     ../modules/home/app-wireguard-tray.nix
     # ../modules/home/robosub.nix
     ../modules/home/app-tailscale.nix
+    ../modules/home/niri-kde-apps.nix
     # inputs.sops-nix.homeManagerModules.sops
     # inputs.sops-nix.homeManagerModules.sops
   ];
