@@ -10,7 +10,11 @@
   # pick up changes live. Without it, Qt picks a dark palette from the portal but
   # KDE apps still use kdeglobals' text colors, which gives dark-on-dark text.
   # environment.d applies to D-Bus-activated apps too (e.g. Dolphin via FileManager1).
-  systemd.user.sessionVariables.QT_QPA_PLATFORMTHEME = "kde";
+  # DMS falls back to gtk3 for both vars; the _QT6 one wins for Qt6 apps, so set both.
+  systemd.user.sessionVariables = {
+    QT_QPA_PLATFORMTHEME = "kde";
+    QT_QPA_PLATFORMTHEME_QT6 = "kde";
+  };
 
   # Opening a KDE app D-Bus-activates kded6. Its gtkconfig module rewrites GTK
   # settings and the color-scheme gsetting from kdeglobals, which flips the whole
