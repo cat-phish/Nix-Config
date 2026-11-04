@@ -42,11 +42,11 @@
     "emacs-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1793785606,
-        "narHash": "sha256-nRinQFHN/VsdMkiDGGeQU4vc6oELSsKV5CskcrR7cUw=",
+        "lastModified": 1793828744,
+        "narHash": "sha256-1XN14XcDDMYry5wiEhLrsj8rtqrhlNWQcRM7rYXuGiA=",
         "ref": "refs/heads/master",
-        "rev": "5d47184211e4ea899c13d760dbc82d6cf8ec7589",
-        "revCount": 116,
+        "rev": "6aa3a5a61a2530f02493458529a4612a0c9d9059",
+        "revCount": 117,
         "type": "git",
         "url": "ssh://git@github.com/cat-phish/Emacs.git"
       },
