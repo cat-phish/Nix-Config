@@ -33,7 +33,7 @@
     ../modules/home/app-talon.nix
     ../modules/home/app-wireguard-tray.nix
     # ../modules/home/robosub.nix
-    # ../modules/home/app-tailscale.nix
+    ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops
     # inputs.sops-nix.homeManagerModules.sops
   ];
@@ -124,7 +124,6 @@
       #   origin = "flathub";
       # }
       "com.usebottles.bottles"
-      "dev.deedles.Trayscale"
       "tv.kodi.Kodi"
       "org.fcast.Sender"
       # "org.winehq.Wine"

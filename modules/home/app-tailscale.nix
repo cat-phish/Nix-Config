@@ -1,48 +1,34 @@
 {
   config,
-  inputs,
   lib,
   pkgs,
-  pkgs-stable,
+  isNixos ? false,
   ...
 }: {
-  # Plasma Manager KDE Configuration
-  imports = [
-  ];
-
-  # sops.secrets = {
-  # };
-
-  home.packages =
-    (with pkgs; [
-      tailscale
-    ])
-    ++ (with pkgs-stable; [
-      ]);
-
-  home.file = {
-  };
-
-  # For non-NixOS systems, you'll need to enable the service manually
-  # or use systemd user services
-  systemd.user.services.tailscale = {
-    Unit = {
-      Description = "Tailscale client daemon";
-      After = ["network-pre.target"];
-      Wants = ["network-pre.target"];
+  # Tailscale on non-NixOS hosts (Fedora).
+  # The daemon (tailscaled) is installed and run system-wide via dnf, because it
+  # needs root for the TUN device/routes; Home Manager only adds the user-level
+  # pieces. One-time prerequisite: `sudo tailscale set --operator=$USER`.
+  config = lib.mkIf (!isNixos) {
+    # Tray icon, started with the graphical (niri) session.
+    systemd.user.services.tailscale-systray = {
+      Unit = {
+        Description = "Tailscale system tray";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target" "dms.service"];
+      };
+      Service = {
+        ExecStart = "/usr/bin/tailscale systray";
+        Restart = "on-failure";
+        RestartSec = 3;
+      };
+      Install.WantedBy = ["graphical-session.target"];
     };
-    Service = {
-      ExecStart = "${pkgs.tailscale}/bin/tailscaled --tun=userspace-networking --socket=%t/tailscaled.socket";
-      Restart = "on-failure";
-      RuntimeDirectory = "tailscale";
-      RuntimeDirectoryMode = "0755";
-      StateDirectory = "tailscale";
-      StateDirectoryMode = "0700";
-      CacheDirectory = "tailscale";
-      CacheDirectoryMode = "0750";
-    };
-    Install = {
-      WantedBy = ["default.target"];
+
+    # Exit-node toggle/picker used by niri keybinds (Mod+X / Mod+Shift+X).
+    home.file.".config/niri/scripts/tailscale-exit-node.sh" = {
+      source = ../../dotfiles/.config/niri/scripts/tailscale-exit-node.sh;
+      executable = true;
     };
   };
 }

@@ -71,6 +71,8 @@
     ])
     ++ (with pkgs-stable; [
       audacity
+      # netbird
+      # netbird-ui
       rssguard
     ]);
 

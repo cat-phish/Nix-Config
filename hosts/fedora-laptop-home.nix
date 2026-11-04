@@ -25,7 +25,7 @@
     ../modules/home/app-foobar2000-wine-dependencies.nix
     # ../modules/home/c-sharp-dev.nix
     # ../modules/home/robosub.nix
-    # ../modules/home/app-tailscale.nix
+    ../modules/home/app-tailscale.nix
     # inputs.sops-nix.homeManagerModules.sops
   ];
 
@@ -110,7 +110,6 @@
       #   origin = "flathub";
       # }
       "com.usebottles.bottles"
-      "dev.deedles.Trayscale"
       "tv.kodi.Kodi"
     ];
     update.auto = {

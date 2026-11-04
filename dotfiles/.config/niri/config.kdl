@@ -225,6 +225,8 @@ binds {
     Mod+O  { focus-workspace "org-mode"; }
     // Mod+P  { focus-workspace "passwords"; }
     Mod+P { spawn-sh "~/.config/niri/scripts/focus_keepassxc.sh"; }
+    Mod+X hotkey-overlay-title="Tailscale: Toggle Exit Node" { spawn-sh "~/.config/niri/scripts/tailscale-exit-node.sh toggle"; }
+    Mod+Shift+X hotkey-overlay-title="Tailscale: Pick Exit Node" { spawn-sh "~/.config/niri/scripts/tailscale-exit-node.sh pick"; }
     Mod+C  { focus-workspace "chat"; }
 
     // Focus Workspaces/Windows
