@@ -1,7 +1,15 @@
 # My Dotfiles
 
-This repository contains my personal NixOS config including configurations for
-various applications, themes, and icons.
+My personal Nix flake: Home Manager on Fedora (the daily driver) plus full NixOS
+configs, all with the same niri + Dux Shell (DMS) desktop, along with dotfiles,
+themes, and icons.
+
+- **Fedora:** standalone Home Manager. niri, dms and drivers come from dnf/COPR via `init.sh`.
+- **NixOS:** `nixos-desktop` / `nixos-laptop`. Kept evaluating and building so switching back is
+  easy, but not used day to day.
+- **`archive/`:** unused code kept for reference (e.g. the old KDE Plasma setup). Nothing there is imported.
+
+See [AGENTS.md](AGENTS.md) for the layout and everyday commands.
 
 ## Installation
 
@@ -10,7 +18,7 @@ run the following command:
 
 ```sh
 nix-shell -p git --run '
-  git clone --recurse-submodules https://github.com/your/repo.git $HOME/.nix &&
+  git clone --recurse-submodules https://github.com/cat-phish/Nix-Config.git $HOME/.nix &&
   cd $HOME/.nix &&
   ./init.sh
 '

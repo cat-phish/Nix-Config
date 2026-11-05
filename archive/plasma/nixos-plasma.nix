@@ -8,6 +8,8 @@
 #   plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
 #   plasma-manager.inputs.home-manager.follows = "home-manager";
 #
+# nixos-laptop also had touchegg (system package) and linked dotfiles/.config/touchegg/touchegg.conf.
+#
 # nixos-desktop also had snap support (dropped at the same time):
 #   nix-snapd.url = "github:nix-community/nix-snapd";  # + nix-snapd.nixosModules.default
 #   services.snap.enable = true;

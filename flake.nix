@@ -21,6 +21,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
+    # Dux Shell (formerly DankMaterialShell) and its greeter, for the NixOS hosts.
+    # Fedora gets dms from the avengemedia/dms COPR instead.
+    dms.url = "github:duxlabs-dev/dux-shell";
+    dms-greeter.url = "github:duxlabs-dev/dux-greeter";
     talon-nix.url = "github:nix-community/talon-nix";
     agenix.url = "github:ryantm/agenix";
     # ROS packages for palouse-robosub (kept on its own pinned nixpkgs, per upstream flake)

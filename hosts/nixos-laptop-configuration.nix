@@ -28,7 +28,6 @@
         openrgb-with-all-plugins
         tailscale
         tailscale-systray
-        touchegg
       ])
       ++ (with pkgs-stable; [
         ]);

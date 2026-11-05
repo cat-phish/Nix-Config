@@ -1,189 +1,126 @@
-# Edit this configuration file to define what should be installed on
-# your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# Shared NixOS base for every NixOS host. Host-specific settings live in
+# hosts/<host>-configuration.nix. The desktop is niri + Dux Shell (DMS), matching Fedora;
+# the old KDE Plasma setup is in archive/plasma/.
 {
   config,
   lib,
   inputs,
   pkgs,
-  pkgs-stable,
   ...
 }: {
   imports = [
-    # Include the results of the hardware scan.
-    # ./hardware-configuration.nix
     inputs.sops-nix.nixosModules.sops
     inputs.talon-nix.nixosModules.talon
+    inputs.dms.nixosModules.dank-material-shell
+    inputs.dms-greeter.nixosModules.default
   ];
 
-  config = {
-    nixpkgs.config.permittedInsecurePackages = [
-      "electron-40.10.5"
+  nixpkgs.config.allowUnfree = true;
+  nixpkgs.config.permittedInsecurePackages = [
+    "electron-40.10.5"
+  ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
+
+  networking.networkmanager.enable = true;
+  time.timeZone = "America/Los_Angeles";
+  i18n.defaultLocale = "en_US.UTF-8";
+  i18n.extraLocaleSettings = {
+    LC_ADDRESS = "en_US.UTF-8";
+    LC_IDENTIFICATION = "en_US.UTF-8";
+    LC_MEASUREMENT = "en_US.UTF-8";
+    LC_MONETARY = "en_US.UTF-8";
+    LC_NAME = "en_US.UTF-8";
+    LC_NUMERIC = "en_US.UTF-8";
+    LC_PAPER = "en_US.UTF-8";
+    LC_TELEPHONE = "en_US.UTF-8";
+    LC_TIME = "en_US.UTF-8";
+  };
+  services.xserver.xkb = {
+    layout = "us";
+    variant = "";
+  };
+
+  # --- Desktop: niri + Dux Shell (DMS) ---
+  programs.niri.enable = true;
+  programs.dank-material-shell = {
+    enable = true;
+    # Start the shell with the niri session (Fedora does this with `systemctl --user add-wants niri.service dms`).
+    systemd.enable = true;
+  };
+  # Greeter: greetd running dms-greeter inside niri, with the user's DMS theme copied in.
+  programs.dms-greeter = {
+    enable = true;
+    compositor.name = "niri";
+    configHome = config.users.users.jordan.home;
+  };
+  # dotfiles/.config/xdg-desktop-portal/niri-portals.conf prefers gnome, then gtk (for FileChooser).
+  xdg.portal = {
+    enable = true;
+    extraPortals = [pkgs.xdg-desktop-portal-gtk];
+  };
+  environment.systemPackages = with pkgs; [
+      # Qt platform theme "kde" (set in modules/home/niri-kde-apps.nix); Fedora installs it via dnf
+      kdePackages.plasma-integration
+
+      age
+      clang
+      coreutils
+      exfat
+      filezilla
+      firefox
+      fzf
+      gcc
+      git
+      glibc
+      gnumake
+      htop
+      nfs-utils
+      nodejs
+      rclone
+      sops
+      tmux
+      vim
+      wget
+      wl-clipboard
+      xclip
+      zsh
     ];
 
-    # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
-
-    # Configure network proxy if necessary
-    # networking.proxy.default = "http://user:password@proxy:port/";
-    # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
-
-    # Enable networking
-    networking.networkmanager.enable = true;
-
-    # Set your time zone.
-    time.timeZone = "America/Los_Angeles";
-
-    # Select internationalisation properties.
-    i18n.defaultLocale = "en_US.UTF-8";
-
-    i18n.extraLocaleSettings = {
-      LC_ADDRESS = "en_US.UTF-8";
-      LC_IDENTIFICATION = "en_US.UTF-8";
-      LC_MEASUREMENT = "en_US.UTF-8";
-      LC_MONETARY = "en_US.UTF-8";
-      LC_NAME = "en_US.UTF-8";
-      LC_NUMERIC = "en_US.UTF-8";
-      LC_PAPER = "en_US.UTF-8";
-      LC_TELEPHONE = "en_US.UTF-8";
-      LC_TIME = "en_US.UTF-8";
-    };
-
-    #  services.xserver.videoDrivers = [ "nvidia" ];
-    #  hardware.opengl.enable = true;
-    #  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
-
-    # Configure keymap in X11
-    services.xserver.xkb = {
-      layout = "us";
-      variant = "";
-    };
-
-    # Enable CUPS to print documents.
-    services.printing.enable = true;
-
-    # Enable sound with pipewire.
-    services.pulseaudio.enable = false;
-    security.rtkit.enable = true;
-    services.pipewire = {
-      enable = true;
-      alsa.enable = true;
-      alsa.support32Bit = true;
-      pulse.enable = true;
-      # If you want to use JACK applications, uncomment this
-      #jack.enable = true;
-
-      # use the example session manager (no others are packaged yet so this is enabled by default,
-      # no need to redefine it in your config for now)
-      #media-session.enable = true;
-    };
-
-    # Enable touchpad support (enabled default in most desktopManager).
-    # services.xserver.libinput.enable = true;
-
-    # Define a user account. Don't forget to set a password with ‘passwd’.
-    users.users.jordan = {
-      isNormalUser = true;
-      description = "Jordan";
-      extraGroups = ["networkmanager" "wheel"];
-      shell = pkgs.zsh;
-    };
-
-    # Enable sops-nix
-    sops = {
-      defaultSopsFile = ./secrets.yaml;
-      defaultSopsFormat = "yaml";
-      age = {
-        # automatically import host SSH keys as age keys
-        keyFile = "$HOME/.config/sops/age";
-        # uses age key that is expected to already be in filesystem
-        sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
-        # generate key if the key above does not exist
-        generateKey = true;
-      };
-
-      # secrets will be output to /run/secrets
-      # e.g. /run/secrets/msmtp-password
-      # secrets required for user creation are handled in respective /users/<username>.nix files
-      # because they will be output to /run/secrets-for-users and only when a user is assigned to a host
-      secrets = {
-        # beets_acoustid_api = {
-        #   owner = config.users.users.jordan.name;
-        # };
-      };
-    };
-
-    programs.zsh.enable = true;
-    # Install firefox.
-    # programs.firefox.enable = true;
-
-    # Allow unfree packages
-    nixpkgs.config.allowUnfree = true;
-
-    # Enable the Flakes feature and the accompanying new nix command-line tool
-    nix.settings.experimental-features = ["nix-command" "flakes"];
-
-    # virtualisation.virtualbox.host.enable = true;
-    # nixpkgs.config.virtualbox.host.enableExtensionPack = true;
-
-    # List packages installed in system profile. To search, run:
-    # $ nix search wget
-    environment.systemPackages =
-      (with pkgs; [
-        # bpytop # no nix pkg
-        age
-        clang
-        coreutils
-        exfat
-        filezilla
-        firefox
-        fzf
-        gcc
-        git
-        glibc
-        gnumake
-        htop
-        nfs-utils
-        nodePackages.nodejs
-        rclone
-        sops
-        tmux
-        vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-        wget
-        xclip
-        zsh
-      ])
-      ++ (with pkgs-stable; [
-        ]);
-
-    programs.talon.enable = true;
-
-    # Some programs need SUID wrappers, can be configured further or are
-    # started in user sessions.
-    # programs.mtr.enable = true;
-    # programs.gnupg.agent = {
-    #   enable = true;
-    #   enableSSHSupport = true;
-    # };
-
-    # List services that you want to enable:
-
-    # Enable the OpenSSH daemon.
-    services.openssh.enable = true;
-
-    services.flatpak.enable = true;
-
-    # Open ports in the firewall.
-    # networking.firewall.allowedTCPPorts = [ ... ];
-    # networking.firewall.allowedUDPPorts = [ ... ];
-    # Or disable the firewall altogether.
-    # networking.firewall.enable = false;
-
-    # This value determines the NixOS release from which the default
-    # settings for stateful data, like file locations and database versions
-    # on your system were taken. It‘s perfectly fine and recommended to leave
-    # this value at the release version of the first install of this system.
-    # Before changing this value read the documentation for this option
-    # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-    system.stateVersion = "24.11"; # Did you read the comment?
+  # --- Audio, printing, services ---
+  services.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
   };
+  services.printing.enable = true;
+  services.openssh.enable = true;
+  services.flatpak.enable = true; # needed by nix-flatpak in Home Manager
+  programs.talon.enable = true;
+
+  # --- User ---
+  programs.zsh.enable = true;
+  users.users.jordan = {
+    isNormalUser = true;
+    description = "Jordan";
+    extraGroups = ["networkmanager" "wheel"];
+    shell = pkgs.zsh;
+  };
+
+  # --- Secrets (sops-nix; no secrets defined yet, see backlog.md) ---
+  sops = {
+    defaultSopsFile = ./secrets.yaml;
+    defaultSopsFormat = "yaml";
+    age = {
+      keyFile = "$HOME/.config/sops/age";
+      sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
+      generateKey = true;
+    };
+    secrets = {};
+  };
+
+  # Release of the first install; don't change it (see `man configuration.nix`).
+  system.stateVersion = "24.11";
 }
