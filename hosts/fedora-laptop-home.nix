@@ -139,6 +139,10 @@
   # };
 
   home.file = {
+    # DMS shell settings (laptop-specific for now). Editable: links into the repo checkout.
+    ".config/dms/settings.json".source =
+      config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/.nix/dotfiles/.config/dms/laptop-settings.json";
     ".apps/appimages/appimages.conf".source = ../dotfiles/.apps/appimages/appimages.conf;
     ".scripts" = {
       source = ../dotfiles/.scripts;

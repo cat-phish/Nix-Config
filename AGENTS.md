@@ -49,4 +49,5 @@ Flakes only see git-tracked files: `git add` any new `.nix` module or dotfile be
 
 - `homeConfigurations."ubuntu@ubuntu"` references `hosts/all-personal-machines/home.nix` and `hosts/live-usb/...`, which don't exist, so it (and `nix flake check`) fails to evaluate. The existing file is `hosts/all-personal-machines-home.nix` (and `-configuration.nix`), which is currently not imported by any active output.
 - `emacs-config` is a `git+ssh` input; evaluating the flake requires GitHub SSH access.
+- The repo is public. `.githooks/pre-commit` runs `gitleaks` on staged changes and blocks commits containing secrets; `home.nix` activation sets `core.hooksPath = .githooks` (and `rebase.autoStash`) in `~/.nix` on every switch. DMS `plugin_settings.json` is gitignored for this reason.
 - Insecure packages must be allow-listed in `permittedInsecurePackages` (in `flake.nix` for system `pkgs`, in `home.nix` for HM).

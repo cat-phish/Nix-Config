@@ -1,6 +1,7 @@
 {
   config,
   inputs,
+  lib,
   pkgs,
   pkgs-stable,
   nvim-config,
@@ -25,6 +26,17 @@
   # want to update the value, then make sure to first check the Home Manager
   # release notes.
   home.stateVersion = "24.11"; # Please read the comment before changing.
+
+  # Per-clone git settings for this repo (git doesn't sync .git/config, so set them on every switch):
+  # - core.hooksPath: use the tracked .githooks/ (pre-commit runs gitleaks; the repo is public)
+  # - rebase.autoStash: let `git pull --rebase` and the rebuild scripts work with uncommitted GUI edits
+  home.activation.nixRepoGitConfig = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    repo="${config.home.homeDirectory}/.nix"
+    if [ -d "$repo/.git" ]; then
+      run ${pkgs.git}/bin/git -C "$repo" config core.hooksPath .githooks
+      run ${pkgs.git}/bin/git -C "$repo" config rebase.autoStash true
+    fi
+  '';
 
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.permittedInsecurePackages = [

@@ -5,14 +5,11 @@
   ...
 }: let
   # Dux Shell (formerly DankMaterialShell). `dms` itself comes from the
-  # avengemedia/dms COPR, not Nix; this module only syncs plugins + their settings.
-  repoDir = "${config.home.homeDirectory}/.nix/dotfiles/.config/dms";
+  # avengemedia/dms COPR, not Nix; this module only syncs which plugins are installed.
+  # plugin_settings.json is intentionally NOT tracked: plugins can save API keys/tokens
+  # and history there, and this repo is public (see backlog.md).
   lockfile = ../../dotfiles/.config/dms/plugins.lock.json;
 in {
-  # Editable: points into the git checkout, so changes made in the DMS GUI show up as repo diffs.
-  xdg.configFile."dms/plugin_settings.json".source =
-    config.lib.file.mkOutOfStoreSymlink "${repoDir}/plugin_settings.json";
-
   # Install/pin plugins from the lockfile. Runs only when the lockfile hash changes; never fails the switch.
   # No --prune, so plugins installed locally but not in the lockfile are kept.
   home.activation.dmsPluginsRestore = lib.hm.dag.entryAfter ["writeBoundary"] ''

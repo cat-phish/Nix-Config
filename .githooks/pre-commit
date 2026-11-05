@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Block commits that contain secrets (this repo is public).
+# Enabled per clone via `core.hooksPath = .githooks`, which home.nix sets on every switch.
+# False positive? Add `# gitleaks:allow` to the line, or a rule/allowlist in .gitleaks.toml.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "[!] gitleaks not installed; skipping secret scan (it comes from modules/home/dev-environment.nix)." >&2
+  exit 0
+fi
+if ! gitleaks git --pre-commit --staged --redact --no-banner --verbose; then
+  echo >&2
+  echo "[!] Commit blocked: gitleaks found possible secrets in the staged changes (shown above, redacted)." >&2
+  echo "    Remove them (or unstage the file), then commit again." >&2
+  exit 1
+fi

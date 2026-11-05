@@ -47,6 +47,10 @@ check_git_status() {
   if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
   cd "$FLAKE_PATH"
 
+  # Refresh the DMS plugin lockfile so GUI plugin installs/updates get committed too.
+  if [ -x /usr/bin/dms ]; then
+    /usr/bin/dms plugins lock -o "$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json" >/dev/null 2>&1 || true
+  fi
   # Check for both modified tracked files and new untracked .nix files
   if [ -n "$(git status --porcelain)" ]; then
     echo "--------------------------------------------------------"
@@ -76,9 +80,24 @@ git_sync_remote() {
   if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
   cd "$FLAKE_PATH"
   echo "Syncing with remote repository..."
-  git fetch origin
+  if ! git fetch origin >/dev/null 2>&1; then
+    echo "[!] git fetch failed (offline?); skipping remote sync."
+    return 0
+  fi
   # Rebase to keep a clean, linear history
-  git rebase origin/$(git branch --show-current)
+  if ! git rebase --autostash "origin/$(git branch --show-current)"; then
+    git rebase --abort 2>/dev/null || true
+    echo "[!] Rebase conflicted (same file changed on both machines?). Aborted; local changes kept."
+    echo "    Resolve manually: cd ~/.nix && git pull"
+    exit 1
+  fi
+    # --autostash can "succeed" yet leave conflict markers when re-applying uncommitted edits.
+    if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+      echo "[!] Your uncommitted edits conflict with the incoming changes in:"
+      git diff --name-only --diff-filter=U | sed 's/^/      /'
+      echo "    Your edits are safe in 'git stash list'. Fix the files, then run: git stash drop"
+      exit 1
+    fi
   echo "[✓] Git sync complete"
 }
 

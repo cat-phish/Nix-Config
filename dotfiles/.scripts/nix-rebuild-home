@@ -13,7 +13,10 @@ trap 'cd "$ORIGINAL_DIR"' EXIT
 sync_remote() {
   cd "$FLAKE_PATH"
   echo "Checking for remote updates..."
-  git fetch origin >/dev/null 2>&1
+  if ! git fetch origin >/dev/null 2>&1; then
+    echo "[!] git fetch failed (offline?); skipping remote sync."
+    return 0
+  fi
   # Only rebase if we are actually behind
   UPSTREAM=${1:-'@{u}'}
   LOCAL=$(git rev-parse @)
@@ -21,7 +24,19 @@ sync_remote() {
 
   if [ "$LOCAL" != "$REMOTE" ]; then
     echo "Remote changes found. Rebasing..."
-    git rebase origin/$(git branch --show-current)
+    if ! git rebase --autostash "origin/$(git branch --show-current)"; then
+      git rebase --abort 2>/dev/null || true
+      echo "[!] Rebase conflicted (same file changed on both machines?). Aborted; local changes kept."
+      echo "    Resolve manually: cd ~/.nix && git pull"
+      exit 1
+    fi
+      # --autostash can "succeed" yet leave conflict markers when re-applying uncommitted edits.
+      if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+        echo "[!] Your uncommitted edits conflict with the incoming changes in:"
+        git diff --name-only --diff-filter=U | sed 's/^/      /'
+        echo "    Your edits are safe in 'git stash list'. Fix the files, then run: git stash drop"
+        exit 1
+      fi
   else
     echo "Already up to date with remote."
   fi
@@ -29,7 +44,11 @@ sync_remote() {
 
 handle_local_changes() {
   cd "$FLAKE_PATH"
-  if ! git diff-index --quiet HEAD --; then
+  # Refresh the DMS plugin lockfile so GUI plugin installs/updates get committed too.
+  if [ -x /usr/bin/dms ]; then
+    /usr/bin/dms plugins lock -o "$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json" >/dev/null 2>&1 || true
+  fi
+  if [ -n "$(git status --porcelain)" ]; then
     echo "--------------------------------------------------"
     echo "[!] Uncommitted changes in $FLAKE_PATH"
     git status -s
