@@ -5,7 +5,6 @@
     ../modules/rclone/rclone-mediaserversmb.nix
     # ../modules/rclone/rclone-hetzner.nix
     # ../modules/home/c-sharp-dev.nix
-    # ../modules/home/robosub.nix
   ];
 
   my.niri.deviceConfig = ../dotfiles/.config/niri/laptop-config.kdl;

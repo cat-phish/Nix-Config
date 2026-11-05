@@ -1,3 +1,6 @@
+# ARCHIVED (Nov 2026). To restore: move back to modules/home/, import it from a host file,
+# and re-add the flake input:
+#   nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
 # ROS 2 (jazzy) toolchain for palouse-robosub development, mirroring
 # https://github.com/palouse-robosub/onboarding/blob/main/flake.nix
 {

@@ -35,7 +35,7 @@ Fedora (niri + Dux Shell/DMS, standalone Home Manager) is the daily driver. The 
 
 **Flake outputs** (`flake.nix`), built with two helpers:
 - `mkNixos "<host>"` = `configuration.nix` (shared system base: niri, DMS + dms-greeter, audio, user, sops) + `hosts/<host>-configuration.nix`, which imports `modules/nixos/*` and `modules/hardware-config/<host>-hardware.nix`.
-- `mkHome { host; isNixos; }` = `home.nix` + `hosts/<host>-home.nix` + the nix-flatpak HM module (plus `agenix` on Fedora). Outputs: `jordan@{fedora-desktop,fedora-laptop,nixos-desktop,nixos-laptop}`.
+- `mkHome { host; isNixos; }` = `home.nix` + `hosts/<host>-home.nix` + the nix-flatpak HM module. Outputs: `jordan@{fedora-desktop,fedora-laptop,nixos-desktop,nixos-laptop}`.
 
 **Home Manager layers:**
 - `home.nix`: user, stateVersion, HM nixpkgs config/overlays, repo git config; imports `modules/home/common.nix`.
@@ -51,7 +51,7 @@ To add a package everywhere, put it in a bundle imported by `common.nix`; for on
 
 **Archive:** `archive/` holds code that isn't imported anywhere but is kept for reference: `archive/plasma/` (the old KDE Plasma + plasma-manager setup, with restore notes in `nixos-plasma.nix`) and `archive/legacy/` (old scripts, unused hosts/modules, the removed `ubuntu@ubuntu` output). Don't import from it; `git mv` a file back out to revive it.
 
-**Secrets:** `secrets.yaml` is sops-encrypted (keys in `.sops.yaml`); sops wiring exists but defines no secrets yet. Never decrypt or print it.
+**Secrets:** `secrets.yaml` is sops-encrypted (keys in `.sops.yaml`); managed with sops-nix (HM module in `home.nix`, NixOS module in `configuration.nix`), which defines no secrets yet. Never decrypt or print it.
 
 ## Known breakage / gotchas
 

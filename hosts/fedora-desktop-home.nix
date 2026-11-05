@@ -9,7 +9,6 @@
     ../modules/rclone/rclone-gdrivedesk.nix
     ../modules/rclone/rclone-mediaserversmb.nix
     # ../modules/rclone/rclone-hetzner.nix
-    # ../modules/home/robosub.nix
   ];
 
   my.niri.deviceConfig = ../dotfiles/.config/niri/desktop-config.kdl;

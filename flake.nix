@@ -26,9 +26,6 @@
     dms.url = "github:duxlabs-dev/dux-shell";
     dms-greeter.url = "github:duxlabs-dev/dux-greeter";
     talon-nix.url = "github:nix-community/talon-nix";
-    agenix.url = "github:ryantm/agenix";
-    # ROS packages for palouse-robosub (kept on its own pinned nixpkgs, per upstream flake)
-    nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
   };
 
   outputs = {
@@ -41,7 +38,6 @@
     darkmatter-grub-theme,
     nix-flatpak,
     talon-nix,
-    agenix,
     ...
   } @ inputs: let
     lib = nixpkgs.lib;
@@ -93,15 +89,11 @@
     }:
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
-        modules =
-          [
-            ./home.nix
-            ./hosts/${host}-home.nix
-            nix-flatpak.homeManagerModules.nix-flatpak
-          ]
-          ++ lib.optionals (!isNixos) [
-            agenix.homeManagerModules.default
-          ];
+        modules = [
+          ./home.nix
+          ./hosts/${host}-home.nix
+          nix-flatpak.homeManagerModules.nix-flatpak
+        ];
         extraSpecialArgs = {
           inherit inputs pkgs-stable nvim-config emacs-config talon-nix isNixos;
         };

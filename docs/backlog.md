@@ -50,7 +50,7 @@ The config has grown piece by piece and has some dead code and inconsistencies. 
 - [x] Reduce repetition in `flake.nix` (four near-identical `homeConfigurations` and two `nixosConfigurations`), e.g. with a `mkHome`/`mkHost` helper
 - [ ] Consolidate nixpkgs config (`allowUnfree`, `permittedInsecurePackages`, overlays, `problems.handlers`), which is currently spread across `flake.nix`, `home.nix`, `configuration.nix`, and host files. Note the gotcha above: `nixpkgs.config` in `home.nix` makes HM ignore the flake-level `pkgs` config
 - [ ] `home.nix` sets `nixpkgs.config.home-manager.useGlobalPkgs`, which isn't a real option in that location; check what was intended
-- [ ] Either finish the sops setup (mostly commented out) or remove it; Fedora also loads `agenix`, so pick one secrets tool
+- [x] Either finish the sops setup (mostly commented out) or remove it; Fedora also loads `agenix`, so pick one secrets tool (kept sops-nix, removed agenix; finishing it is tracked in `backlog.md`)
 - [x] Prune old dated `plasma-config` snapshots, which git history already covers (whole Plasma setup moved to `archive/plasma/`, Nov 2026)
 - [ ] Review the `modules/home/*` bundles for overlap and for packages that are no longer used
 - [ ] Get `nix flake check` passing (the `emacs-config` input needs SSH access) so it can be used to verify future changes
