@@ -171,7 +171,7 @@
       source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
     };
     ".config/niri/scripts/syncthingtray_startup_delay.sh" = {
-      source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
+      source = ../dotfiles/.config/niri/scripts/syncthingtray_startup_delay.sh;
     };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;

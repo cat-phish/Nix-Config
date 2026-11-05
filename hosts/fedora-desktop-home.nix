@@ -59,7 +59,6 @@
       python312Packages.discogs-client
       python312Packages.flask
       python312Packages.pylyrics
-      python312Packages.pyacoustid
       python312Packages.pylast
       python312Packages.requests
       qbittorrent
@@ -131,7 +130,6 @@
       # "org.winehq.Wine"
       # "org.winehq.Wine.gecko"
       # "org.winehq.Wine.mono"
-      "org.fcast.Sender"
     ];
     update.auto = {
       enable = true;
@@ -172,7 +170,7 @@
       source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
     };
     ".config/niri/scripts/syncthingtray_startup_delay.sh" = {
-      source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
+      source = ../dotfiles/.config/niri/scripts/syncthingtray_startup_delay.sh;
     };
     "${config.xdg.configHome}/kmonad" = {
       source = ../dotfiles/.config/kmonad;
