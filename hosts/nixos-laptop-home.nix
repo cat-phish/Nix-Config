@@ -16,7 +16,6 @@
     # ../modules/home/app-foobar2000-wine-dependencies.nix
     ../modules/home/app-syncthing.nix
     ../modules/home/app-numen.nix
-    ../modules/plasma-config/nixos-laptop/plasma-config.nix
     ../modules/rclone/rclone-gdrivelap.nix
     ../modules/rclone/rclone-mediaserversmb.nix
     # ../modules/rclone/rclone-hetzner.nix

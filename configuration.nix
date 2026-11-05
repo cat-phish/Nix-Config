@@ -52,17 +52,6 @@
     #  hardware.opengl.enable = true;
     #  hardware.nvidia.package = config.boot.kernelPackages.nvidiaPackages.stable;
 
-    # Enable the X11 windowing system.
-    # You can disable this if you're only using the Wayland session.
-    services.xserver.enable = true;
-
-    # Enable the KDE Plasma Desktop Environment.
-    services.displayManager.sddm = {
-      enable = true;
-      # theme = "reactplus";
-    };
-    services.desktopManager.plasma6.enable = true;
-
     # Configure keymap in X11
     services.xserver.xkb = {
       layout = "us";
@@ -96,10 +85,6 @@
       isNormalUser = true;
       description = "Jordan";
       extraGroups = ["networkmanager" "wheel"];
-      packages = with pkgs; [
-        kdePackages.kate
-        kdePackages.kcalc
-      ];
       shell = pkgs.zsh;
     };
 

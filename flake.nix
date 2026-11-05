@@ -16,16 +16,11 @@
       url = "github:kmonad/kmonad?dir=nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    plasma-manager.url = "github:mcdonc/plasma-manager/enable-look-and-feel-settings";
-    plasma-manager.inputs.nixpkgs.follows = "nixpkgs";
-    plasma-manager.inputs.home-manager.follows = "home-manager";
     darkmatter-grub-theme = {
       url = "gitlab:VandalByte/darkmatter-grub-theme";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
-    nix-snapd.url = "github:nix-community/nix-snapd";
-    nix-snapd.inputs.nixpkgs.follows = "nixpkgs";
     talon-nix.url = "github:nix-community/talon-nix";
     agenix.url = "github:ryantm/agenix";
     # ROS packages for palouse-robosub (kept on its own pinned nixpkgs, per upstream flake)
@@ -41,9 +36,7 @@
     nvim-config,
     emacs-config,
     kmonad,
-    plasma-manager,
     darkmatter-grub-theme,
-    nix-snapd,
     nix-flatpak,
     talon-nix,
     agenix,
@@ -91,15 +84,10 @@
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
           nix-flatpak.nixosModules.nix-flatpak
-          nix-snapd.nixosModules.default
-          {
-            services.snap.enable = true;
-          }
         ];
         specialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit plasma-manager;
         };
       };
       nixos-laptop = lib.nixosSystem {
@@ -115,7 +103,6 @@
         specialArgs = {
           inherit inputs;
           inherit pkgs-stable;
-          inherit plasma-manager;
         };
       };
     };
@@ -131,7 +118,6 @@
           inherit pkgs-stable;
           inherit nvim-config;
           inherit emacs-config;
-          inherit plasma-manager;
           inherit talon-nix;
           # host is NixOS
           isNixos = true;
@@ -148,7 +134,6 @@
           inherit pkgs-stable;
           inherit nvim-config;
           inherit emacs-config;
-          inherit plasma-manager;
           inherit talon-nix;
           # host is NixOS
           isNixos = true;
@@ -185,7 +170,6 @@
           inherit pkgs-stable;
           inherit nvim-config;
           inherit emacs-config;
-          # inherit plasma-manager;
           inherit talon-nix;
           # host is not NixOS (Fedora)
           isNixos = false;

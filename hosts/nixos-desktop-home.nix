@@ -5,7 +5,6 @@
   pkgs-stable,
   ...
 }: {
-  # Plasma Manager KDE Configuration
   imports = [
     ../modules/home/app-beets.nix
     ../modules/home/communications.nix
@@ -18,7 +17,6 @@
     ../modules/home/games.nix
     ../modules/home/app-wine.nix
     ../modules/home/app-foobar2000-wine-dependencies.nix
-    ../modules/plasma-config/nixos-desktop/plasma-config.nix
     ../modules/rclone/rclone-gdrivedesk.nix
     ../modules/rclone/rclone-mediaserversmb.nix
     ../modules/rclone/rclone-hetzner.nix
