@@ -6,7 +6,6 @@
   pkgs-stable,
   ...
 }: {
-  # Plasma Manager KDE Configuration
   imports = [
   ];
 

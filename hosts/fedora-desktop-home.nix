@@ -1,73 +1,39 @@
-{
-  config,
-  inputs,
-  lib,
-  pkgs,
-  pkgs-stable,
-  # numen,
-  ...
-}: {
+{pkgs, ...}: {
   imports = [
+    ../modules/home/desktop-niri.nix
+    ../modules/home/app-beets.nix
+    ../modules/home/android-tools.nix
+    ../modules/home/games.nix
+    ../modules/home/app-talon.nix
+    ../modules/home/app-wireguard-tray.nix
     ../modules/rclone/rclone-gdrivedesk.nix
     ../modules/rclone/rclone-mediaserversmb.nix
     # ../modules/rclone/rclone-hetzner.nix
-    ../modules/home/app-beets.nix
-    ../modules/home/communications.nix
-    ../modules/home/dev-environment.nix
-    ../modules/home/fun-apps.nix
-    # ../modules/home/games.nix
-    ../modules/home/media-playback.nix
-    ../modules/home/media-mgmt.nix
-    ../modules/home/office-suite.nix
-    ../modules/home/utilities.nix
-    ../modules/home/android-tools.nix
-    ../modules/home/games.nix
-    ../modules/home/app-wine.nix
-    # ../modules/home/app-fcast-sender.nix
-    ../modules/home/app-foobar2000-wine-dependencies.nix
-    ../modules/home/app-syncthing.nix
-    ../modules/home/app-numen.nix
-    ../modules/home/app-talon.nix
-    ../modules/home/app-wireguard-tray.nix
     # ../modules/home/robosub.nix
-    ../modules/home/app-tailscale.nix
-    ../modules/home/niri-kde-apps.nix
-    ../modules/home/dms-plugins.nix
-    # inputs.sops-nix.homeManagerModules.sops
-    # inputs.sops-nix.homeManagerModules.sops
   ];
 
-  # sops.secrets = {
-  # beets_acoustid_api = {};
-  # env_file = {};
-  # };
+  my.niri.deviceConfig = ../dotfiles/.config/niri/desktop-config.kdl;
+  # my.niri.dmsSettings = "desktop-settings.json"; # see backlog.md
 
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
-  home.username = "jordan";
-  home.homeDirectory = "/home/jordan";
+  home.packages = with pkgs; [
+    dotool
+    chromaprint
+    kid3-kde
+    python312Packages.pyacoustid
+    python312Packages.discogs-client
+    python312Packages.flask
+    python312Packages.pylyrics
+    python312Packages.pylast
+    python312Packages.requests
+    qbittorrent
+    zsh
+  ];
 
-  home.packages =
-    (with pkgs; [
-      dotool
-      chromaprint
-      kid3-kde
-      python312Packages.pyacoustid
-      python312Packages.discogs-client
-      python312Packages.flask
-      python312Packages.pylyrics
-      python312Packages.pylast
-      python312Packages.requests
-      qbittorrent
-      zsh
-    ])
-    ++ (with pkgs-stable; [
-      ]);
-  # ++ [
-  #   numen.packages.${pkgs.stdenv.hostPlatform.system}.default
-  # ];
+  services.flatpak.packages = [
+    "org.fcast.Sender"
+  ];
 
-  # Optional but recommended: Enable dotool service for Numen
+  # dotool daemon for input automation (used by numen)
   systemd.user.services.dotool = {
     Unit = {
       Description = "dotool daemon for input automation";
@@ -77,116 +43,6 @@
       ExecStart = "${pkgs.dotool}/bin/dotoold";
       Restart = "on-failure";
     };
-    Install. WantedBy = ["graphical-session.target"];
-  };
-
-  systemd.user.services.ntfy-listener = {
-    Unit = {
-      Description = "ntfy Desktop Notifications";
-      After = ["graphical-session.target"];
-    };
-
-    Install = {
-      WantedBy = ["graphical-session.target"];
-    };
-
-    Service = {
-      # It is safer to pass the token as an environment variable
-      # Environment = ["NTFY_AUTH=Bearer tk_your_token_here"];
-      EnvironmentFile = "%h/.ssh/.env";
-
-      ExecStart = ''
-        ${pkgs.ntfy-sh}/bin/ntfy sub \
-          --token "''${NTFY_AUTH_TOKEN}" \
-          "http://''${MEDIASERVER_HOST}:3924/Tracearr" \
-          '${pkgs.libnotify}/bin/notify-send "[$$NTFY_TOPIC] $$NTFY_TITLE" "$$NTFY_MESSAGE"'
-      '';
-
-      Restart = "always";
-      RestartSec = "10";
-    };
-  };
-
-  services.flatpak = {
-    enable = true;
-
-    remotes = lib.mkOptionDefault [
-      {
-        name = "flathub";
-        location = "https://dl.flathub.org/repo/flathub.flatpakrepo";
-      }
-    ];
-    packages = [
-      # {
-      #   appId = "com.brave.Browser";
-      #   origin = "flathub";
-      # }
-      "com.usebottles.bottles"
-      "tv.kodi.Kodi"
-      "org.fcast.Sender"
-      # "org.winehq.Wine"
-      # "org.winehq.Wine.gecko"
-      # "org.winehq.Wine.mono"
-    ];
-    update.auto = {
-      enable = true;
-      onCalendar = "weekly";
-    };
-
-    uninstallUnmanaged = false;
-  };
-
-  # #Enable Talon Voice Control
-  # programs.talon.enable = true;
-  home.file = {
-    # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
-    ".apps/appimages/appimages.conf".source = ../dotfiles/.apps/appimages/appimages.conf;
-    ".scripts" = {
-      source = ../dotfiles/.scripts;
-      recursive = true;
-    };
-    ".python-scripts" = {
-      source = ../dotfiles/.python-scripts;
-      recursive = true;
-    };
-    ".img" = {
-      source = ../dotfiles/.img;
-      recursive = true;
-    };
-    ".config/niri/config.kdl" = {
-      source = ../dotfiles/.config/niri/config.kdl;
-    };
-    ".config/niri/device-config.kdl" = {
-      source = ../dotfiles/.config/niri/desktop-config.kdl;
-    };
-    ".config/niri/scripts/arrange-columns.sh" = {
-      source = ../dotfiles/.config/niri/scripts/arrange-columns.sh;
-      executable = true;
-    };
-    ".config/niri/scripts/focus_keepassxc.sh" = {
-      source = ../dotfiles/.config/niri/scripts/focus_keepassxc.sh;
-    };
-    ".config/niri/scripts/syncthingtray_startup_delay.sh" = {
-      source = ../dotfiles/.config/niri/scripts/syncthingtray_startup_delay.sh;
-    };
-    "${config.xdg.configHome}/kmonad" = {
-      source = ../dotfiles/.config/kmonad;
-      recursive = true;
-    };
-    "${config.xdg.configHome}/xdg-desktop-portal" = {
-      source = ../dotfiles/.config/xdg-desktop-portal;
-      recursive = true;
-    };
-  };
-
-  home.sessionVariables = {
-    EDITOR = "nvim";
-    SHELL = "/usr/bin/zsh";
-  };
-
-  nix.gc = {
-    automatic = true;
-    dates = "weekly";
-    options = "--delete-older-than 14d";
+    Install.WantedBy = ["graphical-session.target"];
   };
 }

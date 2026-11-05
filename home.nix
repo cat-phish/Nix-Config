@@ -7,6 +7,7 @@
 }: {
   imports = [
     inputs.sops-nix.homeManagerModules.sops
+    ./modules/home/common.nix
   ];
 
   home.username = "jordan";

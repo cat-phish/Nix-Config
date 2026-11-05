@@ -28,11 +28,9 @@
   };
 
   outputs = {
-    self,
     nixpkgs,
     nixpkgs-stable,
     home-manager,
-    # sops-nix,
     nvim-config,
     emacs-config,
     kmonad,
@@ -44,15 +42,15 @@
   } @ inputs: let
     lib = nixpkgs.lib;
     system = "x86_64-linux";
+    pkgsConfig = {
+      allowUnfree = true;
+      permittedInsecurePackages = [
+        "ventoy-1.1.07"
+      ];
+    };
     pkgs = import nixpkgs {
       inherit system;
-      config = {
-        allowUnfree = true;
-        permittedInsecurePackages = [
-          "ventoy-1.1.07"
-        ];
-      };
-      # Add the overlay here so it applies to the globally passed pkgs
+      config = pkgsConfig;
       overlays = [
         (final: prev: {
           python312Packages = prev.python312Packages.override {
@@ -67,113 +65,64 @@
     };
     pkgs-stable = import nixpkgs-stable {
       inherit system;
-      config = {
-        allowUnfree = true;
-        permittedInsecurePackages = [
-          "ventoy-1.1.07"
-        ];
-      };
+      config = pkgsConfig;
     };
+
+    # NixOS system: configuration.nix (shared) + hosts/<host>-configuration.nix
+    mkNixos = host:
+      lib.nixosSystem {
+        modules = [
+          {nixpkgs.hostPlatform = system;}
+          ./configuration.nix
+          ./hosts/${host}-configuration.nix
+          kmonad.nixosModules.default
+          darkmatter-grub-theme.nixosModule
+          nix-flatpak.nixosModules.nix-flatpak
+        ];
+        specialArgs = {inherit inputs pkgs-stable;};
+      };
+
+    # Standalone Home Manager: home.nix (shared) + hosts/<host>-home.nix
+    mkHome = {
+      host,
+      isNixos,
+    }:
+      home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules =
+          [
+            ./home.nix
+            ./hosts/${host}-home.nix
+            nix-flatpak.homeManagerModules.nix-flatpak
+          ]
+          ++ lib.optionals (!isNixos) [
+            agenix.homeManagerModules.default
+          ];
+        extraSpecialArgs = {
+          inherit inputs pkgs-stable nvim-config emacs-config talon-nix isNixos;
+        };
+      };
   in {
     nixosConfigurations = {
-      nixos-desktop = lib.nixosSystem {
-        modules = [
-          {nixpkgs.hostPlatform = system;}
-          ./configuration.nix
-          ./hosts/nixos-desktop-configuration.nix
-          kmonad.nixosModules.default
-          darkmatter-grub-theme.nixosModule
-          nix-flatpak.nixosModules.nix-flatpak
-        ];
-        specialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-        };
-      };
-      nixos-laptop = lib.nixosSystem {
-        modules = [
-          {nixpkgs.hostPlatform = system;}
-          ./configuration.nix
-          ./hosts/nixos-laptop-configuration.nix
-          # sops-nix.nixosModules.sops
-          kmonad.nixosModules.default
-          darkmatter-grub-theme.nixosModule
-          nix-flatpak.nixosModules.nix-flatpak
-        ];
-        specialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-        };
-      };
+      nixos-desktop = mkNixos "nixos-desktop";
+      nixos-laptop = mkNixos "nixos-laptop";
     };
     homeConfigurations = {
-      "jordan@nixos-desktop" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          ./hosts/nixos-desktop-home.nix
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-          inherit nvim-config;
-          inherit emacs-config;
-          inherit talon-nix;
-          # host is NixOS
-          isNixos = true;
-        };
+      "jordan@fedora-desktop" = mkHome {
+        host = "fedora-desktop";
+        isNixos = false;
       };
-      "jordan@nixos-laptop" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          ./hosts/nixos-laptop-home.nix
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-          inherit nvim-config;
-          inherit emacs-config;
-          inherit talon-nix;
-          # host is NixOS
-          isNixos = true;
-        };
+      "jordan@fedora-laptop" = mkHome {
+        host = "fedora-laptop";
+        isNixos = false;
       };
-      "jordan@fedora-desktop" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          ./hosts/fedora-desktop-home.nix
-          nix-flatpak.homeManagerModules.nix-flatpak
-          agenix.homeManagerModules.default
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-          inherit nvim-config;
-          inherit emacs-config;
-          inherit talon-nix;
-          # host is not NixOS (Fedora)
-          isNixos = false;
-        };
+      "jordan@nixos-desktop" = mkHome {
+        host = "nixos-desktop";
+        isNixos = true;
       };
-      "jordan@fedora-laptop" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          ./hosts/fedora-laptop-home.nix
-          nix-flatpak.homeManagerModules.nix-flatpak
-          agenix.homeManagerModules.default
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-          inherit nvim-config;
-          inherit emacs-config;
-          inherit talon-nix;
-          # host is not NixOS (Fedora)
-          isNixos = false;
-        };
+      "jordan@nixos-laptop" = mkHome {
+        host = "nixos-laptop";
+        isNixos = true;
       };
     };
   };

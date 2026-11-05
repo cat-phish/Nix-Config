@@ -1,3 +1,7 @@
 
 # DMS plugin settings can hold API keys/tokens; keep them out of this public repo.
 dotfiles/.config/dms/plugin_settings.json
+
+# nix build output links
+result
+result-*

@@ -1,81 +1,34 @@
+# Template for a new NixOS host. Copy to hosts/<host>-configuration.nix, generate
+# modules/hardware-config/<host>-hardware.nix with `nixos-generate-config --show-hardware-config`,
+# and add `<host> = mkNixos "<host>";` to nixosConfigurations in flake.nix.
+# configuration.nix already provides the shared base (niri + DMS, audio, user, nix settings).
 {
-  config,
-  inputs,
   lib,
   pkgs,
-  pkgs-stable,
   ...
 }: {
   imports = [
-    ./hardware-configuration.nix
-    inputs.sops-nix.nixosModules.sops
+    ../modules/hardware-config/HOST-hardware.nix
+    # ../modules/nixos/nvidiaGPU-desktop.nix
+    # ../modules/nixos/printers.nix
+    ../modules/nixos/utilities.nix
   ];
-  config = {
-    networking.hostName = "jordans-desktop";
 
-    sops.secrets = {
-      # beets_acoustid_api = {
-      #   owner = config.users.users.jordan.name;
-      # };
-    };
+  networking.hostName = "HOST";
 
-    environment.systemPackages =
-      (with pkgs; [
-        ])
-      ++ (with pkgs-stable; [
-        ]);
+  environment.systemPackages = with pkgs; [
+  ];
 
-    ### Services ###
+  # services.kmonad.keyboards.<name> = {
+  #   device = "/dev/input/by-id/...";
+  #   config = builtins.readFile ../dotfiles/.config/kmonad/<file>.kbd;
+  # };
 
-    services.xserver = {
-      # xrandrHeads = [
-      #   {
-      #     output = "DP-1";
-      #     primary = true;
-      #   }
-      #   {
-      #     output = "DP-2";
-      #     monitorConfig = ''Option "Enable" "false"'';
-      #   }
-      #   {
-      #     output = "HDMI-0";
-      #     monitorConfig = ''Option "Enable" "false"'';
-      #   }
-      # ];
-      # exportConfiguration = true;
-    };
-
-    # Kmonad configuration
-    # see here before enabling:
-    # https://github.com/kmonad/kmonad/blob/master/doc/installation.md#configurationnix
-    services.kmonad = {
-      # enable = true;
-      # keyboards = {
-      #   kmonad_keychron_k2_pro = {
-      #     device = "/dev/input/by-id/usb-Keychron_Keychron_K2_Pro-event-kbd";
-      #     config = builtins.readFile ../../dotfiles/.config/kmonad/kmonad_keychron_k2_pro.kbd;
-      #   };
-      # };
-    };
-
-    ### Filesystem Mounts ###
-
-    boot.supportedFilesystems = ["ntfs"];
-
-    # fileSystems."/mnt/music_hdd" = {
-    #   device = "/dev/disk/by-uuid/5E74057374054EE9";
-    #   fsType = "ntfs-3g";
-    #   options = ["rw" "uid=1000"];
-    # };
-
-    ### Bootloader ###
-
-    boot.loader = {
-      grub = {
-        darkmatter-theme = {
-          resolution = "1440p";
-        };
-      };
-    };
+  boot.loader.grub = {
+    enable = true;
+    efiSupport = true;
+    devices = ["nodev"];
+    useOSProber = true;
+    configurationLimit = 20;
   };
 }
