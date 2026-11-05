@@ -8,7 +8,7 @@
     {
       "id": "user",
       "enabled": true,
-      "w": 5,
+      "w": 4,
       "h": 1,
       "col": 0,
       "row": 0
@@ -68,7 +68,7 @@
     {
       "id": "bluetooth",
       "enabled": true,
-      "w": 4,
+      "w": 1,
       "h": 1,
       "col": 4,
       "row": 2
@@ -92,18 +92,19 @@
     {
       "id": "nightMode",
       "enabled": true,
-      "w": 4,
+      "w": 1,
       "h": 1,
-      "col": 0,
-      "row": 4
+      "col": 6,
+      "row": 2,
+      "small": false
     },
     {
       "id": "darkMode",
       "enabled": true,
-      "w": 4,
+      "w": 1,
       "h": 1,
-      "col": 4,
-      "row": 4
+      "col": 5,
+      "row": 2
     },
     {
       "id": "edit",
@@ -111,25 +112,32 @@
       "w": 1,
       "h": 1,
       "small": true,
-      "col": 0,
-      "row": 5
-    },
-    {
-      "id": "runningApps",
-      "enabled": true,
-      "w": 4,
-      "h": 1,
-      "small": true,
-      "col": 0,
-      "row": 6
+      "col": 4,
+      "row": 0
     },
     {
       "id": "builtin_vpn",
       "enabled": true,
+      "w": 1,
+      "h": 1,
+      "col": 7,
+      "row": 2
+    },
+    {
+      "id": "idleInhibitor",
+      "enabled": true,
+      "w": 4,
+      "h": 1,
+      "col": 0,
+      "row": 4
+    },
+    {
+      "id": "plugin_cast",
+      "enabled": true,
       "w": 4,
       "h": 1,
       "col": 4,
-      "row": 5
+      "row": 4
     }
   ],
   "networkPreference": "wifi",
@@ -171,24 +179,37 @@
       ],
       "showOnLastDisplay": true,
       "leftWidgets": [
-        "launcherButton",
-        "workspaceSwitcher",
-        "focusedWindow"
-      ],
-      "centerWidgets": [
-        "weather",
-        "music",
-        "clock",
+        {
+          "id": "tailscaleDashboard",
+          "enabled": true
+        },
+        {
+          "id": "cast",
+          "enabled": true
+        },
+        {
+          "id": "developerUtilities",
+          "enabled": true
+        },
+        {
+          "id": "takeABreak",
+          "enabled": true
+        },
+        {
+          "id": "wallabag",
+          "enabled": true
+        },
         {
           "id": "aiOverviewControl",
           "enabled": true
         }
       ],
+      "centerWidgets": [
+        "music",
+        "clock",
+        "weather"
+      ],
       "rightWidgets": [
-        {
-          "id": "aiQuotas",
-          "enabled": true
-        },
         {
           "id": "systemTray",
           "enabled": true
@@ -242,6 +263,103 @@
       "popupGapsManual": 4,
       "followInterfaceStyle": true,
       "widgetFollowInterfaceStyle": true
+    },
+    {
+      "id": "dot1793859330384",
+      "name": "Dot",
+      "enabled": false,
+      "position": 0,
+      "screenPreferences": [
+        "all"
+      ],
+      "showOnLastDisplay": true,
+      "leftWidgets": [
+        {
+          "id": "tailscaleDashboard",
+          "enabled": true
+        },
+        {
+          "id": "cast",
+          "enabled": true
+        },
+        {
+          "id": "developerUtilities",
+          "enabled": true
+        },
+        {
+          "id": "takeABreak",
+          "enabled": true
+        },
+        {
+          "id": "wallabag",
+          "enabled": true
+        },
+        {
+          "id": "aiOverviewControl",
+          "enabled": true
+        }
+      ],
+      "centerWidgets": [
+        "music",
+        "clock",
+        "weather"
+      ],
+      "rightWidgets": [
+        {
+          "id": "systemTray",
+          "enabled": true
+        },
+        {
+          "id": "clipboard",
+          "enabled": true
+        },
+        {
+          "id": "cpuUsage",
+          "enabled": true,
+          "minimumWidth": true
+        },
+        {
+          "id": "memUsage",
+          "enabled": true
+        },
+        {
+          "id": "battery",
+          "enabled": true
+        },
+        {
+          "id": "controlCenterButton",
+          "enabled": true
+        },
+        {
+          "id": "notificationButton",
+          "enabled": true
+        }
+      ],
+      "spacing": 4,
+      "innerPadding": 4,
+      "bottomGap": 0,
+      "transparency": 1,
+      "widgetTransparency": 1,
+      "squareCorners": false,
+      "noBackground": false,
+      "gothCornersEnabled": false,
+      "gothCornerRadiusOverride": false,
+      "gothCornerRadiusValue": 12,
+      "borderEnabled": false,
+      "borderColor": "surfaceText",
+      "borderOpacity": 1,
+      "borderThickness": 1,
+      "fontScale": 1,
+      "autoHide": false,
+      "autoHideDelay": 250,
+      "openOnOverview": false,
+      "visible": true,
+      "popupGapsAuto": true,
+      "popupGapsManual": 4,
+      "followInterfaceStyle": false,
+      "widgetFollowInterfaceStyle": true,
+      "island": false,
+      "dot": true
     }
   ],
   "configVersion": 42,
