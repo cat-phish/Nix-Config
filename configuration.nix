@@ -16,19 +16,10 @@
     inputs.talon-nix.nixosModules.talon
   ];
 
-  options = {
-    my.arbitrary.option = lib.mkOption {
-      type = lib.types.str;
-      default = "stuff";
-    };
-  };
-
   config = {
     nixpkgs.config.permittedInsecurePackages = [
-      # "wavebox-10.133.4-2"
       "electron-40.10.5"
     ];
-    my.arbitrary.option = "test";
 
     # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 

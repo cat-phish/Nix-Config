@@ -3,29 +3,17 @@
   inputs,
   lib,
   pkgs,
-  pkgs-stable,
-  nvim-config,
-  # talon-nix,
   ...
 }: {
   imports = [
     inputs.sops-nix.homeManagerModules.sops
-    # inputs.talon-nix.nixosModules.talon
   ];
 
-  # Home Manager needs a bit of information about you and the paths it should
-  # manage.
   home.username = "jordan";
   home.homeDirectory = "/home/jordan";
 
-  # This value determines the Home Manager release that your configuration is
-  # compatible with. This helps avoid breakage when a new Home Manager release
-  # introduces backwards incompatible changes.
-  #
-  # You should not change this value, even if you update Home Manager. If you do
-  # want to update the value, then make sure to first check the Home Manager
-  # release notes.
-  home.stateVersion = "24.11"; # Please read the comment before changing.
+  # Don't change this, even when updating Home Manager; read the HM release notes first.
+  home.stateVersion = "24.11";
 
   # Per-clone git settings for this repo (git doesn't sync .git/config, so set them on every switch):
   # - core.hooksPath: use the tracked .githooks/ (pre-commit runs gitleaks; the repo is public)
@@ -38,54 +26,16 @@
     fi
   '';
 
+  # HM re-imports nixpkgs with this config; the flake-level pkgs config doesn't apply here.
   nixpkgs.config.allowUnfree = true;
   nixpkgs.config.permittedInsecurePackages = [
     "electron-40.10.5"
   ];
-  # gtk2 is marked broken (EOL) but onlyoffice-desktopeditors' FHS env still needs it
+  # gtk2 is marked broken (EOL) but onlyoffice-desktopeditors' FHS env still needs it (see docs/backlog.md)
   nixpkgs.config.problems.handlers = {
     "gtk+".broken = "warn";
   };
   nixpkgs.config.home-manager.useGlobalPkgs = true;
-
-  # sops = {
-  #   defaultSopsFile = ./secrets.yaml;
-  #   defaultSopsFormat = "yaml";
-  #   age = {
-  #     # uses age key that is expected to already be in filesystem
-  #    keyFile = "$HOME/.config/sops/age";
-  #     # automatically import host SSH keys as age keys
-  #     sshKeyPaths = ["/etc/ssh/ssh_host_ed25519_key"];
-  #     # generate key if the key above does not exist
-  #     generateKey = true;
-  #   };
-  #
-  #   # secrets will be output to /run/secrets
-  #   # e.g. /run/secrets/msmtp-password
-  #   # secrets required for user creation are handled in respective /users/<username>.nix files
-  #   # because they will be output to /run/secrets-for-users and only when a user is assigned to a host
-  #   secrets = {
-  #   };
-  # };
-
-  # programs.zsh = {
-  #   enable = true;
-  # };
-
-  # programs.neovim = { # NOTE: deprecated in favor of nixCats flake
-  #   enable = true;
-  #   package = pkgs.neovim-nightly;
-  #   withNodJs = true;
-  #   extraPackages = with pkgs; [
-  #     lua-language-server
-  #     stylua
-  #     ripgrep
-  #     gnumake
-  #   ];
-  #   plugins = [
-  #     pkgs.vimPlugins.nvim-treesitter.withAllGrammars
-  #   ];
-  # };
 
   nixpkgs.overlays = [
     (final: prev: {
@@ -102,93 +52,9 @@
     })
   ];
 
-  # The home.packages option allows you to install Nix packages into your
-  # environment.
-  home.packages =
-    # Unstable Packages
-    (with pkgs; [
-      ])
-    # Stable Packages
-    ++ (with pkgs-stable; [
-      ])
-    # Personal nixCats Nvim Flake
-    ++ (with nvim-config; [
-      ])
-    # ++ (with talon-nix; [
-    #   packages.${builtins.currentSystem}.default
-    # ])
-    # ++ (with inputs.erosanix; [
-    #   packages.i686-linux.foobar2000
-    # ])
-    # Overrides
-    ++ [
-      # # It is sometimes useful to fine-tune packages, for example, by applying
-      # # overrides. You can do that directly here, just don't forget the
-      # # parentheses. Maybe you want to install Nerd Fonts with a limited number of
-      # # fonts?
-      # (pkgs.nerdfonts.override {fonts = ["Monaspace"];})
-    ]
-    # Scripts
-    ++ [
-      # # You can also create simple shell scripts directly inside your
-      # # configuration. For example, this adds a command 'my-hello' to your
-      # # environment:
-      # ++
-      # (pkgs.writeShellScriptBin "my-hello" ''
-      #   echo "Hello, ${config.home.username}!"
-      # '')
-    ];
-
-  # Home Manager is pretty good at managing dotfiles. The primary way to manage
-  # plain files is through 'home.file'.
-  home.file = {
-    # # Building this configuration will create a copy of 'dotfiles/screenrc' in
-    # # the Nix store. Activating the configuration will then make '~/.screenrc' a
-    # # symlink to the Nix store copy.
-    # ".screenrc".source = dotfiles/screenrc;
-
-    # # You can also set the file content immediately.
-    # ".gradle/gradle.properties".text = ''
-    #   org.gradle.console=verbose
-    #   org.gradle.daemon.idletimeout=3600000
-    # '';
-
-    # Add ~/.nix/dotfiles/ dotfiles individually here
-    # ".bashrc".source = ./dotfiles/.bashrc;
-    # ".config/tmux/tmux.conf".source = ./dotfiles/.config/tmux/tmux.conf;
-    # "${config.xdg.configHome}/tmux/scripts" = {
-    #   source = ./dotfiles/.config/tmux/scripts;
-    #   recursive = true;
-    # };
-    # ".vim" = {
-    #   source = ./dotfiles/.vim;
-    #   recursive = true;
-    # };
-    # ".zshrc".source = ./dotfiles/.zshrc;
-  };
-  # programs.bash.enable = true; # deprecated in favor of exist existing bashrc
-
-  # Home Manager can also manage your environment variables through
-  # 'home.sessionVariables'. These will be explicitly sourced when using a
-  # shell provided by Home Manager. If you don't want to manage your shell
-  # through Home Manager then you have to manually source 'hm-session-vars.sh'
-  # located at either
-  #
-  #  ~/.nix-profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-  #
-  # or
-  #
-  #  /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
-  #
   home.sessionVariables = {
     EDITOR = "nvim";
-    # SHELL = pkgs.zsh;
   };
 
-  # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 }

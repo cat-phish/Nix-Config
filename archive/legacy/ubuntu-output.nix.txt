@@ -1,0 +1,21 @@
+      "ubuntu@ubuntu" = home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
+        modules = [
+          ./home.nix
+          ./hosts/all-personal-machines/home.nix
+          ./hosts/live-usb/ubuntu/home.nix
+        ];
+        extraSpecialArgs = {
+          inherit inputs;
+          inherit pkgs-stable;
+          inherit nvim-config;
+          # inherit plasma-manager;
+          inherit talon-nix;
+          # host is not NixOS (Ubuntu)
+          isNixos = false;
+          lib = lib;
+          hm = home-manager.lib;
+          # inherit winboat;
+          # inherit erosanix;
+        };
+      };

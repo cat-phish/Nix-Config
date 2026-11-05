@@ -30,19 +30,6 @@
     agenix.url = "github:ryantm/agenix";
     # ROS packages for palouse-robosub (kept on its own pinned nixpkgs, per upstream flake)
     nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
-    # numennix.url = "github:anpandey/numen-nix";
-    # numen = {
-    #   url = "github:anpandey/numen-nix"; # or wherever the flake is
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    # winboat= {
-    #   url = "github:TibixDev/winboat";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
-    # erosanix = {
-    #   url = "github:emmanuelrosa/erosanix";
-    #   inputs.nixpkgs.follows = "nixpkgs";
-    # };
   };
 
   outputs = {
@@ -60,8 +47,6 @@
     nix-flatpak,
     talon-nix,
     agenix,
-    # numen,
-    # winboat,
     ...
   } @ inputs: let
     lib = nixpkgs.lib;
@@ -99,11 +84,9 @@
   in {
     nixosConfigurations = {
       nixos-desktop = lib.nixosSystem {
-        # inherit system; # TODO: remove? replaced with hostPlatform... below
         modules = [
           {nixpkgs.hostPlatform = system;}
           ./configuration.nix
-          # ./hosts/all-personal-machines/configuration.nix
           ./hosts/nixos-desktop-configuration.nix
           kmonad.nixosModules.default
           darkmatter-grub-theme.nixosModule
@@ -117,15 +100,12 @@
           inherit inputs;
           inherit pkgs-stable;
           inherit plasma-manager;
-          # inherit erosanix;
         };
       };
       nixos-laptop = lib.nixosSystem {
-        # inherit system; # TODO: remove? replaced with hostPlatform... below
         modules = [
           {nixpkgs.hostPlatform = system;}
           ./configuration.nix
-          # ./hosts/all-personal-machines/configuration.nix
           ./hosts/nixos-laptop-configuration.nix
           # sops-nix.nixosModules.sops
           kmonad.nixosModules.default
@@ -144,7 +124,6 @@
         inherit pkgs;
         modules = [
           ./home.nix
-          # ./hosts/all-personal-machines/home.nix
           ./hosts/nixos-desktop-home.nix
         ];
         extraSpecialArgs = {
@@ -156,15 +135,12 @@
           inherit talon-nix;
           # host is NixOS
           isNixos = true;
-          # inherit winboat;
-          # inherit erosanix;
         };
       };
       "jordan@nixos-laptop" = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         modules = [
           ./home.nix
-          # ./hosts/all-personal-machines/home.nix
           ./hosts/nixos-laptop-home.nix
         ];
         extraSpecialArgs = {
@@ -176,8 +152,6 @@
           inherit talon-nix;
           # host is NixOS
           isNixos = true;
-          # inherit winboat;
-          # inherit erosanix;
         };
       };
       "jordan@fedora-desktop" = home-manager.lib.homeManagerConfiguration {
@@ -194,7 +168,6 @@
           inherit nvim-config;
           inherit emacs-config;
           inherit talon-nix;
-          # inherit numen;
           # host is not NixOS (Fedora)
           isNixos = false;
         };
@@ -203,7 +176,6 @@
         inherit pkgs;
         modules = [
           ./home.nix
-          # ./hosts/all-personal-machines/home.nix
           ./hosts/fedora-laptop-home.nix
           nix-flatpak.homeManagerModules.nix-flatpak
           agenix.homeManagerModules.default
@@ -217,29 +189,6 @@
           inherit talon-nix;
           # host is not NixOS (Fedora)
           isNixos = false;
-          # inherit winboat;
-          # inherit erosanix;
-        };
-      };
-      "ubuntu@ubuntu" = home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        modules = [
-          ./home.nix
-          ./hosts/all-personal-machines/home.nix
-          ./hosts/live-usb/ubuntu/home.nix
-        ];
-        extraSpecialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-          inherit nvim-config;
-          # inherit plasma-manager;
-          inherit talon-nix;
-          # host is not NixOS (Ubuntu)
-          isNixos = false;
-          lib = lib;
-          hm = home-manager.lib;
-          # inherit winboat;
-          # inherit erosanix;
         };
       };
     };

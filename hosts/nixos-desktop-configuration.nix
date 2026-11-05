@@ -13,12 +13,6 @@
     ../modules/nixos/utilities.nix
     inputs.sops-nix.nixosModules.sops
   ];
-  options = {
-    # Enable numlock on boot
-    ncfg.services.numlock-on-tty = {
-      enable = lib.mkEnableOption "Enable numlock";
-    };
-  };
   config = {
     networking.hostName = "nixos-desktop";
 
