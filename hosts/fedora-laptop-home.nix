@@ -27,6 +27,7 @@
     # ../modules/home/robosub.nix
     ../modules/home/app-tailscale.nix
     ../modules/home/niri-kde-apps.nix
+    ../modules/home/dms-plugins.nix
     # inputs.sops-nix.homeManagerModules.sops
   ];
 
