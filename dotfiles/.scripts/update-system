@@ -408,6 +408,7 @@ case "$OS_ID" in
 EOF
 
     rebuild_home || true
+    "$FLAKE_PATH/dotfiles/.scripts/nix-gpu-setup" || true
     update_appimages || true
     if cmd_exists nix; then gc_nix || true; fi
     ;;

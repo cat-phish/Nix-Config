@@ -670,6 +670,8 @@ setup_fedora() {
       echo "[$STEP/$TOTAL_STEPS] Applying home-manager configuration..."
       home-manager switch --flake ".#$home_manager_flake" || \
           home-manager switch -b backup --flake ".#$home_manager_flake"
+      # Nix GUI apps need Nix GPU drivers at /run/opengl-driver (sudo)
+      bash "$HOME/.nix/dotfiles/.scripts/nix-gpu-setup" || true
       echo ""
     fi
 

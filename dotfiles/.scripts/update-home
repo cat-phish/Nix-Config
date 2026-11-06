@@ -115,6 +115,9 @@ echo ""
 keep_sudo_alive
 SUDO_PID=$!
 
+# Refresh Nix GPU drivers if the flake update changed them (no-op otherwise)
+"$FLAKE_PATH/dotfiles/.scripts/nix-gpu-setup" || true
+
 echo "Running garbage collection..."
 sudo nix-collect-garbage --delete-older-than 14d
 echo "[✓] Cleanup complete."

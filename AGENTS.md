@@ -58,4 +58,5 @@ To add a package everywhere, put it in a bundle imported by `common.nix`; for on
 - `emacs-config` is a `git+ssh` input; evaluating the flake requires GitHub SSH access.
 - The repo is public. `.githooks/pre-commit` runs `gitleaks` on staged changes and blocks commits containing secrets; `home.nix` activation sets `core.hooksPath = .githooks` (and `rebase.autoStash`) in `~/.nix` on every switch. DMS `plugin_settings.json` is gitignored for this reason.
 - Insecure packages must be allow-listed in `permittedInsecurePackages` (in `configuration.nix` for NixOS, in `home.nix` for HM). `nixpkgs.config` in `home.nix` makes HM re-import nixpkgs, so the flake-level `pkgs` config doesn't apply to HM.
+- Nix GUI apps on Fedora need Nix GPU drivers (`targets.genericLinux.gpu` in `common.nix`). If one fails with "Failed to create surface" or similar, run `nix-gpu-setup` (sudo; `update-system`/`update-home` do it automatically, `nix-rebuild-home` only warns).
 - `home-manager build` has no `-o`; to keep a build for comparison use `nix build '.#homeConfigurations."jordan@<host>".activationPackage' -o <link>`.

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# Install/refresh Nix GPU drivers at /run/opengl-driver on non-NixOS (Fedora).
+# Needed by Nix-built GUI apps (wgpu/Vulkan/GL, e.g. herdr-app); provided by the
+# Home Manager option targets.genericLinux.gpu (modules/home/common.nix).
+# Must be re-run whenever the driver store path changes (e.g. mesa bump after a
+# flake update). No-op (no sudo) when already current.
+#
+# Usage: nix-gpu-setup          # fix if out of date (uses sudo)
+#        nix-gpu-setup --check  # report only; exit 1 if out of date
+
+set -euo pipefail
+
+check_only=false
+[ "${1:-}" = "--check" ] && check_only=true
+
+if [ -f /etc/os-release ] && . /etc/os-release && [ "${ID:-}" = "nixos" ]; then
+  exit 0
+fi
+
+setup_bin="$HOME/.nix-profile/bin/non-nixos-gpu-setup"
+if [ ! -e "$setup_bin" ]; then
+  echo "[!] non-nixos-gpu-setup not found; is targets.genericLinux.gpu enabled and Home Manager switched?"
+  exit 0
+fi
+
+pkg=$(dirname "$(dirname "$(readlink -f "$setup_bin")")")
+want="$pkg/lib/tmpfiles.d/non-nixos-gpu.conf"
+have=$(readlink /etc/tmpfiles.d/non-nixos-gpu.conf 2>/dev/null || true)
+
+if [ "$have" = "$want" ] && [ -e /run/opengl-driver ]; then
+  echo "[✓] Nix GPU drivers up to date."
+  exit 0
+fi
+
+if $check_only; then
+  echo "[!] Nix GPU drivers out of date. Run: nix-gpu-setup"
+  exit 1
+fi
+
+echo "Updating Nix GPU drivers (/run/opengl-driver)..."
+sudo "$pkg/bin/non-nixos-gpu-setup"
+echo "[✓] Nix GPU drivers installed."

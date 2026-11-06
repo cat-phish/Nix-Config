@@ -80,6 +80,8 @@ echo "Starting home-manager switch..."
 # it will prompt you naturally in the terminal.
 if home-manager switch -b backup --flake "$FLAKE_PATH"; then
   echo "[✓] Success!"
+  # Warn only (this script avoids sudo); fix with: nix-gpu-setup
+  "$FLAKE_PATH/dotfiles/.scripts/nix-gpu-setup" --check || true
 else
   echo "[!] Failed."
   exit 1
