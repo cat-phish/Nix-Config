@@ -35,6 +35,7 @@
       gtest
       # gcc
       herdr
+      herdr-core
       herdr-desktop
       jq
       # libgcc
