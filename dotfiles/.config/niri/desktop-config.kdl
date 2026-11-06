@@ -81,7 +81,7 @@ workspace "music" {
 }
 
 // Fix column order on the org-mode workspace once its apps have loaded (any order).
-spawn-sh-at-startup "~/.config/niri/scripts/arrange-columns.sh org-mode futo-notes-tauri Emacs"
+spawn-sh-at-startup "~/.config/niri/scripts/arrange-columns.sh org-mode Emacs futo-notes-tauri"
 
 // Named Workspace Rules
 // main monitor
