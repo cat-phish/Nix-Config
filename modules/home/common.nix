@@ -24,6 +24,12 @@
   # Fedora's zsh comes from dnf; on NixOS the system sets the login shell.
   home.sessionVariables.SHELL = lib.mkIf (!isNixos) "/usr/bin/zsh";
 
+  # Non-NixOS: expose Nix mesa/GPU drivers at /run/opengl-driver so Nix GUI apps
+  # (wgpu/Vulkan/GL, e.g. herdr-app) can create a window. After the first switch,
+  # run once: sudo $(readlink -f ~/.nix-profile/bin/non-nixos-gpu-setup)
+  targets.genericLinux.enable = lib.mkIf (!isNixos) true;
+  targets.genericLinux.gpu.enable = lib.mkIf (!isNixos) true;
+
   # Flatpaks via nix-flatpak. On NixOS this needs services.flatpak.enable (configuration.nix).
   services.flatpak = {
     enable = true;
