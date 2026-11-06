@@ -27,16 +27,18 @@
       claude-code
       codex
       docker-compose
-      llvm
-      gh
       eza # ls replacement
-      gitleaks
-      gtest
       fd
       fzf
+      gh
+      gitleaks
+      gtest
       # gcc
+      herdr
+      herdr-desktop
       jq
       # libgcc
+      llvm
       # mongodb #takes too long to build from source
       navi
       nodejs_22
