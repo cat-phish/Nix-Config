@@ -19,6 +19,11 @@
       "path": "dms-plugin",
       "commit": "4ee079211dd94a8e4ffba33117de960ba3ac3f72"
     },
+    "alarmClock": {
+      "repo": "https://github.com/lucyfire/dms-plugins",
+      "path": "alarmClock",
+      "commit": "c463cf2364567bf77ded1e52dbf09c5cf0b9d28e"
+    },
     "auroraClock": {
       "repo": "https://github.com/Hedayatbakhshi/dms-aurora-clock",
       "commit": "5994733ae309d934a8da94574beadd8db24ba275"
@@ -69,6 +74,11 @@
       "repo": "https://github.com/JessVolet/DankConsoleModeWithSteam",
       "commit": "cffe37530cf6ce3cc126da79e6105acb5d6cfce6"
     },
+    "dankDesktopWeather": {
+      "repo": "https://github.com/AvengeMedia/dms-plugins",
+      "path": "DankDesktopWeather",
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
+    },
     "dankGifSearch": {
       "repo": "https://github.com/duxlabs-dev/dux-plugins",
       "path": "DankGifSearch",
@@ -113,6 +123,11 @@
       "repo": "https://github.com/jfchenier/dms-display-mirror",
       "commit": "92cd44c4fb67834bf71fdd78f83c29df5e0750b2"
     },
+    "displaySettings": {
+      "repo": "https://github.com/lucyfire/dms-plugins",
+      "path": "displaySettings",
+      "commit": "c463cf2364567bf77ded1e52dbf09c5cf0b9d28e"
+    },
     "dmsAirDrop": {
       "repo": "https://github.com/Kratospidey/dms-airdrop",
       "commit": "4bc4076210fb4344ec6212bcb3741357dd027bba"
@@ -155,6 +170,11 @@
       "repo": "https://github.com/psyreactor/dms-githubNotifier",
       "commit": "24ce96bc73d08ae60261a0fbe6370d10ac62221a"
     },
+    "gitmojiLauncher": {
+      "repo": "https://github.com/lucyfire/dms-plugins",
+      "path": "gitmojiLauncher",
+      "commit": "c463cf2364567bf77ded1e52dbf09c5cf0b9d28e"
+    },
     "hamqslPropagation": {
       "repo": "https://github.com/devnullvoid/dms-hamqsl-propagation",
       "commit": "92d57fd064869098530a6644b4416fe8d680e9f0"
@@ -184,6 +204,10 @@
     "niriWindows": {
       "repo": "https://github.com/rochacbruno/DankNiriWindows",
       "commit": "411d5ee9f7707029f4c12c824ec3b24ca6756a0d"
+    },
+    "nixMonitor": {
+      "repo": "https://github.com/antonjah/nix-monitor",
+      "commit": "bd941a0e71b8f7763b45c22281a44ff554f82666"
     },
     "nixPackageRunner": {
       "repo": "https://github.com/iahccc/NixPackageRunner",
@@ -258,6 +282,14 @@
     "wallabag": {
       "repo": "https://github.com/arqueon/dms-wallabag",
       "commit": "ff69a337f503816c636d9b1177942d076a3130f7"
+    },
+    "wallpaperBing": {
+      "repo": "https://github.com/max72bra/DankPluginBingWallpaper",
+      "commit": "bb06dbff5d2ababd1b675ad4bcc3cad36d7be42c"
+    },
+    "wallpaperShufflerPlugin": {
+      "repo": "https://github.com/Daniel-42-z/dms-wallpaper-shuffler",
+      "commit": "2b2e63e1831d6e184eecbcad8a2794734bd5d4ae"
     },
     "webSearch": {
       "repo": "https://github.com/devnullvoid/dms-web-search",
