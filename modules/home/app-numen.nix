@@ -9,7 +9,7 @@
   # Whisper-based dictation, a higher-accuracy alternative to numen's Vosk
   # @transcribe. Numen stays in charge of commands; this handles prose.
   #
-  #   numen-dictate auto    record until ~1.5s of silence, then type (numen phrase)
+  #   numen-dictate auto    record until ~1s of silence, then type (numen phrase)
   #   numen-dictate toggle  start recording; run again to stop and type (keybind)
   #
   # Numen is paused (`load` with no files) while recording so the dictated
@@ -17,17 +17,21 @@
   # Typing goes through dotoolc if dotoold is running, else dotool.
   numen-dictate = pkgs.writeShellApplication {
     name = "numen-dictate";
-    runtimeInputs = with pkgs; [sox whisper-cpp libnotify coreutils procps gnused];
+    # Vulkan build: ~2-3x faster on the Intel iGPU than CPU; falls back to CPU
+    # if no Vulkan device is found.
+    runtimeInputs = with pkgs; [sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
     # numenc/dotool/dotoolc come from the system PATH (built from source,
     # with the uinput udev rules).
     text = ''
       MODEL="''${WHISPER_MODEL:-$HOME/.local/share/whisper/ggml-small.en.bin}"
       MODEL_NAME="''${WHISPER_MODEL_NAME:-small.en}"
-      SILENCE_SECS="''${DICTATE_SILENCE:-1.5}"
-      THRESHOLD="''${DICTATE_THRESHOLD:-2%}"
+      SILENCE_SECS="''${DICTATE_SILENCE:-1.0}"
+      THRESHOLD="''${DICTATE_THRESHOLD:-3%}"
+      THREADS="''${WHISPER_THREADS:-4}" # more threads is slower on hybrid P/E-core CPUs
       RUNDIR="''${XDG_RUNTIME_DIR:-/tmp}/numen-dictate"
       AUDIO="$RUNDIR/dictation.wav"
       PIDFILE="$RUNDIR/rec.pid"
+      AUTOPID="$RUNDIR/auto.pid"
       mkdir -p "$RUNDIR"
 
       notify() { notify-send -a Dictation -t 2000 "Dictation" "$1" || true; }
@@ -53,8 +57,12 @@
 
       transcribe_and_type() {
         notify "Processing..."
-        local text
-        text=$(whisper-cli -m "$MODEL" -f "$AUDIO" -nt -np -t "$(nproc)" 2>/dev/null \
+        local text ac
+        # Encode only as much audio context as the clip needs (50 frames/s,
+        # 1500 = full 30s window) instead of always padding to 30s. Greedy
+        # decoding (-bs 1 -bo 1) instead of 5-way beam search.
+        ac=$(soxi -D "$AUDIO" | awk '{a=int($1*50)+128; if(a<384)a=384; if(a>1500)a=0; print a}')
+        text=$(whisper-cli -m "$MODEL" -f "$AUDIO" -nt -np -t "$THREADS" -bs 1 -bo 1 -ac "$ac" 2>/dev/null \
           | sed -E 's/\[[^]]*\]//g; s/\((music|silence|inaudible|blank_audio)[^)]*\)//Ig' \
           | tr '\n' ' ' | tr -s '[:space:]' ' ' | sed -E 's/^ +| +$//g')
         rm -f "$AUDIO"
@@ -75,14 +83,21 @@
           numen_pause
           trap numen_resume EXIT
           notify "Listening... (pause ''${SILENCE_SECS}s to finish)"
-          # Wait for 0.1s above threshold to start, stop after SILENCE_SECS below it.
-          # Hard cap of 2 minutes per utterance.
-          timeout -s INT 120 rec "''${record_args[@]}" \
-            silence 1 0.1 "$THRESHOLD" 1 "$SILENCE_SECS" "$THRESHOLD" || true
+          # highpass drops fan/hum rumble so it doesn't hold the recording open.
+          # Wait for 0.1s above threshold to start, stop after SILENCE_SECS below it,
+          # cap at 2 minutes. `numen-dictate toggle` (Mod+D) stops it early.
+          rec "''${record_args[@]}" highpass 100 \
+            silence 1 0.1 "$THRESHOLD" 1 "$SILENCE_SECS" "$THRESHOLD" trim 0 120 &
+          echo $! >"$AUTOPID"
+          wait $! || true
+          rm -f "$AUTOPID"
           if [ -s "$AUDIO" ]; then transcribe_and_type; else notify "No speech detected."; fi
           ;;
         toggle)
-          if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+          if [ -f "$AUTOPID" ] && kill -0 "$(cat "$AUTOPID")" 2>/dev/null; then
+            # An auto recording is hanging: stop it; the auto run transcribes.
+            kill -INT "$(cat "$AUTOPID")"
+          elif [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
             kill -INT "$(cat "$PIDFILE")"
             while kill -0 "$(cat "$PIDFILE")" 2>/dev/null; do sleep 0.05; done
             rm -f "$PIDFILE"
