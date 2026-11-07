@@ -65,7 +65,8 @@ change: run /etc/numen/scripts/menu change | numenc & \
 # Ignore this, vosk-model-small-en-us-0.15 can output huh after a long silence.
 huh:
 
-# Whisper dictation: say "say", wait for the notification, then speak.
-# Pauses numen, records until you stop talking, then types the text.
+# Whisper dictation: say "say" and keep talking (pausing first is fine too).
+# @transcribe keeps numen from running the words as commands; the audio comes
+# from numen-dictate-buffer, then recording continues until you stop talking.
 # Backgrounded so numen can process the pause; see modules/home/app-numen.nix.
-say: run numen-dictate auto &
+@transcribe say: run numen-dictate say &

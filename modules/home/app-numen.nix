@@ -78,10 +78,19 @@
     '';
   };
 
+  # Keeps the last 30s of mic audio in RAM (systemd user service below) so
+  # "say" can transcribe speech that started before numen recognised it.
+  numen-dictate-buffer = pkgs.writeScriptBin "numen-dictate-buffer" (
+    "#!${pkgs.python3}/bin/python3\n"
+    + builtins.replaceStrings ["@rec@"] ["${pkgs.sox}/bin/rec"] (builtins.readFile ./numen-dictate-buffer.py)
+  );
+
   # Whisper-based dictation, a higher-accuracy alternative to numen's Vosk
   # @transcribe. Numen stays in charge of commands; this handles prose.
   #
-  #   numen-dictate auto    record until ~1s of silence, then type (numen phrase)
+  #   numen-dictate say     numen "say" phrase: take the speech since "say" from
+  #                         numen-dictate-buffer, record until ~1s of silence, type
+  #   numen-dictate auto    record from now until ~1s of silence, then type
   #   numen-dictate toggle  start recording; run again to stop and type (keybind)
   #
   # Numen is paused while recording so the dictated prose isn't also run as
@@ -91,7 +100,7 @@
     name = "numen-dictate";
     # Vulkan build: ~2-3x faster on the Intel iGPU than CPU; falls back to CPU
     # if no Vulkan device is found.
-    runtimeInputs = with pkgs; [numen-mode sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
+    runtimeInputs = with pkgs; [numen-mode numen-dictate-buffer sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
     # numenc/dotool/dotoolc come from the system PATH (built from source,
     # with the uinput udev rules).
     text = ''
@@ -103,6 +112,7 @@
       AUDIO="$RUNDIR/dictation.wav"
       PIDFILE="$RUNDIR/rec.pid"
       AUTOPID="$RUNDIR/auto.pid"
+      BUFSOCK="$RUNDIR/buffer.sock"
       mkdir -p "$RUNDIR"
 
       # Backgrounded so the notification never delays recording/typing.
@@ -128,10 +138,29 @@
           | sed -E 's/\[[^]]*\]//g; s/\((music|silence|inaudible|blank_audio)[^)]*\)//Ig' \
           | tr '\n' ' ' | tr -s '[:space:]' ' ' | sed -E 's/^ +| +$//g')
         rm -f "$AUDIO"
-        if [ -z "$text" ]; then
+        if [ "''${STRIP_SAY:-0}" = 1 ]; then
+          # Buffered audio starts at (or a few words before) the "say" trigger:
+          # drop everything up to it if it's within the first 4 words.
+          text=$(printf '%s\n' "$text" | awk '{
+            n = split($0, w, " ")
+            for (i = 1; i <= n && i <= 4; i++) {
+              x = tolower(w[i]); gsub(/[[:punct:]]/, "", x)
+              if (x == "say") {
+                o = ""; for (j = i + 1; j <= n; j++) o = o (o == "" ? "" : " ") w[j]
+                print toupper(substr(o, 1, 1)) substr(o, 2); exit
+              }
+            }
+            print }')
+        fi
+        type_text "$text"
+      }
+
+      type_text() {
+        if [ -z "$1" ]; then
           notify "No speech detected."
           return
         fi
+        local text="$1"
         if pgrep -x dotoold >/dev/null; then
           printf 'type %s\n' "$text" | dotoolc
         else
@@ -140,6 +169,25 @@
       }
 
       case "''${1:-auto}" in
+        say)
+          numen_pause
+          trap numen_resume EXIT
+          if [ -S "$BUFSOCK" ]; then
+            # numen fires this after you stop talking (@transcribe), so the
+            # speech is already in the buffer; this returns as soon as there's
+            # been SILENCE_SECS of quiet. Mod+D (toggle) stops it early.
+            numen-dictate-buffer capture "$AUDIO" --end "$SILENCE_SECS" \
+              --threshold "$(awk -v t="''${THRESHOLD%\%}" 'BEGIN{print t/100}')" &
+            echo $! >"$AUTOPID"
+            wait $! || true
+            rm -f "$AUTOPID"
+            if [ -s "$AUDIO" ]; then STRIP_SAY=1 transcribe_and_type; else notify "No speech detected."; fi
+          else
+            # Buffer service not running: fall back to numen's own (Vosk) transcript.
+            notify "numen-dictate-buffer not running; typed Vosk transcript"
+            type_text "$(head -n 1 "''${NUMEN_STATE_DIR:-$HOME/.local/state/numen}/transcripts" 2>/dev/null)"
+          fi
+          ;;
         auto)
           ensure_model
           numen_pause
@@ -175,7 +223,7 @@
           fi
           ;;
         *)
-          echo "usage: numen-dictate [auto|toggle]" >&2
+          echo "usage: numen-dictate [say|auto|toggle]" >&2
           exit 2
           ;;
       esac
@@ -185,7 +233,21 @@ in {
   imports = [
   ];
 
-  home.packages = [numen-mode numen-dictate];
+  home.packages = [numen-mode numen-dictate numen-dictate-buffer];
+
+  # Always-on, in-memory only (nothing is written to disk until "say").
+  systemd.user.services.numen-dictate-buffer = {
+    Unit = {
+      Description = "Rolling microphone buffer for numen-dictate";
+      After = ["graphical-session.target" "pipewire-pulse.service"];
+    };
+    Service = {
+      ExecStart = "${numen-dictate-buffer}/bin/numen-dictate-buffer serve";
+      Restart = "on-failure";
+      RestartSec = 2;
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
 
   home.file = {
     ".config/numen/phrases" = {
