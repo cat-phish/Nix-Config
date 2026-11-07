@@ -66,13 +66,18 @@
       }
       notify() { (notify-send -a Numen -t 1500 "Numen" "$1" || true) & }
 
+      # The flag holds the PID of the numen instance that was put to sleep, so
+      # a restarted numen (which always starts awake) is never treated as asleep.
+      numen_pid() { pgrep -xo numen || true; }
+      asleep() { [ -f "$FLAG" ] && [ -n "$(numen_pid)" ] && [ "$(cat "$FLAG")" = "$(numen_pid)" ]; }
+
       case "''${1:-status}" in
-        sleep) touch "$FLAG"; numen_load "$SLEEP_FILE"; notify "Asleep (say \"${wakePhrase}\")" ;;
+        sleep) numen_pid >"$FLAG"; numen_load "$SLEEP_FILE"; notify "Asleep (say \"${wakePhrase}\")" ;;
         wake) rm -f "$FLAG"; load_awake; notify "Awake" ;;
-        toggle) if [ -f "$FLAG" ]; then "$0" wake; else "$0" sleep; fi ;;
+        toggle) if asleep; then "$0" wake; else "$0" sleep; fi ;;
         pause) numen_load ;;
-        restore) if [ -f "$FLAG" ]; then numen_load "$SLEEP_FILE"; else load_awake; fi ;;
-        status) if [ -f "$FLAG" ]; then echo asleep; else echo awake; fi ;;
+        restore) if asleep; then numen_load "$SLEEP_FILE"; else load_awake; fi ;;
+        status) if asleep; then echo asleep; else echo awake; fi ;;
         *) echo "usage: numen-mode [sleep|wake|toggle|pause|restore|status]" >&2; exit 2 ;;
       esac
     '';
