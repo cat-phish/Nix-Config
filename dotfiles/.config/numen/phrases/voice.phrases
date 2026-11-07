@@ -64,3 +64,8 @@ change: run /etc/numen/scripts/menu change | numenc & \
 
 # Ignore this, vosk-model-small-en-us-0.15 can output huh after a long silence.
 huh:
+
+# Whisper dictation (more accurate than @transcribe, for prose).
+# Pauses numen, records until you stop talking, then types the text.
+# Backgrounded so numen can process the pause; see modules/home/app-numen.nix.
+dictate: run numen-dictate auto &
