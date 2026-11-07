@@ -20,20 +20,58 @@
   };
   whisperModel = whisperModels."base.en";
 
+  # Talon-style sleep mode. Numen's own pause (`load` with no files) can't be
+  # undone by voice, so "sleep" instead loads sleep.phrases, which only
+  # contains the wake phrase. State is a flag file so other scripts (e.g.
+  # numen-dictate) restore the right mode after temporarily pausing numen.
+  #
+  #   numen-mode sleep|wake|toggle  switch mode (with a notification)
+  #   numen-mode pause              load nothing (used while dictating)
+  #   numen-mode restore            reload whatever the current mode is
+  #   numen-mode status             print "awake" or "asleep"
+  numen-mode = pkgs.writeShellApplication {
+    name = "numen-mode";
+    runtimeInputs = with pkgs; [libnotify coreutils procps];
+    text = ''
+      FLAG="''${XDG_RUNTIME_DIR:-/tmp}/numen-asleep"
+      SLEEP_FILE="$HOME/.config/numen/sleep.phrases"
+
+      numen_load() {
+        pgrep -x numen >/dev/null || return 0
+        echo "load $*" | numenc || true
+      }
+      load_awake() {
+        # shellcheck disable=SC2086
+        numen_load ''${NUMEN_PHRASES:-"$HOME"/.config/numen/phrases/*.phrases}
+      }
+      notify() { (notify-send -a Numen -t 1500 "Numen" "$1" || true) & }
+
+      case "''${1:-status}" in
+        sleep) touch "$FLAG"; numen_load "$SLEEP_FILE"; notify "Asleep (say \"wake up\")" ;;
+        wake) rm -f "$FLAG"; load_awake; notify "Awake" ;;
+        toggle) if [ -f "$FLAG" ]; then "$0" wake; else "$0" sleep; fi ;;
+        pause) numen_load ;;
+        restore) if [ -f "$FLAG" ]; then numen_load "$SLEEP_FILE"; else load_awake; fi ;;
+        status) if [ -f "$FLAG" ]; then echo asleep; else echo awake; fi ;;
+        *) echo "usage: numen-mode [sleep|wake|toggle|pause|restore|status]" >&2; exit 2 ;;
+      esac
+    '';
+  };
+
   # Whisper-based dictation, a higher-accuracy alternative to numen's Vosk
   # @transcribe. Numen stays in charge of commands; this handles prose.
   #
   #   numen-dictate auto    record until ~1s of silence, then type (numen phrase)
   #   numen-dictate toggle  start recording; run again to stop and type (keybind)
   #
-  # Numen is paused (`load` with no files) while recording so the dictated
-  # prose isn't also run as commands, then resumed with $NUMEN_PHRASES.
+  # Numen is paused while recording so the dictated prose isn't also run as
+  # commands, then restored to its previous mode (awake/asleep) via numen-mode.
   # Typing goes through dotoolc if dotoold is running, else dotool.
   numen-dictate = pkgs.writeShellApplication {
     name = "numen-dictate";
     # Vulkan build: ~2-3x faster on the Intel iGPU than CPU; falls back to CPU
     # if no Vulkan device is found.
-    runtimeInputs = with pkgs; [sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
+    runtimeInputs = with pkgs; [numen-mode sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
     # numenc/dotool/dotoolc come from the system PATH (built from source,
     # with the uinput udev rules).
     text = ''
@@ -50,14 +88,8 @@
       # Backgrounded so the notification never delays recording/typing.
       notify() { (notify-send -a Dictation -t 2000 "Dictation" "$1" || true) & }
 
-      numen_running() { pgrep -x numen >/dev/null; }
-      numen_pause() { if numen_running; then echo load | numenc || true; fi; }
-      numen_resume() {
-        if numen_running; then
-          # shellcheck disable=SC2086
-          echo "load ''${NUMEN_PHRASES:-$(echo "$HOME"/.config/numen/phrases/*.phrases)}" | numenc || true
-        fi
-      }
+      numen_pause() { numen-mode pause; }
+      numen_resume() { numen-mode restore; }
 
       ensure_model() {
         [ -f "$MODEL" ] || { notify "Whisper model not found: $MODEL"; exit 1; }
@@ -133,12 +165,14 @@ in {
   imports = [
   ];
 
-  home.packages = [numen-dictate];
+  home.packages = [numen-mode numen-dictate];
 
   home.file = {
     ".config/numen/phrases" = {
       source = ../../dotfiles/.config/numen/phrases;
       recursive = true;
     };
+    # Outside phrases/ so the *.phrases glob for awake mode doesn't include it.
+    ".config/numen/sleep.phrases".source = ../../dotfiles/.config/numen/sleep.phrases;
   };
 }

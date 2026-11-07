@@ -91,3 +91,7 @@ write file: caps off \
 # This cycles round splits in Vim
 switch: caps off \
 	press Escape ctrl+w w
+
+# Sleep mode (like Talon): numen only listens for "wake up" until woken.
+# Backgrounded so numen can process the reload; see modules/home/app-numen.nix.
+sleep: run numen-mode sleep &
