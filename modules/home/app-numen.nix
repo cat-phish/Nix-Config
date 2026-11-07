@@ -6,6 +6,20 @@
   pkgs-stable,
   ...
 }: let
+  # Whisper models, fetched by Nix (pinned by hash). base.en is ~2-3x faster
+  # than small.en on this hardware with slightly lower accuracy; tiny.en is
+  # faster still but noticeably sloppier. Override per run with WHISPER_MODEL.
+  whisperModels = lib.mapAttrs (name: hash:
+    pkgs.fetchurl {
+      url = "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-${name}.bin";
+      inherit hash;
+    }) {
+    "tiny.en" = "sha256-kh5M+Ghv3Zk9zQgaXaW2w2W/3hFi5ysI11rHUomSCx8=";
+    "base.en" = "sha256-oDd5yG3zMjB19eeWyyzlAp8A7Ihp7uP9+4l6/jbG0AI=";
+    "small.en" = "sha256-xhONbVjsyDIgl+D5h8MvG+i7ChhTKj+I9zTRu/nEHl0=";
+  };
+  whisperModel = whisperModels."base.en";
+
   # Whisper-based dictation, a higher-accuracy alternative to numen's Vosk
   # @transcribe. Numen stays in charge of commands; this handles prose.
   #
@@ -23,8 +37,7 @@
     # numenc/dotool/dotoolc come from the system PATH (built from source,
     # with the uinput udev rules).
     text = ''
-      MODEL="''${WHISPER_MODEL:-$HOME/.local/share/whisper/ggml-small.en.bin}"
-      MODEL_NAME="''${WHISPER_MODEL_NAME:-small.en}"
+      MODEL="''${WHISPER_MODEL:-${whisperModel}}"
       SILENCE_SECS="''${DICTATE_SILENCE:-1.0}"
       THRESHOLD="''${DICTATE_THRESHOLD:-3%}"
       THREADS="''${WHISPER_THREADS:-4}" # more threads is slower on hybrid P/E-core CPUs
@@ -34,7 +47,8 @@
       AUTOPID="$RUNDIR/auto.pid"
       mkdir -p "$RUNDIR"
 
-      notify() { notify-send -a Dictation -t 2000 "Dictation" "$1" || true; }
+      # Backgrounded so the notification never delays recording/typing.
+      notify() { (notify-send -a Dictation -t 2000 "Dictation" "$1" || true) & }
 
       numen_running() { pgrep -x numen >/dev/null; }
       numen_pause() { if numen_running; then echo load | numenc || true; fi; }
@@ -46,11 +60,7 @@
       }
 
       ensure_model() {
-        [ -f "$MODEL" ] && return
-        notify "Downloading Whisper model $MODEL_NAME (one time)..."
-        mkdir -p "$(dirname "$MODEL")"
-        whisper-cpp-download-ggml-model "$MODEL_NAME" "$(dirname "$MODEL")" >/dev/null \
-          || { notify "Model download failed"; exit 1; }
+        [ -f "$MODEL" ] || { notify "Whisper model not found: $MODEL"; exit 1; }
       }
 
       record_args=(-q -c 1 -r 16000 -b 16 -e signed-integer "$AUDIO")
