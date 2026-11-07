@@ -3,8 +3,8 @@
 @cancel no:
 
 # Transcribe a sentence
-# For example, "scribe please type this".
-@transcribe say: set numen_fmt echo normal \
+# For example, "plain say please type this".
+@transcribe plain say: set numen_fmt echo normal \
 	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 
 # Transcribe a sentence formatted...
@@ -65,7 +65,7 @@ change: run /etc/numen/scripts/menu change | numenc & \
 # Ignore this, vosk-model-small-en-us-0.15 can output huh after a long silence.
 huh:
 
-# Whisper dictation (more accurate than @transcribe, for prose).
+# Whisper dictation: say "say", wait for the notification, then speak.
 # Pauses numen, records until you stop talking, then types the text.
 # Backgrounded so numen can process the pause; see modules/home/app-numen.nix.
-dictate: run numen-dictate auto &
+say: run numen-dictate auto &

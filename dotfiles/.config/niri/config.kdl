@@ -201,8 +201,8 @@ binds {
     // }
 
     // Application Launchers
-    Mod+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    Mod+Shift+D hotkey-overlay-title="Whisper Dictation (toggle)" { spawn "numen-dictate" "toggle"; }
+    Mod+Shift+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
+    Mod+D hotkey-overlay-title="Whisper Dictation (toggle)" { spawn "numen-dictate" "toggle"; }
     Mod+Space hotkey-overlay-title="Application Launcher" {
       spawn "dms" "ipc" "call" "spotlight" "toggle";
     }
