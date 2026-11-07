@@ -1,0 +1,36 @@
+# Decoy vocabulary for numen sleep mode (see modules/home/app-numen.nix).
+# While asleep, numen only knows the words it has phrases for, so without
+# these every utterance gets forced into the wake phrase. Each word here
+# (plus every word from phrases/*.phrases) becomes a do-nothing phrase.
+# Words unknown to the Vosk model are ignored, so adding more is harmless.
+the be to of and a in that have i it for not on with he as you do at this
+but his by from they we say her she or an will my one all would there
+their what so up out if about who get which go me when make can like time
+no just him know take people into year your good some could them see other
+than then now look only come its over think also back after use two how our
+work first well way even new want because any these give day most us is are
+was were been has had did does said says going gone got made went yes okay
+ok hey hi hello thanks thank please sorry right left down here where why
+very really much more many lot little big small long short old young great
+nice fine bad sure maybe still never always again today tomorrow yesterday
+morning night week month home house store car food water coffee lunch
+dinner breakfast eat drink sleep talk call email message phone computer
+browser open close start stop wait walk run read write type play watch
+listen music video movie show game book page line file folder thing things
+something nothing everything someone anyone everyone place world life hand
+head face eye eyes man woman kid kids friend family mom dad name number
+money job meeting question answer problem idea point part case fact story
+word words should might must shall need feel try leave put mean keep let
+begin seem help turn ask tell find live believe hold bring happen stand
+lose pay meet include continue set learn change lead understand follow
+create speak spend grow offer remember love consider appear buy serve die
+send expect build stay fall cut reach kill remain suggest raise pass sell
+require report decide pull check pick weather pretty outside inside later
+soon early late off through before between under around while during without
+again against same different next last own each every few both such another
+those being doing having am isn't don't can't won't i'm it's that's what's
+there's let's you're we're they're i've i'll i'd yeah nope uh um oh ah hmm
+well actually basically literally probably definitely though although since
+until unless whether either neither enough quite rather almost already also
+anyway somewhere anywhere everywhere upstairs downstairs kitchen room door
+window desk chair table bed office school car bus train

@@ -1,3 +1,0 @@
-# Loaded by `numen-mode sleep`: numen ignores everything except this phrase.
-# See modules/home/app-numen.nix.
-wake up: run numen-mode wake &
