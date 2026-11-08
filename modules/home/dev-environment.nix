@@ -18,14 +18,23 @@
   # };
 
   home.packages =
-    (with pkgs; [
+    # TEMPORARY: held back to an older nixpkgs (input nixpkgs-hold in
+    # flake.nix) because they fail to build on current unstable. Move them
+    # back into the list below once they build again (see backlog.md).
+    (with (import inputs.nixpkgs-hold {
+        system = pkgs.stdenv.hostPlatform.system;
+        config.allowUnfree = true;
+      }); [
+        codex
+        herdr-desktop
+      ])
+    ++ (with pkgs; [
       aspell
       antigravity-cli
       bat # cat replacement with syntax highlighting
       # clang
       clang-tools
       claude-code
-      codex
       docker-compose
       eza # ls replacement
       fd
@@ -36,7 +45,6 @@
       # gcc
       herdr
       herdr-core
-      herdr-desktop
       jq
       # libgcc
       llvm

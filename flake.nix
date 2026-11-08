@@ -4,6 +4,12 @@
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
     nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-24.11";
+    # TEMPORARY (Nov 2026): packages that fail to build on current unstable
+    # are taken from the unstable revision before the 2026-11-08 update:
+    # codex (aws-lc-sys wants a system AWS-LC) and herdr-desktop (zstd-sys
+    # can't find libzstd). Used in modules/home/dev-environment.nix; remove
+    # once they build again (see backlog.md).
+    nixpkgs-hold.url = "github:NixOS/nixpkgs/f9a75f41be3a74eab55d3a7679d34ad6cc0da977";
     home-manager.url = "github:nix-community/home-manager";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
     sops-nix.url = "github:Mic92/sops-nix";
@@ -99,7 +105,11 @@
           disko.nixosModules.disko
           # Shell comforts for every user listed in my.server.shellUsers (modules/home/server-shell.nix).
           home-manager.nixosModules.home-manager
-          ({config, lib, ...}: {
+          ({
+            config,
+            lib,
+            ...
+          }: {
             home-manager = {
               useGlobalPkgs = true;
               useUserPackages = true;
