@@ -12,6 +12,7 @@
   adminKeys = [
     # "ssh-ed25519 AAAA... jordan@fedora-desktop"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOa80EdbiAlEsJgMvotXA0jcicun018mby+0Nlh6IWIp jordan@fedora-laptop"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAF5vqA1M8gffxvQvF5ojYUWlX4OT/bwxPBn8aCgmTF0 jordan@fedora-desktop"
   ];
   agentKeys = [
     # "ssh-ed25519 AAAA... agent-vm client"
