@@ -1,3 +1,4 @@
+# Numen voice control, tray icon and dictation. User guide: docs/numen.md
 {
   config,
   inputs,
@@ -6,6 +7,8 @@
   pkgs-stable,
   ...
 }: let
+  cfg = config.my.numen.dictation;
+
   # Whisper models, fetched by Nix (pinned by hash). base.en is ~2-3x faster
   # than small.en on this hardware with slightly lower accuracy; tiny.en is
   # faster still but noticeably sloppier. Override per run with WHISPER_MODEL.
@@ -18,7 +21,56 @@
     "base.en" = "sha256-oDd5yG3zMjB19eeWyyzlAp8A7Ihp7uP9+4l6/jbG0AI=";
     "small.en" = "sha256-xhONbVjsyDIgl+D5h8MvG+i7ChhTKj+I9zTRu/nEHl0=";
   };
-  whisperModel = whisperModels."base.en";
+  whisperModel = whisperModels.${cfg.whisperModel};
+
+  # FUTO asr4all streaming models (https://huggingface.co/futo-org/asr4all-m
+  # etc.): the onnx/ bundle of each size, pinned to a commit. The bundle
+  # includes the reference engine (asr4all_onnx.py) numen-dictate-stream uses.
+  # Only the selected size is downloaded. License: FUTO ethical-use weights
+  # license (personal use is fine).
+  asr4allModels = lib.mapAttrs (size: {
+    rev,
+    hash,
+  }:
+    pkgs.runCommand "asr4all-${size}-onnx" {
+      nativeBuildInputs = [pkgs.curl];
+      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+      outputHashMode = "recursive";
+      outputHashAlgo = "sha256";
+      outputHash = hash;
+    } ''
+      mkdir -p $out
+      for f in asr4all.onnx.data asr4all_onnx.py metadata.json vad.onnx \
+               pcec_c16.onnx pcec_c16_flush.onnx pcec_c64.onnx pcec_c64_flush.onnx \
+               stream_c16r4.onnx stream_c32r8.onnx stream_c64r16.onnx \
+               stream_c128r24.onnx stream_c256r32.onnx stream_c512r8.onnx; do
+        curl -sSfL --retry 3 -o "$out/$f" \
+          "https://huggingface.co/futo-org/asr4all-${size}/resolve/${rev}/onnx/$f"
+      done
+    '') {
+    s = {
+      rev = "30cb61728e7a0e333422fc3c8902bf2410e7df01";
+      hash = "sha256-bZAIj83w4YiLEqHflqH5SBbddI9LFgmbeabA0MdelYE=";
+    };
+    m = {
+      rev = "9b1506ca35ebfdc04be6b87868cc2f95eff10210";
+      hash = "sha256-J/Re/7mzSNyYUQRuNoLibSujQnXn8QPKHJe0oD3Hl54=";
+    };
+    l = {
+      rev = "f9c5157d220fc3cfc71b97baf9970325ff7d4ae5";
+      hash = "sha256-OulHqTV6AF53zmtnI9REYveHwlnJdeqfG4Zv+eb1ToU=";
+    };
+  };
+
+  # Streaming dictation engine/typer (types while you talk). See the script.
+  numen-dictate-stream = let
+    python = pkgs.python3.withPackages (p: [p.onnxruntime p.numpy]);
+  in
+    pkgs.writeScriptBin "numen-dictate-stream" (
+      "#!${python}/bin/python3\n"
+      + builtins.replaceStrings ["@model@" "@tier@"] ["${asr4allModels.${cfg.asr4allSize}}" cfg.asr4allTier]
+      (builtins.readFile ./numen-dictate-stream.py)
+    );
 
   # Talon-style sleep mode. Numen's own pause (`load` with no files) can't be
   # undone by voice, so "sleep" instead loads sleep.phrases, which only
@@ -131,10 +183,11 @@
     name = "numen-dictate";
     # Vulkan build: ~2-3x faster on the Intel iGPU than CPU; falls back to CPU
     # if no Vulkan device is found.
-    runtimeInputs = with pkgs; [numen-mode numen-dictate-buffer sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
+    runtimeInputs = with pkgs; [numen-mode numen-dictate-buffer numen-dictate-stream sox whisper-cpp-vulkan libnotify coreutils procps gnused gawk];
     # numenc/dotool/dotoolc come from the system PATH (built from source,
     # with the uinput udev rules).
     text = ''
+      ENGINE="''${DICTATE_ENGINE:-${cfg.engine}}" # whisper | asr4all
       MODEL="''${WHISPER_MODEL:-${whisperModel}}"
       SILENCE_SECS="''${DICTATE_SILENCE:-1.0}"
       THRESHOLD="''${DICTATE_THRESHOLD:-3%}"
@@ -198,6 +251,63 @@
           printf 'type %s\n' "$text" | dotool
         fi
       }
+
+      THRESHOLD_FRAC=$(awk -v t="''${THRESHOLD%\%}" 'BEGIN{print t/100}')
+      raw_rec() { rec -q -t raw -c 1 -r 16000 -b 16 -e signed-integer - highpass 100 trim 0 120; }
+
+      # asr4all: types while you talk (numen-dictate-stream). $1 = mode.
+      stream_dictate() {
+        case "$1" in
+          say)
+            numen_pause
+            trap numen_resume EXIT
+            if [ ! -S "$BUFSOCK" ]; then
+              notify "numen-dictate-buffer not running; typed Vosk transcript"
+              type_text "$(head -n 1 "''${NUMEN_STATE_DIR:-$HOME/.local/state/numen}/transcripts" 2>/dev/null)"
+              return
+            fi
+            # Buffered speech since "say" first, then live until SILENCE_SECS
+            # of quiet. Mod+D (toggle) stops it early.
+            numen-dictate-buffer stream --end "$SILENCE_SECS" --threshold "$THRESHOLD_FRAC" \
+              | numen-dictate-stream --strip-say &
+            ;;
+          auto)
+            numen_pause
+            trap numen_resume EXIT
+            notify "Listening... (pause ''${SILENCE_SECS}s to finish)"
+            raw_rec | numen-dictate-stream --silence "$SILENCE_SECS" --threshold "$THRESHOLD_FRAC" &
+            ;;
+        esac
+        echo $! >"$AUTOPID"
+        wait $! || notify "No speech detected."
+        rm -f "$AUTOPID"
+      }
+
+      if [ "$ENGINE" = asr4all ]; then
+        case "''${1:-auto}" in
+          say | auto)
+            stream_dictate "''${1:-auto}"
+            exit 0
+            ;;
+          toggle)
+            if [ -f "$AUTOPID" ] && kill -0 "$(cat "$AUTOPID")" 2>/dev/null; then
+              kill -INT "$(cat "$AUTOPID")" # the say/auto run flushes and restores numen
+            elif [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
+              pid=$(cat "$PIDFILE")
+              kill -INT "$pid"
+              while kill -0 "$pid" 2>/dev/null; do sleep 0.05; done
+              rm -f "$PIDFILE"
+              numen_resume
+            else
+              numen_pause
+              raw_rec | numen-dictate-stream &
+              echo $! >"$PIDFILE"
+              notify "Listening... run again to stop."
+            fi
+            exit 0
+            ;;
+        esac
+      fi
 
       case "''${1:-auto}" in
         say)
@@ -269,85 +379,138 @@
       "#!${python}/bin/python3\n"
       + builtins.replaceStrings ["@numen_mode@"] ["${numen-mode}/bin/numen-mode"] (builtins.readFile ./numen-tray.py)
     );
+
+  # Compares every whisper and asr4all model on your recordings (opt-in:
+  # my.numen.dictation.bench, since it pulls in all models, ~1.2 GB more).
+  numen-asr-bench = let
+    python = pkgs.python3.withPackages (p: [p.onnxruntime p.numpy]);
+  in
+    pkgs.writeScriptBin "numen-asr-bench" (
+      "#!${python}/bin/python3\n"
+      + builtins.replaceStrings
+      ["@whisper_cli@" "@whisper_models@" "@asr4all_models@" "@rec@" "@sentences@"]
+      [
+        "${pkgs.whisper-cpp-vulkan}/bin/whisper-cli"
+        (builtins.toJSON (lib.mapAttrs (_: m: "${m}") whisperModels))
+        (builtins.toJSON (lib.mapAttrs (_: m: "${m}") asr4allModels))
+        "${pkgs.sox}/bin/rec"
+        "${./numen-asr-bench.sentences}"
+      ]
+      (builtins.readFile ./numen-asr-bench.py)
+    );
 in {
   imports = [
   ];
 
-  home.packages = [numen-mode numen-dictate numen-dictate-buffer numen-tray];
-
-  # numen itself. No Install section: it's never started automatically, only
-  # from the tray (or `systemctl --user start numen`). Inherits the user
-  # manager's PATH/WAYLAND_DISPLAY, so phrase `run` actions work as in a
-  # terminal. numen is built from source into /usr/local/bin (Fedora).
-  systemd.user.services.numen = {
-    Unit = {
-      Description = "Numen voice control";
-      PartOf = ["graphical-session.target"];
-      After = ["graphical-session.target" "pipewire-pulse.service"];
+  # Dictation engine and models. Switch in a host file, e.g.
+  #   my.numen.dictation.engine = "whisper";
+  # (or per run: DICTATE_ENGINE=whisper numen-dictate auto).
+  # Benchmark on fedora-laptop (Core Ultra 7 155U), 7 read sentences, Nov 2026:
+  #   whisper tiny.en 7.1% WER, base.en 3.6%, small.en 3.6% (0.3/0.4/0.9 s
+  #   after you stop talking); asr4all-m c16r4 6.0%, c64r16 3.6%, types while
+  #   you talk ~1 s behind (c64r16 lags ~6 s, too slow for live typing).
+  options.my.numen.dictation = {
+    engine = lib.mkOption {
+      type = lib.types.enum ["whisper" "asr4all"];
+      default = "asr4all";
+      description = "whisper: transcribe after you stop talking (whisper.cpp). asr4all: FUTO's streaming model, types while you talk.";
     };
-    Service = {
-      ExecStart = "/usr/local/bin/numen";
-      Restart = "on-failure";
-      RestartSec = 2;
-      # On SIGTERM numen often hangs freeing the Vosk recognizer, which held
-      # it alive for the default 45s and then (Fedora) SIGABRTed it. It has
-      # nothing to save, so kill it after 2s instead.
-      TimeoutStopSec = 2;
-      TimeoutStopFailureMode = "kill";
+    whisperModel = lib.mkOption {
+      type = lib.types.enum (lib.attrNames whisperModels);
+      default = "base.en";
     };
+    asr4allSize = lib.mkOption {
+      type = lib.types.enum (lib.attrNames asr4allModels);
+      default = "m";
+      description = "s (28M), m (56M, what FUTO's keyboard uses) or l (97M).";
+    };
+    asr4allTier = lib.mkOption {
+      type = lib.types.enum ["stream_c16r4" "stream_c32r8" "stream_c64r16" "stream_c128r24" "stream_c256r32" "stream_c512r8"];
+      default = "stream_c16r4";
+      description = "Latency tier: c16r4 commits every 640 ms (~1.5 s first result); higher tiers are slightly more accurate but lag more.";
+    };
+    bench = lib.mkEnableOption "numen-asr-bench, which compares all dictation models on your voice (downloads every model)";
   };
 
-  # Fedora's /usr/lib/systemd/user/service.d/10-timeout-abort.conf (a drop-in,
-  # so it beats the unit file) sets abort; a later-sorting drop-in wins back.
-  xdg.configFile."systemd/user/numen.service.d/90-timeout-kill.conf".text = ''
-    [Service]
-    TimeoutStopFailureMode=kill
-  '';
+  config = {
+    home.packages =
+      [numen-mode numen-dictate numen-dictate-buffer numen-dictate-stream numen-tray]
+      ++ lib.optional cfg.bench numen-asr-bench;
 
-  # Launcher entry: brings back the tray if it's gone and turns numen on.
-  xdg.desktopEntries.numen = {
-    name = "Numen";
-    comment = "Start numen voice control and its tray icon";
-    exec = "${numen-mode}/bin/numen-mode on";
-    icon = "audio-input-microphone";
-    terminal = false;
-    categories = ["Utility" "Accessibility"];
-  };
+    # numen itself. No Install section: it's never started automatically, only
+    # from the tray (or `systemctl --user start numen`). Inherits the user
+    # manager's PATH/WAYLAND_DISPLAY, so phrase `run` actions work as in a
+    # terminal. numen is built from source into /usr/local/bin (Fedora).
+    systemd.user.services.numen = {
+      Unit = {
+        Description = "Numen voice control";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target" "pipewire-pulse.service"];
+      };
+      Service = {
+        ExecStart = "/usr/local/bin/numen";
+        Restart = "on-failure";
+        RestartSec = 2;
+        # On SIGTERM numen often hangs freeing the Vosk recognizer, which held
+        # it alive for the default 45s and then (Fedora) SIGABRTed it. It has
+        # nothing to save, so kill it after 2s instead.
+        TimeoutStopSec = 2;
+        TimeoutStopFailureMode = "kill";
+      };
+    };
 
-  systemd.user.services.numen-tray = {
-    Unit = {
-      Description = "Numen tray icon";
-      PartOf = ["graphical-session.target"];
-      After = ["graphical-session.target" "dms.service"];
-    };
-    Service = {
-      ExecStart = "${numen-tray}/bin/numen-tray";
-      Restart = "on-failure";
-      RestartSec = 3;
-    };
-    Install.WantedBy = ["graphical-session.target"];
-  };
+    # Fedora's /usr/lib/systemd/user/service.d/10-timeout-abort.conf (a drop-in,
+    # so it beats the unit file) sets abort; a later-sorting drop-in wins back.
+    xdg.configFile."systemd/user/numen.service.d/90-timeout-kill.conf".text = ''
+      [Service]
+      TimeoutStopFailureMode=kill
+    '';
 
-  # Always-on, in-memory only (nothing is written to disk until "say").
-  systemd.user.services.numen-dictate-buffer = {
-    Unit = {
-      Description = "Rolling microphone buffer for numen-dictate";
-      After = ["graphical-session.target" "pipewire-pulse.service"];
+    # Launcher entry: brings back the tray if it's gone and turns numen on.
+    xdg.desktopEntries.numen = {
+      name = "Numen";
+      comment = "Start numen voice control and its tray icon";
+      exec = "${numen-mode}/bin/numen-mode on";
+      icon = "audio-input-microphone";
+      terminal = false;
+      categories = ["Utility" "Accessibility"];
     };
-    Service = {
-      ExecStart = "${numen-dictate-buffer}/bin/numen-dictate-buffer serve";
-      Restart = "on-failure";
-      RestartSec = 2;
-    };
-    Install.WantedBy = ["graphical-session.target"];
-  };
 
-  home.file = {
-    ".config/numen/phrases" = {
-      source = ../../dotfiles/.config/numen/phrases;
-      recursive = true;
+    systemd.user.services.numen-tray = {
+      Unit = {
+        Description = "Numen tray icon";
+        PartOf = ["graphical-session.target"];
+        After = ["graphical-session.target" "dms.service"];
+      };
+      Service = {
+        ExecStart = "${numen-tray}/bin/numen-tray";
+        Restart = "on-failure";
+        RestartSec = 3;
+      };
+      Install.WantedBy = ["graphical-session.target"];
     };
-    # Outside phrases/ so the *.phrases glob for awake mode doesn't include it.
-    ".config/numen/sleep.phrases".source = sleepPhrases;
+
+    # Always-on, in-memory only (nothing is written to disk until "say").
+    systemd.user.services.numen-dictate-buffer = {
+      Unit = {
+        Description = "Rolling microphone buffer for numen-dictate";
+        After = ["graphical-session.target" "pipewire-pulse.service"];
+      };
+      Service = {
+        ExecStart = "${numen-dictate-buffer}/bin/numen-dictate-buffer serve";
+        Restart = "on-failure";
+        RestartSec = 2;
+      };
+      Install.WantedBy = ["graphical-session.target"];
+    };
+
+    home.file = {
+      ".config/numen/phrases" = {
+        source = ../../dotfiles/.config/numen/phrases;
+        recursive = true;
+      };
+      # Outside phrases/ so the *.phrases glob for awake mode doesn't include it.
+      ".config/numen/sleep.phrases".source = sleepPhrases;
+    };
   };
 }

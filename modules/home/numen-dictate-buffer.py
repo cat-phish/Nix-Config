@@ -8,9 +8,13 @@ speaker goes quiet.
 
   numen-dictate-buffer serve
   numen-dictate-buffer capture OUT.wav [--gap S] [--end S] [--max S] [--threshold F]
+  numen-dictate-buffer stream [--gap S] [--end S] [--max S] [--threshold F]
 
 capture prints nothing and exits 0 if OUT.wav was written, 1 if no speech.
-SIGINT/SIGTERM to capture stops it early and keeps what was recorded.
+stream writes the same audio as raw s16le 16 kHz mono to stdout as it
+arrives (buffered speech first, then live), for numen-dictate-stream; exits
+0 if there was speech, 1 if not.
+SIGINT/SIGTERM to either stops it early and keeps what was recorded.
 """
 
 import argparse
@@ -99,58 +103,74 @@ def speech_start(levels, thr, gap_frames):
     return 0
 
 
+def speech_frames(conn, buf, gap, end, mx, thr, state):
+    """Yield the frames of the most recent speech: what's already buffered
+    since it started, then live frames until `end` seconds of quiet, `mx`
+    seconds in total, or the client sends anything (stop) / goes away.
+    Sets state["stopped"] and state["trailing"] (quiet frames at the end)."""
+    gap_f, end_f, max_f = int(gap * FPS), int(end * FPS), int(mx * FPS)
+    state["stopped"], state["trailing"] = False, 0
+    with buf.cond:
+        snap = list(buf.frames)
+    levels = [x[2] for x in snap]
+    start = speech_start(levels, thr, gap_f)
+    heard, trailing, n = start is not None, 0, 0
+    if heard:
+        trailing = len(levels) - 1 - max(k for k, v in enumerate(levels) if v >= thr)
+        for x in snap[start:]:
+            n += 1
+            yield x[1]
+    last = snap[-1][0] if snap else buf.seq - 1
+
+    while not (heard and trailing >= end_f) and n < max_f:
+        if select.select([conn], [], [], 0)[0]:
+            state["stopped"] = True  # client asked to stop (or went away)
+            try:
+                conn.recv(64)  # read it: closing with unread data resets the connection
+            except OSError:
+                pass
+            break
+        with buf.cond:
+            buf.cond.wait_for(lambda: buf.seq - 1 > last, timeout=0.1)
+            new = [x for x in buf.frames if x[0] > last]
+        for seq, b, lv in new:
+            last = seq
+            if lv >= thr:
+                heard, trailing = True, 0
+            elif heard:
+                trailing += 1
+            if heard:
+                n += 1
+                yield b
+    state["trailing"] = trailing
+
+
 def handle(conn, buf):
     try:
         f = conn.makefile("rb")
         parts = f.readline().decode().split()
-        if len(parts) != 6 or parts[0] != "capture":
-            conn.sendall(b"error bad request\n")
-            return
-        out = parts[1]
-        gap, end, mx, thr = map(float, parts[2:])
-        gap_f, end_f, max_f = int(gap * FPS), int(end * FPS), int(mx * FPS)
-
-        with buf.cond:
-            snap = list(buf.frames)
-        levels = [x[2] for x in snap]
-        start = speech_start(levels, thr, gap_f)
-        frames, heard = [], start is not None
-        if heard:
-            frames = [x[1] for x in snap[start:]]
-            trailing = len(levels) - 1 - max(k for k, v in enumerate(levels) if v >= thr)
+        state = {}
+        if len(parts) == 6 and parts[0] == "capture":
+            out = parts[1]
+            frames = list(speech_frames(conn, buf, *map(float, parts[2:]), state))
+            if not frames:
+                conn.sendall(b"empty\n")
+                return
+            # Drop most of the trailing silence; whisper doesn't need it.
+            if not state["stopped"] and state["trailing"] > LEAD_IN:
+                frames = frames[: len(frames) - state["trailing"] + LEAD_IN]
+            with wave.open(out, "wb") as w:
+                w.setnchannels(1)
+                w.setsampwidth(2)
+                w.setframerate(RATE)
+                w.writeframes(b"".join(frames))
+            conn.sendall(b"ok\n")
+        elif len(parts) == 5 and parts[0] == "stream":
+            # Raw audio, then the connection closes; no header or status line.
+            for b in speech_frames(conn, buf, *map(float, parts[1:]), state):
+                conn.sendall(b)
         else:
-            trailing = 0
-        last = snap[-1][0] if snap else buf.seq - 1
-
-        stopped = False
-        while not (heard and trailing >= end_f) and len(frames) < max_f:
-            if select.select([conn], [], [], 0)[0]:
-                stopped = True  # client asked to stop (or went away)
-                break
-            with buf.cond:
-                buf.cond.wait_for(lambda: buf.seq - 1 > last, timeout=0.1)
-                new = [x for x in buf.frames if x[0] > last]
-            for seq, b, lv in new:
-                last = seq
-                if lv >= thr:
-                    heard, trailing = True, 0
-                elif heard:
-                    trailing += 1
-                if heard:
-                    frames.append(b)
-
-        if not heard or not frames:
-            conn.sendall(b"empty\n")
-            return
-        # Drop most of the trailing silence; whisper doesn't need it.
-        if not stopped and trailing > LEAD_IN:
-            frames = frames[: len(frames) - trailing + LEAD_IN]
-        with wave.open(out, "wb") as w:
-            w.setnchannels(1)
-            w.setsampwidth(2)
-            w.setframerate(RATE)
-            w.writeframes(b"".join(frames))
-        conn.sendall(b"ok\n")
+            conn.sendall(b"error bad request\n")
     except (OSError, ValueError) as e:
         try:
             conn.sendall(f"error {e}\n".encode())
@@ -199,18 +219,52 @@ def capture(a):
     sys.exit(0 if resp == "ok" else 1)
 
 
+def stream(a):
+    s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    s.connect(sock_path())
+    s.sendall(f"stream {a.gap} {a.end} {a.max} {a.threshold}\n".encode())
+
+    def stop(*_):
+        try:
+            s.sendall(b"stop\n")
+        except OSError:
+            pass
+
+    signal.signal(signal.SIGINT, stop)
+    signal.signal(signal.SIGTERM, stop)
+    out, got = sys.stdout.buffer, False
+    while True:
+        try:
+            b = s.recv(FRAME_BYTES * 8)
+        except InterruptedError:
+            continue
+        except ConnectionResetError:
+            break
+        if not b:
+            break
+        got = True
+        try:
+            out.write(b)
+            out.flush()
+        except BrokenPipeError:
+            break  # the reader went away
+    sys.exit(0 if got else 1)
+
+
 def main():
     p = argparse.ArgumentParser()
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("serve")
     c = sub.add_parser("capture")
     c.add_argument("out")
-    c.add_argument("--gap", type=float, default=1.0, help="silence (s) that separates utterances")
-    c.add_argument("--end", type=float, default=1.0, help="silence (s) that ends the capture")
-    c.add_argument("--max", type=float, default=120.0, help="max capture length (s)")
-    c.add_argument("--threshold", type=float, default=0.03, help="speech level, fraction of full scale")
+    st = sub.add_parser("stream")
+    for x in (c, st):
+        x.add_argument("--gap", type=float, default=1.0, help="silence (s) that separates utterances")
+        x.add_argument("--end", type=float, default=1.0, help="silence (s) that ends the capture")
+        x.add_argument("--max", type=float, default=120.0, help="max capture length (s)")
+        x.add_argument("--threshold", type=float, default=0.03, help="speech level, fraction of full scale")
     a = p.parse_args()
-    serve() if a.cmd == "serve" else capture(a)
+    {"serve": lambda: serve(), "capture": lambda: capture(a), "stream": lambda: stream(a)}[a.cmd]()
 
 
 if __name__ == "__main__":
