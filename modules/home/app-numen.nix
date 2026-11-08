@@ -29,6 +29,8 @@
   #   numen-mode pause              load nothing (used while dictating)
   #   numen-mode restore            reload whatever the current mode is
   #   numen-mode status             print "awake" or "asleep"
+  #   numen-mode off                quit numen (voice: "newman off")
+  #   numen-mode on                 start numen and the tray icon
   wakePhrase = "wake up";
   # Asleep, numen restricts recognition to the words of the loaded phrases, so
   # a lone wake phrase matches *everything*. Pad it with do-nothing phrases for
@@ -51,7 +53,7 @@
 
   numen-mode = pkgs.writeShellApplication {
     name = "numen-mode";
-    runtimeInputs = with pkgs; [libnotify coreutils procps];
+    runtimeInputs = with pkgs; [libnotify coreutils procps gnugrep];
     text = ''
       FLAG="''${XDG_RUNTIME_DIR:-/tmp}/numen-asleep"
       SLEEP_FILE="$HOME/.config/numen/sleep.phrases"
@@ -78,7 +80,31 @@
         pause) numen_load ;;
         restore) if asleep; then numen_load "$SLEEP_FILE"; else load_awake; fi ;;
         status) if asleep; then echo asleep; else echo awake; fi ;;
-        *) echo "usage: numen-mode [sleep|wake|toggle|pause|restore|status]" >&2; exit 2 ;;
+        # Quit numen (the tray icon stays). --no-block: when run from a numen
+        # phrase, this process is in numen's cgroup and gets killed by the stop.
+        off)
+          rm -f "$FLAG"
+          if systemctl --user is-active --quiet numen; then
+            systemctl --user --no-block stop numen
+          elif pkill -x numen; then
+            # Started by hand in a terminal. numen can hang on exit (see
+            # numen.service), so force it after 2s.
+            for _ in 1 2 3 4 5 6 7 8 9 10; do pgrep -x numen >/dev/null || break; sleep 0.2; done
+            pkill -9 -x numen || true
+          fi
+          notify "Off"
+          ;;
+        # Start numen, and the tray icon if it was quit or killed (desktop entry).
+        on)
+          systemctl --user start numen-tray.service
+          # Not if one is running outside the service (started in a terminal).
+          main=$(systemctl --user show numen -p MainPID --value)
+          if ! pgrep -x numen | grep -vqx "''${main:-0}"; then
+            systemctl --user start numen.service
+            notify "Starting..."
+          fi
+          ;;
+        *) echo "usage: numen-mode [sleep|wake|toggle|pause|restore|status|on|off]" >&2; exit 2 ;;
       esac
     '';
   };
@@ -234,11 +260,73 @@
       esac
     '';
   };
+  # Tray icon (DMS tray, via StatusNotifierItem): shows running/stopped and
+  # awake/asleep; left click starts/stops numen, middle click sleeps/wakes.
+  numen-tray = let
+    python = pkgs.python3.withPackages (p: [p.pyqt6]);
+  in
+    pkgs.writeScriptBin "numen-tray" (
+      "#!${python}/bin/python3\n"
+      + builtins.replaceStrings ["@numen_mode@"] ["${numen-mode}/bin/numen-mode"] (builtins.readFile ./numen-tray.py)
+    );
 in {
   imports = [
   ];
 
-  home.packages = [numen-mode numen-dictate numen-dictate-buffer];
+  home.packages = [numen-mode numen-dictate numen-dictate-buffer numen-tray];
+
+  # numen itself. No Install section: it's never started automatically, only
+  # from the tray (or `systemctl --user start numen`). Inherits the user
+  # manager's PATH/WAYLAND_DISPLAY, so phrase `run` actions work as in a
+  # terminal. numen is built from source into /usr/local/bin (Fedora).
+  systemd.user.services.numen = {
+    Unit = {
+      Description = "Numen voice control";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target" "pipewire-pulse.service"];
+    };
+    Service = {
+      ExecStart = "/usr/local/bin/numen";
+      Restart = "on-failure";
+      RestartSec = 2;
+      # On SIGTERM numen often hangs freeing the Vosk recognizer, which held
+      # it alive for the default 45s and then (Fedora) SIGABRTed it. It has
+      # nothing to save, so kill it after 2s instead.
+      TimeoutStopSec = 2;
+      TimeoutStopFailureMode = "kill";
+    };
+  };
+
+  # Fedora's /usr/lib/systemd/user/service.d/10-timeout-abort.conf (a drop-in,
+  # so it beats the unit file) sets abort; a later-sorting drop-in wins back.
+  xdg.configFile."systemd/user/numen.service.d/90-timeout-kill.conf".text = ''
+    [Service]
+    TimeoutStopFailureMode=kill
+  '';
+
+  # Launcher entry: brings back the tray if it's gone and turns numen on.
+  xdg.desktopEntries.numen = {
+    name = "Numen";
+    comment = "Start numen voice control and its tray icon";
+    exec = "${numen-mode}/bin/numen-mode on";
+    icon = "audio-input-microphone";
+    terminal = false;
+    categories = ["Utility" "Accessibility"];
+  };
+
+  systemd.user.services.numen-tray = {
+    Unit = {
+      Description = "Numen tray icon";
+      PartOf = ["graphical-session.target"];
+      After = ["graphical-session.target" "dms.service"];
+    };
+    Service = {
+      ExecStart = "${numen-tray}/bin/numen-tray";
+      Restart = "on-failure";
+      RestartSec = 3;
+    };
+    Install.WantedBy = ["graphical-session.target"];
+  };
 
   # Always-on, in-memory only (nothing is written to disk until "say").
   systemd.user.services.numen-dictate-buffer = {

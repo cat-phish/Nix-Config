@@ -95,3 +95,6 @@ switch: caps off \
 # Sleep mode (like Talon): numen only listens for "wake up" until woken.
 # Backgrounded so numen can process the reload; see modules/home/app-numen.nix.
 sleep: run numen-mode sleep &
+# Quit numen (start it again from the tray icon). "numen" isn't in the Vosk
+# vocabulary; "newman" is and sounds the same.
+newman off: run numen-mode off &
