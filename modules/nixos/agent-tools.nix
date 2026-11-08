@@ -5,6 +5,17 @@
   # npm packages that ship binaries). Without it they fail with "No such file or directory".
   programs.nix-ld.enable = true;
 
+  # Rootless Docker: each user runs their own daemon (`docker`/`docker compose` just work,
+  # no docker group, which would be root-equivalent). It also keeps containers behind the
+  # LAN egress block: their traffic leaves as a user process through the `output` chain,
+  # where rootful Docker's would be routed (forward chain) around it.
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true; # sets DOCKER_HOST for every user
+  };
+  # Rootless containers need subordinate UID/GID ranges for the user running them.
+  users.users.agent.autoSubUidGidRange = true;
+
   environment.systemPackages = with pkgs; [
     # --- Agent CLIs ---
     antigravity-cli
@@ -20,6 +31,7 @@
     # --- Dev basics ---
     fd
     gh
+    gitleaks # repos' pre-commit hooks (barista-assistant, ~/.nix) refuse to commit without it
     jq
     nodejs_22
     python3

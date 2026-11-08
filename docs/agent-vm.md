@@ -37,7 +37,7 @@ host-specific parts.
 | **Access** | SSH with keys only, over Tailscale (and over the LAN) |
 | **Users** | `jordan`: admin and deploys (wheel, passwordless sudo). `agent`: runs the agents (no sudo) |
 | **Isolation** | Can't open connections to your LAN; Tailscale ACLs stop it from reaching tailnet devices |
-| **Tools** | claude-code, codex, opencode, git, gh, node 22, ripgrep, fd, jq, tmux, neovim, herdr-core (`hc`) |
+| **Tools** | claude-code, codex, opencode, antigravity (`agy`), git, gh, gitleaks, node 22, python 3 + uv, rootless Docker + compose, ripgrep, fd, jq, tmux, your nvim/zsh setup, herdr-core (`hc`) |
 
 **What isolation means here:** agents run in a separate VM as an unprivileged user. They
 have none of your SSH keys, the sops age key, a `~/.nix` checkout with push rights, or
