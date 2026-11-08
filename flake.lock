@@ -80,11 +80,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1794037540,
-        "narHash": "sha256-4KXv+oLlXDeslVltnV9/AqW8n0QK4MIKrzUDcY/X42U=",
+        "lastModified": 1794106377,
+        "narHash": "sha256-UPb+oG7l3JqHIRBf5ZqKNv2JPSxxeoW5U2i3fnAzfP8=",
         "owner": "duxlabs-dev",
         "repo": "dux-shell",
-        "rev": "6933f9893334cfd742656950540aa0e6bd3940ff",
+        "rev": "47b1638c548bbed2b8bf83ee11bb0a30409f4f0b",
         "type": "github"
       },
       "original": {
