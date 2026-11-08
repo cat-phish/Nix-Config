@@ -69,6 +69,15 @@ else
     print_warning "Firmware script failed or skipped. Wireless dongle may not work."
 fi
 
+# Step 6: Optionally enroll the DKMS signing key for Secure Boot (asks first)
+print_info "Step 6: Secure Boot key enrollment (optional)..."
+MOK_SCRIPT="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/fedora-secureboot-mok-setup.sh"
+if [[ -f "$MOK_SCRIPT" ]]; then
+    bash "$MOK_SCRIPT" || print_warning "MOK enrollment failed (run $MOK_SCRIPT later)"
+else
+    print_warning "MOK setup script not found: $MOK_SCRIPT"
+fi
+
 # Return to user home
 cd "$TARGET_HOME"
 

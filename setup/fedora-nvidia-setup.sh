@@ -130,8 +130,8 @@ print_info "Step 2: Checking Secure Boot status..."
 if command -v mokutil &> /dev/null; then
     if mokutil --sb-state 2>/dev/null | grep -q "SecureBoot enabled"; then
         print_warning "Secure Boot is ENABLED"
-        print_warning "NVIDIA drivers may not load properly with Secure Boot."
-        print_warning "You may need to disable Secure Boot in BIOS or enroll MOK keys."
+        print_warning "NVIDIA drivers won't load until the akmods signing key is enrolled in MOK."
+        print_warning "You'll be offered that enrollment after the drivers build (or disable Secure Boot in BIOS)."
         echo ""
         if [[ "$SKIP_CONFIRM" != true ]]; then
             echo -n "Continue anyway? [y/N]: "
@@ -303,6 +303,16 @@ systemctl enable nvidia-suspend.service
 systemctl enable nvidia-hibernate.service
 systemctl enable nvidia-resume.service
 print_success "NVIDIA services enabled"
+echo ""
+
+# Step 14: Optionally enroll the akmods signing key for Secure Boot (asks first)
+print_info "Step 13: Secure Boot key enrollment (optional)..."
+MOK_SCRIPT="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/fedora-secureboot-mok-setup.sh"
+if [[ -f "$MOK_SCRIPT" ]]; then
+    bash "$MOK_SCRIPT" || print_warning "MOK enrollment failed (run $MOK_SCRIPT later)"
+else
+    print_warning "MOK setup script not found: $MOK_SCRIPT"
+fi
 echo ""
 
 # Final summary
