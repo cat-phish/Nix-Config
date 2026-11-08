@@ -21,7 +21,6 @@
     fd
     gh
     jq
-    neovim
     nodejs_22
     python3
     uv

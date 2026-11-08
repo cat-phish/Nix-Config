@@ -17,6 +17,7 @@
     yazi
     zoxide
     nvim-config.packages.${pkgs.stdenv.hostPlatform.system}.nvim
+    nvim-config.packages.${pkgs.stdenv.hostPlatform.system}.nvim-unstable
   ];
 
   home.sessionVariables.EDITOR = "nvim";
