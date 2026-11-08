@@ -7,6 +7,7 @@
 
   environment.systemPackages = with pkgs; [
     # --- Agent CLIs ---
+    antigravity-cli
     claude-code
     codex
     # TODO: drop override once nixpkgs fixes the opencode node_modules hash (same as modules/home/dev-environment.nix)
@@ -29,8 +30,23 @@
 
     # --- herdr ---
     # herdr-core provides `hc`; herdr-app on the desktop attaches over SSH (`ssh agent-vm hc connect`).
-    # hc starts its core on demand. If it turns out not to survive SSH logout, add a
-    # systemd.user.services unit here running `hc server start` (agent has linger on).
     herdr-core
   ];
+
+  # Start herdr's core at boot for `agent` (linger is on, so its user manager starts
+  # without a login) instead of waiting for the first client to connect.
+  systemd.user.services.herdr-core = {
+    description = "herdr core";
+    unitConfig.ConditionUser = "agent";
+    wantedBy = ["default.target"];
+    after = ["network-online.target"];
+    serviceConfig = {
+      # `hc server start` launches the core and returns; the core stays in this unit's cgroup.
+      Type = "oneshot";
+      RemainAfterExit = true;
+      ExecStart = "${pkgs.herdr-core}/bin/hc server start";
+      ExecStop = "${pkgs.herdr-core}/bin/hc server stop";
+      TimeoutStartSec = 60;
+    };
+  };
 }

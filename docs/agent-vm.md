@@ -371,9 +371,9 @@ Unraid VM):
   is in legacy BIOS mode. Recreate it with OVMF/UEFI.
 - **`nixos-rebuild --target-host` fails copying paths ("lacks a signature").** Deploy as `jordan`,
   which is a trusted Nix user. `agent` isn't.
-- **herdr terminals die when SSH disconnects.** `agent` has lingering enabled, but herdr's core
-  may still exit on logout. Add a systemd user service in the `herdr` section of
-  `modules/nixos/agent-tools.nix` that runs `hc server start`, then deploy.
+- **herdr core isn't running.** It's started at boot by the `herdr-core` user unit for `agent`
+  (`modules/nixos/agent-tools.nix`). Check it with `ssh agent-vm systemctl --user status herdr-core`
+  and `journalctl --user -u herdr-core`.
 - **The VM can't resolve DNS.** The Pi-hole IPs in `dnsServers` changed, or DHCP is handing out a
   different DNS server. Update the values and deploy.
 - **Tailscale only connects through a relay (DERP).** Make sure UDP 41641 is allowed. It is by
