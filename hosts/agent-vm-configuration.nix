@@ -40,12 +40,13 @@ in {
   services.qemuGuest.enable = true;
 
   users.users.jordan.openssh.authorizedKeys.keys = adminKeys;
+  my.server.shellUsers = ["jordan" "agent"];
 
   # Unprivileged account that runs the agents. No wheel, no sudo.
   users.users.agent = {
     isNormalUser = true;
     description = "Coding agents";
-    shell = pkgs.bashInteractive;
+    shell = pkgs.zsh;
     openssh.authorizedKeys.keys = agentKeys;
     # Keep user services (e.g. an agent backend) alive after SSH logout.
     linger = true;

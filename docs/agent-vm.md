@@ -56,6 +56,7 @@ desktop and copied over.
 | `hosts/agent-vm-configuration.nix` | SSH keys, the `agent` user, LAN egress block, boot loader, `stateVersion` |
 | `modules/nixos/agent-tools.nix` | The swappable tool layer: agent CLIs and herdr. Edit only this file to change tools |
 | `modules/hardware-config/agent-vm-hardware.nix` | QEMU guest profile and the disk layout (disko) |
+| `modules/home/server-shell.nix` | Your zsh/p10k/tmux/nvim/git setup for `jordan` and `agent` (Home Manager), plus direnv for per-project dev shells |
 
 ---
 
@@ -329,6 +330,7 @@ As `agent` (`ssh agent-vm`):
 
 | Task | Command (from your desktop) |
 |---|---|
+| Update + deploy (script) | `nix-deploy-agent-vm` (`--no-update` to skip `nix flake update`, `--dry` to only build) |
 | Deploy config changes | `nix run 'nixpkgs#nixos-rebuild' -- switch --flake "$HOME/.nix#agent-vm" --target-host jordan@agent-vm --sudo` |
 | Build without deploying | `nix build "$HOME/.nix#nixosConfigurations.agent-vm.config.system.build.toplevel" --no-link` |
 | Update packages | `nix flake update` in `~/.nix`, then deploy |

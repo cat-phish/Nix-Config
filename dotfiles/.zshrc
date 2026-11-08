@@ -6,7 +6,7 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
 fi
 
 # Ensure SHELL is set for Nix correctly
-export SHELL="$HOME/.nix-profile/bin/zsh"
+if [[ -x "$HOME/.nix-profile/bin/zsh" ]]; then export SHELL="$HOME/.nix-profile/bin/zsh"; else export SHELL="$(command -v zsh)"; fi
 
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
@@ -25,8 +25,8 @@ if [ -f ~/.nix-profile/etc/profile.d/hm-session-vars.sh ]; then
   source ~/.nix-profile/etc/profile.d/hm-session-vars.sh
 elif [ -f ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh ]; then
   source ~/.local/state/nix/profiles/profile/etc/profile.d/hm-session-vars.sh
-elif [ -f /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh ]; then
-  source /etc/profiles/per-user/jordan/etc/profile.d/hm-session-vars.sh
+elif [ -f /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh ]; then
+  source /etc/profiles/per-user/$USER/etc/profile.d/hm-session-vars.sh
 fi
 
 # Load compdef completion
@@ -740,3 +740,6 @@ alias lsl="eza --color=always --long --icons=always"
 
 # Zoxide
 eval "$(zoxide init --cmd cd zsh)"
+
+# direnv (per-project dev shells; installed on agent-vm)
+command -v direnv >/dev/null && eval "$(direnv hook zsh)"

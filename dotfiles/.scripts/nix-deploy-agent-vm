@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# Update and deploy the agent VM (nixosConfigurations.agent-vm) from this machine.
+#
+#   nix-deploy-agent-vm               commit check, git sync, flake update, build, deploy
+#   nix-deploy-agent-vm --no-update   deploy the current config without updating flake inputs
+#   nix-deploy-agent-vm --dry         build only; don't touch the VM
+#
+# Options:
+#   --host <name>    flake output to deploy (default: agent-vm)
+#   --target <ssh>   where to deploy (default: jordan@<host>, the Tailscale name)
+#
+# The VM never builds anything: the system is built here and copied over as `jordan`.
+
+set -euo pipefail
+
+FLAKE_PATH="$HOME/.nix"
+HOST="agent-vm"
+TARGET=""
+DO_UPDATE=true
+DRY=false
+
+usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; }
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --no-update) DO_UPDATE=false ;;
+    --dry) DRY=true ;;
+    --host) HOST="$2"; shift ;;
+    --target) TARGET="$2"; shift ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown option: $1"; usage; exit 1 ;;
+  esac
+  shift
+done
+TARGET="${TARGET:-jordan@$HOST}"
+
+if [ "$(id -u)" -eq 0 ]; then
+  echo "Run this as your regular user (not root)."
+  exit 1
+fi
+
+cd "$FLAKE_PATH"
+
+# --- Uncommitted changes: offer to commit (deploying from a dirty tree works, but untracked
+# files are invisible to the flake and the VM would run something that isn't in git) ---
+if [ -n "$(git status --porcelain)" ]; then
+  echo "--------------------------------------------------------"
+  echo "[!] Uncommitted changes in $FLAKE_PATH:"
+  git status -s
+  echo "--------------------------------------------------------"
+  read -r -p "Stage and commit them now? [Y/n] " response
+  if [[ "${response:-Y}" =~ ^[Yy]$ ]]; then
+    read -r -p "Commit message (blank for default): " msg
+    git add -A
+    git commit -m "${msg:-Config update [$(date +'%Y-%m-%d %H:%M:%S')]}"
+    echo "[✓] Committed"
+  else
+    read -r -p "Deploy the uncommitted working tree anyway? [y/N] " response
+    [[ "${response:-N}" =~ ^[Yy]$ ]] || { echo "Aborted."; exit 1; }
+  fi
+fi
+
+# --- Sync with the remote so the VM gets the same config as the other machines ---
+echo "Syncing with remote..."
+if git fetch origin >/dev/null 2>&1; then
+  if ! git rebase --autostash "origin/$(git branch --show-current)"; then
+    git rebase --abort 2>/dev/null || true
+    echo "[!] Rebase conflicted. Resolve manually: cd ~/.nix && git pull"
+    exit 1
+  fi
+  echo "[✓] Git sync complete"
+else
+  echo "[!] git fetch failed (offline?); skipping sync."
+fi
+
+# --- Update flake inputs (shared with the desktops; they pick it up on their next update) ---
+if $DO_UPDATE; then
+  echo "Updating flake inputs..."
+  nix flake update
+  if ! git diff --quiet flake.lock; then
+    git add flake.lock
+    git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
+    echo "[✓] flake.lock updated and committed"
+  else
+    echo "[-] flake.lock unchanged"
+  fi
+fi
+
+# --- Build locally first, so a broken config never reaches the VM ---
+echo "Building $HOST..."
+nix build "$FLAKE_PATH#nixosConfigurations.$HOST.config.system.build.toplevel" --no-link
+echo "[✓] Build succeeded"
+
+# Push commits only after a successful build, so a broken update doesn't reach the other machines.
+if [ -n "$(git log '@{u}..' 2>/dev/null)" ]; then
+  echo "Pushing commits..."
+  git push && echo "[✓] Pushed" || echo "[!] git push failed; deploying anyway."
+fi
+
+if $DRY; then
+  echo "--dry: not deploying."
+  exit 0
+fi
+
+# --- Deploy ---
+echo "Deploying to $TARGET..."
+nix run 'nixpkgs#nixos-rebuild' -- switch \
+  --flake "$FLAKE_PATH#$HOST" \
+  --target-host "$TARGET" \
+  --sudo
+echo "[✓] $HOST deployed"
+echo "Roll back with: ssh $TARGET sudo nixos-rebuild switch --rollback"

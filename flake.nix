@@ -97,6 +97,16 @@
           ./server-configuration.nix
           ./hosts/${host}-configuration.nix
           disko.nixosModules.disko
+          # Shell comforts for every user listed in my.server.shellUsers (modules/home/server-shell.nix).
+          home-manager.nixosModules.home-manager
+          ({config, lib, ...}: {
+            home-manager = {
+              useGlobalPkgs = true;
+              useUserPackages = true;
+              extraSpecialArgs = {inherit nvim-config;};
+              users = lib.genAttrs config.my.server.shellUsers (_: import ./modules/home/server-shell.nix);
+            };
+          })
         ];
         specialArgs = {inherit inputs pkgs-stable;};
       };

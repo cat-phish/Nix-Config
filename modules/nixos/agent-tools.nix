@@ -1,6 +1,10 @@
 # Agent tooling for agent-vm. This is the swappable layer: changing which agent CLI
 # or multiplexer the VM runs should only mean editing this file.
 {pkgs, ...}: {
+  # Lets prebuilt Linux binaries run (pip wheels with C extensions, uv-downloaded Pythons,
+  # npm packages that ship binaries). Without it they fail with "No such file or directory".
+  programs.nix-ld.enable = true;
+
   environment.systemPackages = with pkgs; [
     # --- Agent CLIs ---
     claude-code
@@ -18,6 +22,8 @@
     jq
     neovim
     nodejs_22
+    python3
+    uv
     ripgrep
     tmux
 

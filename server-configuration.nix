@@ -7,6 +7,14 @@
   pkgs,
   ...
 }: {
+  # Users that get the desktop zsh/tmux/nvim setup via Home Manager (see mkServer in flake.nix).
+  options.my.server.shellUsers = lib.mkOption {
+    type = lib.types.listOf lib.types.str;
+    default = ["jordan"];
+    description = "Users that get modules/home/server-shell.nix.";
+  };
+
+  config = {
   nixpkgs.config.allowUnfree = true;
   nix.settings = {
     experimental-features = ["nix-command" "flakes"];
@@ -69,4 +77,5 @@
 
   zramSwap.enable = true;
   # system.stateVersion is set per host (release of that host's first install).
+  };
 }
