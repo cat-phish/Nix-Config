@@ -33,8 +33,9 @@ Flakes only see git-tracked files: `git add` any new `.nix` module or dotfile be
 
 Fedora (niri + Dux Shell/DMS, standalone Home Manager) is the daily driver. The NixOS hosts run the same niri + DMS desktop; they're kept evaluating and building, but aren't used day to day.
 
-**Flake outputs** (`flake.nix`), built with two helpers:
+**Flake outputs** (`flake.nix`), built with three helpers:
 - `mkNixos "<host>"` = `configuration.nix` (shared system base: niri, DMS + dms-greeter, audio, user, sops) + `hosts/<host>-configuration.nix`, which imports `modules/nixos/*` and `modules/hardware-config/<host>-hardware.nix`.
+- `mkServer "<host>"` = `server-configuration.nix` (headless base: SSH keys only, Tailscale, admin user) + `hosts/<host>-configuration.nix` + disko. Output: `agent-vm`, an isolated coding-agent VM on the Unraid server (agent tools in `modules/nixos/agent-tools.nix`). It's installed and deployed from the desktop (`nixos-anywhere`, `nixos-rebuild --target-host`); never connect to the server or VM yourself, give the user the commands.
 - `mkHome { host; isNixos; }` = `home.nix` + `hosts/<host>-home.nix` + the nix-flatpak HM module. Outputs: `jordan@{fedora-desktop,fedora-laptop,nixos-desktop,nixos-laptop}`.
 
 **Home Manager layers:**

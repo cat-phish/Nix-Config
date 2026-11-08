@@ -26,6 +26,11 @@
     dms.url = "github:duxlabs-dev/dux-shell";
     dms-greeter.url = "github:duxlabs-dev/dux-greeter";
     talon-nix.url = "github:nix-community/talon-nix";
+    # Declarative partitioning for headless servers (used by nixos-anywhere installs).
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -38,6 +43,7 @@
     darkmatter-grub-theme,
     nix-flatpak,
     talon-nix,
+    disko,
     ...
   } @ inputs: let
     lib = nixpkgs.lib;
@@ -82,6 +88,19 @@
         specialArgs = {inherit inputs pkgs-stable;};
       };
 
+    # Headless NixOS server: server-configuration.nix (shared) + hosts/<host>-configuration.nix.
+    # No desktop; deployed from another machine with nixos-anywhere / nixos-rebuild --target-host.
+    mkServer = host:
+      lib.nixosSystem {
+        modules = [
+          {nixpkgs.hostPlatform = system;}
+          ./server-configuration.nix
+          ./hosts/${host}-configuration.nix
+          disko.nixosModules.disko
+        ];
+        specialArgs = {inherit inputs pkgs-stable;};
+      };
+
     # Standalone Home Manager: home.nix (shared) + hosts/<host>-home.nix
     mkHome = {
       host,
@@ -102,6 +121,7 @@
     nixosConfigurations = {
       nixos-desktop = mkNixos "nixos-desktop";
       nixos-laptop = mkNixos "nixos-laptop";
+      agent-vm = mkServer "agent-vm"; # isolated coding-agent VM on the Unraid server
     };
     homeConfigurations = {
       "jordan@fedora-desktop" = mkHome {
