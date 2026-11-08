@@ -250,7 +250,7 @@ restricted from the start.
    Open the login URL it prints and approve the device. Tagged devices have key expiry
    turned off by default; check that it's off in the Machines list.
 
-3. Confirm from your desktop: `ssh jordan@agent-vm` (MagicDNS name).
+3. Confirm from your desktop: `ssh jordan@agent-vm` (MagicDNS name). Use `jordan@agent-vm`, not an `agent-vm` SSH alias: once you add the Step 8 aliases, deploy through `agent-vm-admin`.
 
 ## Step 8: Connect from your desktop
 
@@ -331,7 +331,7 @@ As `agent` (`ssh agent-vm`):
 | Task | Command (from your desktop) |
 |---|---|
 | Update + deploy (script) | `nix-deploy-agent-vm` (`--no-update` to skip `nix flake update`, `--dry` to only build) |
-| Deploy config changes | `nix run 'nixpkgs#nixos-rebuild' -- switch --flake "$HOME/.nix#agent-vm" --target-host jordan@agent-vm --sudo` |
+| Deploy config changes | `nix run 'nixpkgs#nixos-rebuild' -- switch --flake "$HOME/.nix#agent-vm" --target-host agent-vm-admin --sudo` |
 | Build without deploying | `nix build "$HOME/.nix#nixosConfigurations.agent-vm.config.system.build.toplevel" --no-link` |
 | Update packages | `nix flake update` in `~/.nix`, then deploy |
 | Roll back | `ssh agent-vm-admin sudo nixos-rebuild switch --rollback`, or pick an older entry in the boot menu |

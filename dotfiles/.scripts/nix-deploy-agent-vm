@@ -7,7 +7,7 @@
 #
 # Options:
 #   --host <name>    flake output to deploy (default: agent-vm)
-#   --target <ssh>   where to deploy (default: jordan@<host>, the Tailscale name)
+#   --target <ssh>   where to deploy (default: the <host>-admin alias from ~/.ssh/config, see docs/agent-vm.md Step 8)
 #
 # The VM never builds anything: the system is built here and copied over as `jordan`.
 
@@ -32,7 +32,7 @@ while [ $# -gt 0 ]; do
   esac
   shift
 done
-TARGET="${TARGET:-jordan@$HOST}"
+TARGET="${TARGET:-$HOST-admin}"
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "Run this as your regular user (not root)."
