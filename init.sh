@@ -718,7 +718,9 @@ setup_fedora() {
         STEP=$((STEP + 1))
         echo "[$STEP/$TOTAL_STEPS] Installing Niri..."
         sudo dnf copr enable -y avengemedia/dms
-        sudo dnf install -y niri dms
+        # qt6-qtwebsockets-devel: QtWebSockets QML module for the DMS Home Assistant plugin
+        # (Fedora ships the QML module in -devel; it must match the system Qt, so not Nix)
+        sudo dnf install -y niri dms qt6-qtwebsockets-devel
         systemctl --user add-wants niri.service dms
         # TODO: add prompt above for dankgreet default
         # Enable dankgreet

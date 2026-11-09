@@ -3,8 +3,10 @@
 # Downloads the same prebuilt zips Vicinae's in-app stores use (Raycast Store and Vicinae Store),
 # so there's nothing to build. Run by update-system; safe to run by hand any time.
 #
-# Extensions it installed carry a .update-system-version stamp. Only those are updated or pruned;
-# extensions installed from the in-app store are left alone. Always exits 0.
+# Extensions it installed carry a .update-system-version stamp; only those are pruned when removed
+# from the conf. Extensions installed from Vicinae's in-app stores are added to the conf
+# automatically (Vicinae never updates them itself). Local/dev extensions are left alone.
+# Always exits 0.
 set -uo pipefail
 
 FLAKE_PATH="${FLAKE_PATH:-$HOME/.nix}"
@@ -106,7 +108,8 @@ update_one() {
   fi
 }
 
-echo "Updating Vicinae extensions..."
+# Read extensions.conf into "store author name" entries
+entries=()
 while IFS= read -r raw || [ -n "$raw" ]; do
   line="${raw%%#*}"
   line="${line//[[:space:]]/}"
@@ -115,9 +118,64 @@ while IFS= read -r raw || [ -n "$raw" ]; do
     echo "[!] Ignoring malformed line in $CONF: $raw (expected raycast:author/name or vicinae:author/name)"
     continue
   fi
+  entries+=("${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}")
   wanted["${BASH_REMATCH[3]}"]=1
-  update_one "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
 done <"$CONF"
+
+echo "Updating Vicinae extensions..."
+
+# Adopt extensions installed from Vicinae's in-app stores (no stamp): add them to
+# extensions.conf so they get updated and synced like the rest. Vicinae itself never
+# updates store installs. Extensions that aren't in either store (local/dev) are left alone.
+declare -A gui_copy=()
+for dir in "$EXT_DIR"/*/; do
+  dir="${dir%/}"
+  [ -L "$dir" ] && continue
+  [ -f "$dir/$STAMP" ] && continue
+  [ -f "$dir/package.json" ] || continue
+  read -r author name < <(jq -r '[(.author | if type == "object" then .name else . end) // "", .name // ""] | @tsv' "$dir/package.json" 2>/dev/null)
+  if [ -z "${author:-}" ] || [ -z "${name:-}" ]; then
+    echo "[-] Skipping ${dir##*/}: no author/name in package.json"
+    continue
+  fi
+  gui_copy["$name"]="$dir"
+  [ -n "${wanted[$name]:-}" ] && continue # already listed; the copy is replaced below
+
+  store=""
+  for s in raycast vicinae; do
+    if [ -n "$(lookup "$s" "$author" "$name")" ]; then
+      store="$s"
+      break
+    fi
+  done
+  if [ -z "$store" ]; then
+    unset 'gui_copy[$name]'
+    echo "[-] Skipping ${dir##*/}: $author/$name isn't in the Raycast or Vicinae store (local extension?)"
+    continue
+  fi
+
+  [ -n "$(tail -c1 "$CONF")" ] && echo >>"$CONF"
+  printf '%s:%s/%s  # added from the Vicinae GUI %s\n' "$store" "$author" "$name" "$(date +%F)" >>"$CONF"
+  entries+=("$store $author $name")
+  wanted["$name"]=1
+  echo "[✓] Added $store:$author/$name to extensions.conf (installed from the Vicinae GUI)"
+done
+
+for entry in "${entries[@]}"; do
+  read -r store author name <<<"$entry"
+  update_one "$store" "$author" "$name"
+done
+
+# A GUI install of a listed extension in a differently named folder would be a duplicate
+# once ours is in place; remove it. (Same-named folders were replaced by update_one.)
+for name in "${!gui_copy[@]}"; do
+  dir="${gui_copy[$name]}"
+  if [ "$dir" != "$EXT_DIR/$name" ] && [ -d "$dir" ] && [ -f "$EXT_DIR/$name/$STAMP" ]; then
+    rm -rf "$dir"
+    echo "[✓] Removed duplicate GUI copy ${dir##*/} of $name"
+    changed=1
+  fi
+done
 
 # Prune extensions this script installed that are no longer listed
 for dir in "$EXT_DIR"/*/; do

@@ -48,6 +48,7 @@ check_git_status() {
   cd "$FLAKE_PATH"
 
   # Refresh the DMS plugin lockfile so GUI plugin installs/updates get committed too.
+  # (Plugin updates happen later in update_dms_plugins, after syncing with the remote.)
   if [ -x /usr/bin/dms ]; then
     /usr/bin/dms plugins lock -o "$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json" >/dev/null 2>&1 || true
   fi
@@ -305,6 +306,24 @@ update_appimages() {
   fi
 }
 
+# Update DMS plugins (nothing else does) and record the new commits in the lockfile.
+# Runs after git_sync_remote: first install plugins the other machine added (restore, no
+# prune) so the lock doesn't drop them, then update everything, then lock. git_commit_push
+# commits the lockfile; other machines restore those exact commits on their next switch.
+# (update-home / nix-rebuild-* only lock, so a plain rebuild never pulls plugin updates.)
+update_dms_plugins() {
+  [ -x /usr/bin/dms ] || return 0
+  local lockfile="$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json"
+  echo "Updating DMS plugins..."
+  /usr/bin/dms plugins restore "$lockfile" >/dev/null 2>&1 || true
+  if timeout 300 /usr/bin/dms plugins update --all >/dev/null 2>&1; then
+    echo "[✓] DMS plugins updated"
+  else
+    echo "[!] DMS plugin update failed (offline?); keeping current versions"
+  fi
+  /usr/bin/dms plugins lock -o "$lockfile" >/dev/null 2>&1 || true
+}
+
 # Commit flake.lock if changed, and push any unpushed commits
 git_commit_push() {
   if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
@@ -316,6 +335,13 @@ git_commit_push() {
     git commit -m "Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
   else
     echo "[-] No changes detected in flake.lock."
+  fi
+
+  local dms_lock="dotfiles/.config/dms/plugins.lock.json"
+  if ! git diff --exit-code "$dms_lock" >/dev/null 2>&1; then
+    echo "DMS plugin updates detected. Committing..."
+    git add "$dms_lock"
+    git commit -m "DMS plugins update [$(date +'%Y-%m-%d %H:%M:%S')]"
   fi
 
   # Push if local branch is ahead of remote
@@ -373,6 +399,7 @@ git_sync_remote
 
 # Step 2: Update Flake & Share
 update_flake || true
+update_dms_plugins || true
 git_commit_push || true
 
 # Step 3: Apply System Changes

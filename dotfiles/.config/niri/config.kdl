@@ -205,6 +205,8 @@ binds {
     Mod+D hotkey-overlay-title="Dictation (toggle)" { spawn "numen-dictate" "toggle"; }
     Mod+Space hotkey-overlay-title="Application Launcher: vicinae" { spawn "vicinae" "toggle"; }
     Mod+Semicolon hotkey-overlay-title="Emoji Picker" { spawn "vicinae" "deeplink" "vicinae://launch/core/search-emojis"; }
+    // DMS AI Assistant plugin; API key from ~/.ssh/dms.env (see dms.service drop-in in desktop-niri.nix)
+    Mod+A hotkey-overlay-title="AI Assistant" { spawn "dms" "ipc" "call" "plugins" "toggle" "aiAssistant"; }
 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 

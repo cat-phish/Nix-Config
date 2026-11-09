@@ -32,8 +32,8 @@ loads the repo settings on top through `VICINAE_OVERRIDES`. A key set in the rep
 the same key changed in the GUI, so keep GUI-managed keys (`favorites`, `fallbacks`) out of
 `settings`.
 
-Extensions installed from the in-app store still work, but they won't be on your other machines.
-To keep one, add it to `extensions.conf`.
+Extensions you install from the in-app store are added to `extensions.conf` automatically on the
+next `update-system` run (see [Extensions](#extensions)).
 
 ## How updates work
 
@@ -61,11 +61,18 @@ nothing to build and no hashes. For each line it:
   the version to `.update-system-version` in that folder.
 
 It also removes extensions that it installed but are no longer listed, and restarts the `vicinae`
-service if anything changed. It never touches extensions you installed from the in-app store (they
-have no `.update-system-version` file). If a store is down or a download fails, it keeps the
-current version and moves on, so it can't break `update-system`.
+service if anything changed. If a store is down or a download fails, it keeps the current version
+and moves on, so it can't break `update-system`.
 
-**Adding one:**
+**Installs from the in-app store are adopted.** Vicinae never updates store extensions itself, so
+before updating, the script looks for extensions with no `.update-system-version` file. It reads
+their author and name from `package.json`, finds which store has them, and appends a line to
+`extensions.conf` (marked `# added from the Vicinae GUI <date>`). From then on they're updated and
+synced like the rest. The new line is committed through `update-system`'s "uncommitted changes"
+prompt on its next run. Extensions in neither store (local or development builds) are left alone.
+
+**Adding one:** install it from Vicinae's in-app store and it's picked up on the next
+`update-system` (or `vicinae-extensions`) run. Or add it by hand:
 
 1. Find its author and name.
    - **Raycast:** from the store URL, `https://www.raycast.com/<author>/<name>`.
@@ -73,7 +80,8 @@ current version and moves on, so it can't break `update-system`.
 2. Add a line to `dotfiles/.config/vicinae/extensions.conf`, e.g. `raycast:ricoberger/gitmoji`.
 3. Run `vicinae-extensions` (or wait for the next `update-system`), then commit.
 
-**Removing one:** delete its line and run `vicinae-extensions`.
+**Removing one:** delete its line and run `vicinae-extensions`. Uninstalling it only in the GUI
+doesn't stick: the line is still in `extensions.conf`, so the next run installs it again.
 
 **Updating:** automatic. To update right away, run `vicinae-extensions`. To force a reinstall,
 delete the extension's `.update-system-version` file first.

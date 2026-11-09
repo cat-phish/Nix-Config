@@ -53,6 +53,15 @@ in {
           "${config.home.homeDirectory}/.nix/dotfiles/.config/dms/${cfg.dmsSettings}";
       };
 
+    # Secrets for DMS plugins (e.g. OPENAI_API_KEY for the AI Assistant, Mod+A) come from
+    # ~/.ssh/dms.env, outside the repo. A dedicated file on purpose: every DMS plugin runs in the
+    # shell process and can read its environment, so keep only plugin keys here (not ~/.ssh/.env).
+    # The leading "-" makes a missing file fine. Fedora's dms.service comes from the COPR rpm.
+    xdg.configFile."systemd/user/dms.service.d/secrets.conf".text = ''
+      [Service]
+      EnvironmentFile=-%h/.ssh/dms.env
+    '';
+
     # Desktop notifications from the media server's ntfy topic.
     # Secrets (NTFY_AUTH_TOKEN, MEDIASERVER_HOST) come from ~/.ssh/.env, outside the repo.
     systemd.user.services.ntfy-listener = {
