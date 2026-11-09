@@ -62,6 +62,26 @@ in {
       EnvironmentFile=-%h/.ssh/dms.env
     '';
 
+    # Launcher entries (Vicinae, fuzzel...) for DMS Settings. DMS ships none: its own .desktop
+    # files are NoDisplay. To add a page, put `<tab> = "<Title>";` in `pages`; list the tab IDs
+    # with `dms ipc call settings tabs`.
+    xdg.desktopEntries = let
+      mkEntry = name: exec: {
+        inherit name exec;
+        icon = "dev.duxlabs.shell";
+        categories = ["Settings"];
+        terminal = false;
+      };
+      pages = {
+        # plugins = "Plugins";
+      };
+    in
+      {dms-settings = mkEntry "DMS Settings" "dms ipc call settings focusOrToggle";}
+      // lib.mapAttrs' (tab: title:
+        lib.nameValuePair "dms-settings-${tab}"
+        (mkEntry "DMS Settings: ${title}" "dms ipc call settings openWith ${tab}"))
+      pages;
+
     # Desktop notifications from the media server's ntfy topic.
     # Secrets (NTFY_AUTH_TOKEN, MEDIASERVER_HOST) come from ~/.ssh/.env, outside the repo.
     systemd.user.services.ntfy-listener = {
