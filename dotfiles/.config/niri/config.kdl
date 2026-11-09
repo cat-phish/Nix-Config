@@ -193,8 +193,8 @@ binds {
     XF86MonBrightnessDown allow-when-locked=true {
        spawn "dms" "ipc" "call" "brightness" "decrement" "5" "";
     }
-    Mod+Y hotkey-overlay-title="Clipboard Manager" {
-        spawn "dms" "ipc" "call" "clipboard" "toggle";
+    Mod+Y hotkey-overlay-title="Clipboard History" {
+        spawn "vicinae" "deeplink" "vicinae://launch/clipboard/history";
     }
     // Mod+M hotkey-overlay-title="Task Manager" {
     //     spawn "dms" "ipc" "call" "processlist" "toggle";
@@ -203,9 +203,8 @@ binds {
     // Application Launchers
     Mod+Shift+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Mod+D hotkey-overlay-title="Dictation (toggle)" { spawn "numen-dictate" "toggle"; }
-    Mod+Space hotkey-overlay-title="Application Launcher" {
-      spawn "dms" "ipc" "call" "spotlight" "toggle";
-    }
+    Mod+Space hotkey-overlay-title="Application Launcher: vicinae" { spawn "vicinae" "toggle"; }
+    Mod+Semicolon hotkey-overlay-title="Emoji Picker" { spawn "vicinae" "deeplink" "vicinae://launch/core/search-emojis"; }
 
     Super+Alt+L hotkey-overlay-title="Lock the Screen: swaylock" { spawn "swaylock"; }
 

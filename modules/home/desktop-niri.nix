@@ -11,6 +11,7 @@ in {
   imports = [
     ./niri-kde-apps.nix
     ./dms-plugins.nix
+    ./app-vicinae.nix
   ];
 
   options.my.niri = {
