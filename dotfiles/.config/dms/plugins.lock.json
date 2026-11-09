@@ -4,7 +4,7 @@
     "activateLinux": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "activateLinux",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
     "aiAssistant": {
       "repo": "https://github.com/devnullvoid/dms-ai-assistant",
@@ -12,7 +12,7 @@
     },
     "aiOverviewControl": {
       "repo": "https://github.com/bernardopg/AiOverviewControl",
-      "commit": "076194c73bff238c855dc74e54cb1783f3bac594"
+      "commit": "4f7f13bd88e4bafef50343695924d91c531ee2de"
     },
     "aibou": {
       "repo": "https://github.com/satoshoe-dev/aibou",
@@ -22,7 +22,7 @@
     "alarmClock": {
       "repo": "https://github.com/lucyfire/dms-plugins",
       "path": "alarmClock",
-      "commit": "bd6303a215db88360294e792533b3cba99a29270"
+      "commit": "c463cf2364567bf77ded1e52dbf09c5cf0b9d28e"
     },
     "auroraClock": {
       "repo": "https://github.com/Hedayatbakhshi/dms-aurora-clock",
@@ -31,12 +31,12 @@
     "breathing": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "breathing",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
     "cast": {
       "repo": "https://github.com/Conava/dux-plugins",
       "path": "Cast",
-      "commit": "9763ee8c8d97d1731f57e886f91ce306f495cd67"
+      "commit": "7b55937e68a3625ddb8243a4f2a23d0e4e42a59a"
     },
     "colorPickerDms": {
       "repo": "https://github.com/bernardopg/color-picker-dms",
@@ -45,17 +45,17 @@
     "dankActions": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankActions",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "dankBatteryAlerts": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankBatteryAlerts",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "dankClight": {
       "repo": "https://github.com/duxlabs-dev/dux-plugins",
       "path": "DankClight",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "dankConsoleSteam": {
       "repo": "https://github.com/JessVolet/DankConsoleModeWithSteam",
@@ -64,17 +64,17 @@
     "dankDesktopWeather": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankDesktopWeather",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "dankHooks": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankHooks",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "dankPomodoroTimer": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankPomodoroTimer",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "dankRssWidget": {
       "repo": "https://github.com/BrendonJL/dms-rss-widget",
@@ -103,7 +103,7 @@
     "displaySettings": {
       "repo": "https://github.com/lucyfire/dms-plugins",
       "path": "displaySettings",
-      "commit": "bd6303a215db88360294e792533b3cba99a29270"
+      "commit": "c463cf2364567bf77ded1e52dbf09c5cf0b9d28e"
     },
     "dmsAirDrop": {
       "repo": "https://github.com/Kratospidey/dms-airdrop",
@@ -124,7 +124,7 @@
     "freshrssReader": {
       "repo": "https://github.com/jtcarrasco/freshrss-reader",
       "path": "dms",
-      "commit": "d16a6fe66b432249300a7e2fbd03577f030500fd"
+      "commit": "123ec9dbeeda2be9a46704dd06473a9beabb1f4d"
     },
     "gameControllerBattery": {
       "repo": "https://github.com/Hujair/gameControllerBattery",
@@ -149,7 +149,7 @@
     "mediaDownloader": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "mediaDownloader",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
     "modernClock": {
       "repo": "https://github.com/beefsizzle/ModernClockDMS",
@@ -166,7 +166,7 @@
     },
     "nixMonitor": {
       "repo": "https://github.com/antonjah/nix-monitor",
-      "commit": "ef3db9d5a525ddf41355e8c456b40d56480a6626"
+      "commit": "bd941a0e71b8f7763b45c22281a44ff554f82666"
     },
     "nvidiaGpuDankbarMonitor": {
       "repo": "https://github.com/Reverssss/dms-nvidia-gpu-monitor",
@@ -175,7 +175,7 @@
     "ocrScanner": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "ocrScanner",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
     "pokeDash": {
       "repo": "https://github.com/samgrande/PokeDash",
@@ -194,7 +194,7 @@
     "quickCapture": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "quickCapture",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
     "radioAtlasLite": {
       "repo": "https://github.com/alamin147/RadioAtlasLite",
@@ -211,7 +211,7 @@
     "takeABreak": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "takeABreak",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
     "timeUntil": {
       "repo": "https://github.com/fdmarcin/TimeUntil",
@@ -236,11 +236,11 @@
     },
     "wallpaperBing": {
       "repo": "https://github.com/max72bra/DankPluginBingWallpaper",
-      "commit": "143b473a4680dd8485279b5845a09c679de61c71"
+      "commit": "bb06dbff5d2ababd1b675ad4bcc3cad36d7be42c"
     },
     "wallpaperShufflerPlugin": {
       "repo": "https://github.com/Daniel-42-z/dms-wallpaper-shuffler",
-      "commit": "8c6758cb1bb91ef226b070d859bedd5c4b2ce9d0"
+      "commit": "2b2e63e1831d6e184eecbcad8a2794734bd5d4ae"
     }
   }
 }
