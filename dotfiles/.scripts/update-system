@@ -185,10 +185,13 @@ update_one_appimage() {
         tmp_extract=$(mktemp -d)
         (
           cd "$tmp_extract"
+          # The top-level icon is often a symlink into usr/share/icons, so extract that
+          # tree too ("*" in --appimage-extract patterns also matches "/"; "**" does not)
+          # and follow links. Use the largest PNG, not the first (often 16x16).
           "$target_bin" --appimage-extract "*.png" >/dev/null 2>&1 || true
-          "$target_bin" --appimage-extract "usr/share/icons/**/*.png" >/dev/null 2>&1 || true
+          "$target_bin" --appimage-extract "usr/share/icons/*" >/dev/null 2>&1 || true
           local found_icon
-          found_icon=$(find squashfs-root -name "*.png" -type f 2>/dev/null | head -n1)
+          found_icon=$(find -L squashfs-root -name "*.png" -type f -printf '%s %p\n' 2>/dev/null | sort -rn | head -n1 | cut -d' ' -f2-)
           if [ -n "$found_icon" ]; then
             cp "$found_icon" "$icon_dir/${bin_name}.png"
           fi
@@ -383,6 +386,7 @@ case "$OS_ID" in
       exit 1
     fi
     rebuild_home || true
+    "$FLAKE_PATH/dotfiles/.scripts/vicinae-extensions" || true
     gc_nix || true
 
     echo "Updating Zsh Zinit and its Plugins..."
@@ -410,6 +414,7 @@ EOF
     rebuild_home || true
     "$FLAKE_PATH/dotfiles/.scripts/nix-gpu-setup" || true
     update_appimages || true
+    "$FLAKE_PATH/dotfiles/.scripts/vicinae-extensions" || true
     if cmd_exists nix; then gc_nix || true; fi
     ;;
 

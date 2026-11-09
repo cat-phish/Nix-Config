@@ -1,0 +1,137 @@
+#!/usr/bin/env bash
+# Install/update the Vicinae extensions listed in ~/.nix/dotfiles/.config/vicinae/extensions.conf.
+# Downloads the same prebuilt zips Vicinae's in-app stores use (Raycast Store and Vicinae Store),
+# so there's nothing to build. Run by update-system; safe to run by hand any time.
+#
+# Extensions it installed carry a .update-system-version stamp. Only those are updated or pruned;
+# extensions installed from the in-app store are left alone. Always exits 0.
+set -uo pipefail
+
+FLAKE_PATH="${FLAKE_PATH:-$HOME/.nix}"
+CONF="$FLAKE_PATH/dotfiles/.config/vicinae/extensions.conf"
+EXT_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/vicinae/extensions"
+STAMP=".update-system-version"
+UA="vicinae-extensions-updater"
+
+for c in curl jq unzip; do
+  if ! command -v "$c" >/dev/null 2>&1; then
+    echo "[!] vicinae-extensions: '$c' not found, skipping"
+    exit 0
+  fi
+done
+if [ ! -f "$CONF" ]; then
+  echo "[!] vicinae-extensions: no $CONF"
+  exit 0
+fi
+
+mkdir -p "$EXT_DIR"
+tmp_root=$(mktemp -d)
+trap 'rm -rf "$tmp_root"' EXIT
+changed=0
+declare -A wanted=()
+
+# Print "<version> <download url>" for one extension, or nothing on failure
+lookup() {
+  local store="$1" author="$2" name="$3"
+  case "$store" in
+    raycast)
+      # The Raycast API returns raw control characters inside strings; strip them for jq
+      curl -fsS -m 30 -A "$UA" "https://www.raycast.com/api/v1/extensions/$author/$name" 2>/dev/null |
+        tr -d '\000-\037' |
+        jq -r 'select(.commit_sha and .download_url) | "\(.commit_sha) \(.download_url)"' 2>/dev/null
+      ;;
+    vicinae)
+      curl -fsS -m 30 -A "$UA" "https://api.vicinae.com/v1/store/search?q=$name" 2>/dev/null |
+        jq -r --arg a "$author" --arg n "$name" \
+          '.extensions[]? | select(.name == $n and .author.handle == $a) | "\(.updatedAt) \(.downloadUrl)"' 2>/dev/null |
+        head -n1
+      ;;
+  esac
+}
+
+update_one() {
+  local store="$1" author="$2" name="$3"
+  local dest="$EXT_DIR/$name" info version url current=""
+
+  info=$(lookup "$store" "$author" "$name")
+  if [ -z "$info" ]; then
+    echo "[!] $store:$author/$name: not found or store unreachable (keeping current version)"
+    return 0
+  fi
+  version="${info%% *}"
+  url="${info#* }"
+
+  # A leftover Home Manager link (from the old declarative setup) is replaced
+  if [ -L "$dest" ]; then
+    rm -f "$dest"
+  elif [ -f "$dest/$STAMP" ]; then
+    current=$(cat "$dest/$STAMP")
+  fi
+
+  if [ "$current" = "$version" ]; then
+    echo "[-] $name is up to date"
+    return 0
+  fi
+
+  local work="$tmp_root/$name"
+  mkdir -p "$work/unpacked"
+  if ! curl -fsSL -m 120 -A "$UA" "$url" -o "$work/ext.zip" 2>/dev/null ||
+    ! unzip -q "$work/ext.zip" -d "$work/unpacked" 2>/dev/null; then
+    echo "[!] $name: download or unzip failed (keeping current version)"
+    return 0
+  fi
+
+  # Zips normally contain <name>/...; accept a single top-level dir with any name, or no dir
+  local src="$work/unpacked/$name"
+  if [ ! -f "$src/package.json" ]; then
+    src=$(find "$work/unpacked" -maxdepth 2 -name package.json -printf '%h\n' | head -n1)
+  fi
+  if [ -z "$src" ] || [ ! -f "$src/package.json" ]; then
+    echo "[!] $name: no package.json in the download (keeping current version)"
+    return 0
+  fi
+
+  echo "$version" >"$src/$STAMP"
+  if [ -e "$dest" ]; then
+    mv "$dest" "$work/old"
+  fi
+  if mv "$src" "$dest"; then
+    local verb="Installed"
+    [ -n "$current" ] && verb="Updated"
+    echo "[✓] $verb $name ($store:$author/$name)"
+    changed=1
+  else
+    echo "[!] $name: could not install into $dest"
+    [ -e "$work/old" ] && mv "$work/old" "$dest"
+  fi
+}
+
+echo "Updating Vicinae extensions..."
+while IFS= read -r raw || [ -n "$raw" ]; do
+  line="${raw%%#*}"
+  line="${line//[[:space:]]/}"
+  [ -z "$line" ] && continue
+  if [[ ! "$line" =~ ^(raycast|vicinae):([A-Za-z0-9._-]+)/([A-Za-z0-9._-]+)$ ]]; then
+    echo "[!] Ignoring malformed line in $CONF: $raw (expected raycast:author/name or vicinae:author/name)"
+    continue
+  fi
+  wanted["${BASH_REMATCH[3]}"]=1
+  update_one "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}" "${BASH_REMATCH[3]}"
+done <"$CONF"
+
+# Prune extensions this script installed that are no longer listed
+for dir in "$EXT_DIR"/*/; do
+  dir="${dir%/}"
+  [ -f "$dir/$STAMP" ] || continue
+  name="${dir##*/}"
+  if [ -z "${wanted[$name]:-}" ]; then
+    rm -rf "$dir"
+    echo "[✓] Removed $name (no longer in extensions.conf)"
+    changed=1
+  fi
+done
+
+if [ "$changed" = 1 ] && systemctl --user is-active --quiet vicinae 2>/dev/null; then
+  systemctl --user restart vicinae && echo "[✓] Restarted vicinae"
+fi
+exit 0

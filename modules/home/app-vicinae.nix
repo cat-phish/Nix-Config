@@ -3,13 +3,7 @@
   lib,
   pkgs,
   ...
-}: let
-  # Raycast extensions are built from a sparse checkout of github.com/raycast/extensions at this rev.
-  # Vicinae's Raycast API coverage is partial: if one stops building or working, drop it here.
-  raycastRev = "c12374ce5a5a26772418b1c3f624943eb8b9ec21";
-  raycast = name: sha256: npmDepsHash:
-    config.lib.vicinae.mkRayCastExtension {inherit name sha256 npmDepsHash; rev = raycastRev;};
-in {
+}: {
   # Vicinae: Raycast-style launcher (Mod+Space) and clipboard history (Mod+Y), replacing
   # DMS Spotlight and its launcher plugins. Binds live in dotfiles/.config/niri/config.kdl.
   # Built in: apps, calculator/units/currency, emoji (core:search-emojis), clipboard,
@@ -18,6 +12,8 @@ in {
   # "Search DuckDuckGo"), shortcuts/quicklinks and snippets. Vicinae needs settings.json writable,
   # so `settings` below go through VICINAE_OVERRIDES (mutableSettings) and win over GUI edits of
   # the same keys; keep GUI-managed keys out of it.
+  # Extensions aren't managed here: they're listed in dotfiles/.config/vicinae/extensions.conf
+  # and installed/updated by ~/.scripts/vicinae-extensions (run by update-system). See docs/vicinae.md.
   programs.vicinae = {
     enable = true;
     systemd.enable = true;
@@ -67,12 +63,6 @@ in {
         };
       };
     };
-
-    extensions = [
-      (raycast "gitmoji" "sha256-Fn3QuysgWyo2YfV+WLS7oWbn4TuyiwalE3LFVWzkTd0=" "sha256-iE3IFLtwq0yqK+FOGEGGUofAiKvPxjR/g+INzdmHQAw=")
-      (raycast "gif-search" "sha256-YU+pIaRyvFzCuUQG9sOT5wipBaE9yl7+5enq0RSbXnM=" "sha256-jDILjv/0Jo/nwJdVtLvYNz2NRf7dJPJ702W+wyzDDN0=")
-      (raycast "nixpkgs-search" "sha256-7BjmyUm4i4XlEmSrsC0EBCTh51DhJy9EQKnfXzZQ+b4=" "sha256-8RddF785evDtABgXEAu1FBQ6dwuIgr5BmYkQVuIbjfg=")
-    ];
   };
 
   # Script commands (replace the DMS web search and nix package runner plugins).

@@ -19,7 +19,7 @@
       fcast-receiver
       feishin
       grayjay
-      iptvnator
+      # iptvnator: AppImage via update-system (dotfiles/.apps/appimages/appimages.conf)
       lsp-plugins # a collection of open source audio plugins
       mpv
       plezy

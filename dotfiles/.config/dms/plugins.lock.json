@@ -33,10 +33,6 @@
       "path": "breathing",
       "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
     },
-    "calculator": {
-      "repo": "https://github.com/rochacbruno/DankCalculator",
-      "commit": "a27b80ad8c3dd42da11af83461674fb362817515"
-    },
     "cast": {
       "repo": "https://github.com/Conava/dux-plugins",
       "path": "Cast",
@@ -45,15 +41,6 @@
     "colorPickerDms": {
       "repo": "https://github.com/bernardopg/color-picker-dms",
       "commit": "b16ec4b3aefddfadac25c94275c4ff494ce1cd62"
-    },
-    "commandRunner": {
-      "repo": "https://github.com/devnullvoid/dms-command-runner",
-      "commit": "ea59490eede60d7dc87697b670f1eccc6ad54593"
-    },
-    "converter": {
-      "repo": "https://github.com/viewerofall-labs/weather-viewer",
-      "path": "converter",
-      "commit": "1892857e462be9b830582d891e989a61fe194d75"
     },
     "dankActions": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
@@ -79,11 +66,6 @@
       "path": "DankDesktopWeather",
       "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
-    "dankGifSearch": {
-      "repo": "https://github.com/duxlabs-dev/dux-plugins",
-      "path": "DankGifSearch",
-      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
-    },
     "dankHooks": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankHooks",
@@ -97,11 +79,6 @@
     "dankRssWidget": {
       "repo": "https://github.com/BrendonJL/dms-rss-widget",
       "commit": "a4cd88d511d7704e618656c08ef5a1b5b7f81ff3"
-    },
-    "dankStickerSearch": {
-      "repo": "https://github.com/duxlabs-dev/dux-plugins",
-      "path": "DankStickerSearch",
-      "commit": "0a6c984e746b6b411cdc4ec024abce41e78d19a2"
     },
     "ddcBrightness": {
       "repo": "https://github.com/smithyyang/dms-brightness-plugin",
@@ -144,15 +121,6 @@
       "repo": "https://github.com/jonkristian/dms-easyeffects",
       "commit": "151f3914b53ba8bebfb5a34f4a0901ed441e80a4"
     },
-    "emojiLauncher": {
-      "repo": "https://github.com/devnullvoid/dms-emoji-launcher",
-      "commit": "fc385900e6df292f0a7e5bdda4e3e37169897d7c"
-    },
-    "emojiPicker": {
-      "repo": "https://github.com/hthienloc/dms-plugins",
-      "path": "emojiPicker",
-      "commit": "b8ec2719ad2fc4d09075882e957d16ca9387f398"
-    },
     "freshrssReader": {
       "repo": "https://github.com/jtcarrasco/freshrss-reader",
       "path": "dms",
@@ -169,11 +137,6 @@
     "githubNotifier": {
       "repo": "https://github.com/psyreactor/dms-githubNotifier",
       "commit": "24ce96bc73d08ae60261a0fbe6370d10ac62221a"
-    },
-    "gitmojiLauncher": {
-      "repo": "https://github.com/lucyfire/dms-plugins",
-      "path": "gitmojiLauncher",
-      "commit": "c463cf2364567bf77ded1e52dbf09c5cf0b9d28e"
     },
     "hamqslPropagation": {
       "repo": "https://github.com/devnullvoid/dms-hamqsl-propagation",
@@ -201,17 +164,9 @@
       "repo": "https://github.com/arcatva/dms-next-boot-selector",
       "commit": "78e75e8e0555f9a8f860f4be98a39cd22e1c09bf"
     },
-    "niriWindows": {
-      "repo": "https://github.com/rochacbruno/DankNiriWindows",
-      "commit": "411d5ee9f7707029f4c12c824ec3b24ca6756a0d"
-    },
     "nixMonitor": {
       "repo": "https://github.com/antonjah/nix-monitor",
       "commit": "bd941a0e71b8f7763b45c22281a44ff554f82666"
-    },
-    "nixPackageRunner": {
-      "repo": "https://github.com/iahccc/NixPackageRunner",
-      "commit": "829ad93c15b7c0ec82a6d7483728029037442601"
     },
     "nvidiaGpuDankbarMonitor": {
       "repo": "https://github.com/Reverssss/dms-nvidia-gpu-monitor",
@@ -290,10 +245,6 @@
     "wallpaperShufflerPlugin": {
       "repo": "https://github.com/Daniel-42-z/dms-wallpaper-shuffler",
       "commit": "2b2e63e1831d6e184eecbcad8a2794734bd5d4ae"
-    },
-    "webSearch": {
-      "repo": "https://github.com/devnullvoid/dms-web-search",
-      "commit": "821f5b437ea96739ce1cbc85ce324fb55e8884bb"
     }
   }
 }
