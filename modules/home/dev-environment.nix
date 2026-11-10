@@ -95,6 +95,9 @@
 
   programs.emacs = {
     enable = true;
+    # Native Wayland build: real touchpad pixel deltas for smooth scrolling
+    # (ultra-scroll) and crisp text at fractional scale, instead of X11 via XWayland.
+    package = pkgs.emacs-pgtk;
     # package = pkgs-stable.emacs.override { # xwidgets for launching org-roam ui inside emacs
     #   withXwidgets = true;
     #   withGTK3 = true;

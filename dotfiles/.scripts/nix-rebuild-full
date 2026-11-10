@@ -61,8 +61,8 @@ handle_git_workflow() {
     git status -s
     echo "--------------------------------------------------"
 
-    read -p "Would you like to commit and push these changes now? (y/N): " confirm
-    if [[ $confirm == [yY] ]]; then
+    read -p "Would you like to commit and push these changes now? (Y/n): " confirm
+    if [[ -z $confirm || $confirm == [yY] ]]; then
       read -p "Commit message (Enter for timestamp): " msg
       [ -z "$msg" ] && msg="System rebuild update [$(date +'%Y-%m-%d %H:%M:%S')]"
 

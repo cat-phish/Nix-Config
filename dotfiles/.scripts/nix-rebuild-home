@@ -54,8 +54,8 @@ handle_local_changes() {
     git status -s
     echo "--------------------------------------------------"
 
-    read -p "Commit and sync changes? (y/N): " confirm
-    if [[ $confirm == [yY] ]]; then
+    read -p "Commit and sync changes? (Y/n): " confirm
+    if [[ -z $confirm || $confirm == [yY] ]]; then
       read -p "Commit message (Enter for timestamp): " msg
       [ -z "$msg" ] && msg="Config update [$(date +'%Y-%m-%d %H:%M:%S')]"
 

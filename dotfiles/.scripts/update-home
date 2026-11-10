@@ -76,8 +76,8 @@ handle_git_workflow() {
     git status -s
     echo "--------------------------------------------------------"
 
-    read -p "Would you like to sync these changes? (y/N): " confirm
-    if [[ $confirm == [yY] ]]; then
+    read -p "Would you like to sync these changes? (Y/n): " confirm
+    if [[ -z $confirm || $confirm == [yY] ]]; then
       read -p "Commit message (Enter for timestamp): " msg
       [ -z "$msg" ] && msg="Nix flake update [$(date +'%Y-%m-%d %H:%M:%S')]"
 
