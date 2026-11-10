@@ -69,7 +69,7 @@ window-rule {
     open-focused false
 }
 window-rule {
-    match at-startup=true app-id=r#"Emacs$"#
+    match at-startup=true app-id=r#"^[Ee]macs$"#
     open-on-workspace "org-mode"
     open-maximized true
     open-focused false

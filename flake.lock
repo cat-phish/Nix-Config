@@ -80,11 +80,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1794152120,
-        "narHash": "sha256-YtsJydblZxUxL9JUq2HdP62bu5mfleA3M7Hx///v31M=",
+        "lastModified": 1794282582,
+        "narHash": "sha256-iPqUzaFrWtXT0JUDmoQU67+E7J3sOdhrV3TMw98DHjk=",
         "owner": "duxlabs-dev",
         "repo": "dux-shell",
-        "rev": "32d6c430f89f58122c8f4a6de5b38aaf5316b1d3",
+        "rev": "3548daab9a7595b6dff52a79eda4cccd3697fdd6",
         "type": "github"
       },
       "original": {
@@ -99,11 +99,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1794151165,
-        "narHash": "sha256-DQIF135cPpdyv34BL9MuNLt93JbCeDze+Z8T11ys2kc=",
+        "lastModified": 1794282582,
+        "narHash": "sha256-LVVB/lA0gNLdgmnafD+TcqdIu9AOtjK08dptfEeMhuA=",
         "owner": "duxlabs-dev",
         "repo": "dux-greeter",
-        "rev": "a3aa55f7269a36bed66dcf3e0d244da83244d3a2",
+        "rev": "399eb7faa9cb5f8585679da0c7f9a424f9cefc20",
         "type": "github"
       },
       "original": {
@@ -115,11 +115,11 @@
     "emacs-config": {
       "flake": false,
       "locked": {
-        "lastModified": 1794286357,
-        "narHash": "sha256-Wj6HbbmxmRLO6fo3jw0UmkGl3PBOTztamwE0ckW+3bQ=",
+        "lastModified": 1794286924,
+        "narHash": "sha256-62HjyJ2rFQoX39O8Qcja7IZL/fHQFjqb1wbBWhEgnl8=",
         "ref": "refs/heads/master",
-        "rev": "666e0815a95dc065251716372fbce64758b69928",
-        "revCount": 132,
+        "rev": "63a441748e2714a0983aed63b6275d8773395f2f",
+        "revCount": 133,
         "type": "git",
         "url": "ssh://git@github.com/cat-phish/Emacs.git"
       },
@@ -189,11 +189,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793979366,
-        "narHash": "sha256-7OoWDsYO9teiPxl0QdlS5lYE20Pue8/5mpscSL32FUA=",
+        "lastModified": 1794278858,
+        "narHash": "sha256-rkrJwLgLSHBnXfgoSKIDa+2LLGdTqynsV3GAxOTGhUU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "2c0c1f01521469cf0271180c453c79782d53c2f6",
+        "rev": "82ce401aa350502897c3f2e85f384d61cd3b0b6d",
         "type": "github"
       },
       "original": {
@@ -530,11 +530,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1793995029,
-        "narHash": "sha256-ZlE4BtMjWhfC6rFXLO9Qimn36Ene1INqCgKDDvazjhc=",
+        "lastModified": 1794261845,
+        "narHash": "sha256-Ivif/kuD68yEOKcZZG3zSwNMFUuIgzUgeJuzcHrQy+8=",
         "owner": "Mic92",
         "repo": "sops-nix",
-        "rev": "89a234ce2daf6e568a7d4b4fe250afdd23d84e20",
+        "rev": "fe7b4228405aeac2ce7192c2049a6e2bc8637082",
         "type": "github"
       },
       "original": {

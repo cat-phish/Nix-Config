@@ -333,7 +333,7 @@ window-rule {
     default-column-width {}
 }
 window-rule {
-  match app-id=r#"Emacs$"#
+  match app-id=r#"^[Ee]macs$"#
   open-maximized true
 }
 
