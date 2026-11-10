@@ -31,6 +31,13 @@
         # "top" puts the launcher behind fullscreen windows on niri.
         layer_shell.layer = "overlay";
       };
+      # Don't crawl the rclone FUSE mounts. When Wi-Fi drops at suspend, a readdir on them
+      # hangs in uninterruptible sleep, the indexer can't be frozen, and suspend fails
+      # (laptop stays awake and the lock screen ignores input for a minute after opening the lid).
+      providers.files.preferences.excludedIndexingPaths = map (p: "${config.home.homeDirectory}/${p}") [
+        "gdrive"
+        "mediaserver"
+      ];
     };
 
     # Static copy of the DMS "blue" theme (~/.cache/DankMaterialShell/dms-colors.json);

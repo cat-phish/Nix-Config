@@ -95,20 +95,17 @@ window-rule {
 window-rule {
   match app-id=r#"discord$"#
   open-on-workspace "chat"
-  open-maximized true
   // default-column-width { proportion 0.50; }
 }
 window-rule {
   match at-startup=true app-id=r#"konversation$"#
   open-on-workspace "chat"
-  open-maximized true
   // default-column-width { proportion 0.50; }
   open-focused false
 }
 window-rule {
   match at-startup=true app-id=r#"nheko$"#
   open-on-workspace "chat"
-  open-maximized true
   // default-column-width { proportion 0.50; }
   open-focused false
 }

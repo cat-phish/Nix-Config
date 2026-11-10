@@ -30,6 +30,19 @@
   targets.genericLinux.enable = lib.mkIf (!isNixos) true;
   targets.genericLinux.gpu.enable = lib.mkIf (!isNixos) true;
 
+  # Fedora: stop imsettings from starting IBus at login. Under niri it launches
+  # `ibus-daemon --xim` with GTK/QT_IM_MODULE=ibus, and IBus pops up a "should be
+  # called from the desktop session in Wayland" notification. Hidden=true in a
+  # user autostart entry overrides /etc/xdg/autostart/imsettings-start.desktop.
+  xdg.configFile."autostart/imsettings-start.desktop" = lib.mkIf (!isNixos) {
+    text = ''
+      [Desktop Entry]
+      Type=Application
+      Name=Input Method starter
+      Hidden=true
+    '';
+  };
+
   # Flatpaks via nix-flatpak. On NixOS this needs services.flatpak.enable (configuration.nix).
   services.flatpak = {
     enable = true;

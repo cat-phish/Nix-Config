@@ -725,7 +725,8 @@ setup_fedora() {
         # TODO: add prompt above for dankgreet default
         # Enable dankgreet
         sudo dnf copr enable avengemedia/danklinux
-        sudo dnf install -y dms-greeter
+        # gnome-keyring-pam: lets greetd unlock the login keyring with your password
+        sudo dnf install -y dms-greeter gnome-keyring-pam
         dms greeter enable
         dms greeter sync
         dms greeter status
