@@ -11,7 +11,7 @@ include "device-config.kdl"
 spawn-sh-at-startup "konsole -e dgop"
 spawn-at-startup "keepassxc"
 // stderr kept so startup crashes can be diagnosed (overwritten each login)
-spawn-sh-at-startup "discord --enable-logging=stderr > ~/.cache/discord-startup.log 2>&1"
+spawn-sh-at-startup "nm-online -q -t 120; discord --enable-logging=stderr > ~/.cache/discord-startup.log 2>&1"
 spawn-at-startup "konversation"
 spawn-at-startup "firefox"
 spawn-at-startup "kitty"

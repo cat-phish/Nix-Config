@@ -93,7 +93,7 @@ window-rule {
     open-focused false
 }
 window-rule {
-  match at-startup=true app-id=r#"discord$"#
+  match app-id=r#"discord$"#
   open-on-workspace "chat"
   open-maximized true
   // default-column-width { proportion 0.50; }
