@@ -28,7 +28,7 @@
   ];
 
   services.flatpak.packages = [
-    "org.fcast.Sender"
+    # "org.fcast.Sender"
   ];
 
   # dotool daemon for input automation (used by numen)
