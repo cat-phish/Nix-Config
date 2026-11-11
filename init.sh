@@ -256,7 +256,7 @@ fi
 
 setup_fedora() {
     ## UPDATE THIS WHEN ADDING/REMOVING STEPS ##
-    local TOTAL_STEPS=0
+    local TOTAL_STEPS=1 # zsh login shell (always runs)
     local STEP=0
 
     echo "==== Starting Fedora Setup ===="
@@ -743,6 +743,19 @@ setup_fedora() {
         sudo dnf install dankcalendar-git
         echo ""
     fi
+
+    # Make zsh the login shell. home.sessionVariables.SHELL only reaches shells
+    # that source hm-session-vars; systemd, niri and GUI apps launched from it
+    # (herdr, ...) take SHELL from /etc/passwd. Takes effect after re-login.
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Setting zsh as the login shell..."
+    sudo dnf install -y zsh
+    if [ "$(getent passwd "$USER" | cut -d: -f7)" != "/usr/bin/zsh" ]; then
+        sudo chsh -s /usr/bin/zsh "$USER"
+    else
+        echo "[✓] Login shell is already /usr/bin/zsh."
+    fi
+    echo ""
 
     # Mark setup as complete
     touch "$MARKER_FILE"

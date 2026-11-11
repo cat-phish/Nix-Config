@@ -21,8 +21,12 @@
     ./app-tailscale.nix # Fedora only (guarded inside)
   ];
 
-  # Fedora's zsh comes from dnf; on NixOS the system sets the login shell.
-  home.sessionVariables.SHELL = lib.mkIf (!isNixos) "/usr/bin/zsh";
+  # Fedora: the login shell stays dnf's /usr/bin/zsh (init.sh runs chsh) so logins
+  # survive a broken /nix, but everything else uses Nix zsh (dev-environment.nix).
+  # environment.d carries SHELL to systemd, niri and GUI apps started from it
+  # (herdr...), which otherwise take /etc/passwd's shell. On NixOS the system sets it.
+  home.sessionVariables.SHELL = lib.mkIf (!isNixos) "${config.home.profileDirectory}/bin/zsh";
+  systemd.user.sessionVariables.SHELL = lib.mkIf (!isNixos) "${config.home.profileDirectory}/bin/zsh";
 
   # Non-NixOS: expose Nix mesa/GPU drivers at /run/opengl-driver so Nix GUI apps
   # (wgpu/Vulkan/GL, e.g. herdr-app) can create a window. After the first switch,

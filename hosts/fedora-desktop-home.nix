@@ -25,7 +25,6 @@
     python312Packages.pylast
     python312Packages.requests
     qbittorrent
-    zsh
   ];
 
   services.flatpak.packages = [

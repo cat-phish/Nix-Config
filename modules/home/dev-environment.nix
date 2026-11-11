@@ -58,6 +58,7 @@
           outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
         };
       }))
+      pre-commit
       ripgrep
       vscode
       vim
