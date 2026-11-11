@@ -39,10 +39,22 @@ into a bundle by hand at any time.
 ## Commands
 
 ```sh
-dnf-sync --status   # show what would be saved / installed / removed, change nothing
-dnf-sync --save     # sort packages you installed by hand (no sudo)
-dnf-sync --apply    # repos, installs, removals (sudo)
+fedora-install <pkg>...  # sudo dnf install, then choose where to keep each package
+dnf-sync --status        # show what would be saved / installed / removed, change nothing
+dnf-sync --save [pkg...] # sort packages you installed by hand (no sudo)
+dnf-sync --apply         # repos, installs, removals (sudo)
 ```
+
+### fedora-install
+
+Use it instead of `sudo dnf install`. Arguments starting with `-` go to dnf as options. When the
+install succeeds, each package gets the same `c/h/i/s` prompt as `--save` (below) and is written to
+`setup/dnf-saved.json`. Package specs that aren't plain names (`'pkgconfig(gtk4)'`,
+`/usr/bin/foo`) are recorded under the name of the package that provides them. Packages that were
+already installed are offered too, so `fedora-install foo` also tracks something you installed
+before. Packages already declared are reported and skipped. Groups (`@name`) and `.rpm` files are
+installed but not tracked. It runs `dnf-sync --save <names>`, which skips the history and ignore
+checks for the packages you name. Commit the JSON afterwards, or let `update-system` do it.
 
 `update-system` runs `--save` before its commit prompt, so saved entries get committed and pushed,
 and `--apply` after `dnf upgrade`. `init.sh` runs `--apply` right after the first Home Manager

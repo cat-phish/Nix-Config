@@ -4,6 +4,8 @@
 #
 #   dnf-sync --save     save packages you installed by hand with dnf into setup/dnf-saved.json
 #                       (one choice per package: common / this host / ignore / skip). No sudo.
+#   dnf-sync --save <pkg>...  same, but only for these packages, even if not in dnf history or
+#                       ignored (used by fedora-install). Already-declared ones are reported.
 #   dnf-sync --apply    enable listed repos, install listed packages that are missing, and remove
 #                       packages that were dropped from the config since the last apply. Uses sudo.
 #   dnf-sync --status   show what --save and --apply would offer; changes nothing.
@@ -21,12 +23,15 @@ HOST="${DNF_SYNC_HOST:-$(hostname)}"
 ME="${USER:-$(id -un)}"
 
 usage() {
-  sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'
   exit 2
 }
 
 MODE="${1:-}"
 case "$MODE" in --save | --apply | --status) ;; *) usage ;; esac
+shift
+ONLY=("$@") # --save only: limit to these package names
+[ ${#ONLY[@]} -gt 0 ] && [ "$MODE" != --save ] && usage
 
 OS_ID=""
 [ -f /etc/os-release ] && OS_ID=$(. /etc/os-release && echo "${ID:-}")
@@ -165,6 +170,17 @@ save_candidates() {
   mapfile -t ignore < <(decl '.ignore[]')
   mapfile -t swapped < <(decl '.swaps | keys[]')
   local p
+  if [ ${#ONLY[@]} -gt 0 ]; then
+    # Named explicitly: skip the history and ignore checks, the user asked for these.
+    printf '%s\n' "${ONLY[@]}" | awk 'NF && !seen[$0]++' | while read -r p; do
+      if in_list "$p" "${declared[@]}" "${swapped[@]}"; then
+        echo "[-] dnf: $p is already in the config" >&2
+      else
+        echo "$p"
+      fi
+    done
+    return 0
+  fi
   while read -r p; do
     [ -n "$p" ] || continue
     in_list "$p" "${declared[@]}" "${swapped[@]}" && continue
@@ -221,11 +237,11 @@ do_save() {
   local -a cand common=() hostonly=() ignored=() skipped=()
   mapfile -t cand < <(save_candidates)
   if [ ${#cand[@]} -eq 0 ]; then
-    echo "[-] dnf: no new manual installs to save"
+    [ ${#ONLY[@]} -eq 0 ] && echo "[-] dnf: no new manual installs to save"
     return 0
   fi
   if [ "$INTERACTIVE" = 0 ]; then
-    echo "[i] dnf: installed by hand, not in the config (run 'dnf-sync --save' to sort them):"
+    echo "[i] dnf: installed by hand, not in the config (run 'dnf-sync --save${ONLY[*]:+ ${cand[*]}}' to sort them):"
     printf '      %s\n' "${cand[@]}"
     return 0
   fi
@@ -234,7 +250,11 @@ do_save() {
   local -a choice
   for p in "${cand[@]}"; do ((${#p} > w)) && w=${#p}; done
   say ""
-  say "$total package(s) installed by hand aren't in the config."
+  if [ ${#ONLY[@]} -gt 0 ]; then
+    say "Where should $total package(s) be kept installed?"
+  else
+    say "$total package(s) installed by hand aren't in the config."
+  fi
   while true; do
     save_legend
     choice=()

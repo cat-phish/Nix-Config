@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# Install dnf packages, then choose where to keep them: common (all Fedora hosts), this host only,
+# ignore on this host, or skip. The choice goes into setup/dnf-saved.json via dnf-sync, so the
+# other machine installs it on its next update-system. See docs/dnf.md.
+#
+#   fedora-install <pkg>... [dnf options]
+#
+# Arguments starting with "-" are passed to dnf as options. Package specs can be names, provides
+# (e.g. 'pkgconfig(gtk4)') or file paths; each is recorded under the name of the package that got
+# installed. Groups (@name) and local .rpm files are installed but not tracked. Packages already
+# installed are still offered, so this also tracks something installed earlier.
+set -uo pipefail
+
+FLAKE_PATH="${FLAKE_PATH:-$HOME/.nix}"
+
+if [ $# -eq 0 ] || [ "$1" = -h ] || [ "$1" = --help ]; then
+  sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//'
+  exit 2
+fi
+
+OS_ID=""
+[ -f /etc/os-release ] && OS_ID=$(. /etc/os-release && echo "${ID:-}")
+if [ "$OS_ID" != fedora ]; then
+  echo "[!] fedora-install: not Fedora"
+  exit 1
+fi
+
+# dnf options that take a separate value ("--repo foo"); the value isn't a package.
+takes_value() {
+  case "$1" in
+    --repo | --repoid | --enablerepo | --disablerepo | --setopt | --releasever | --exclude | -x | \
+      --installroot | --config | -c | --from-repo | --forcearch | --comment | --use-host-config) return 0 ;;
+  esac
+  return 1
+}
+
+specs=()
+skip_next=0
+for a in "$@"; do
+  if [ "$skip_next" = 1 ]; then
+    skip_next=0
+  elif [[ $a == -* ]]; then
+    takes_value "$a" && skip_next=1
+  else
+    specs+=("$a")
+  fi
+done
+
+sudo dnf install "$@" || {
+  rc=$?
+  echo "[!] fedora-install: dnf install failed, nothing recorded"
+  exit "$rc"
+}
+
+names=()
+for s in "${specs[@]}"; do
+  case "$s" in
+    @*)
+      echo "[-] fedora-install: $s is a group, not tracked"
+      continue
+      ;;
+    *.rpm)
+      echo "[-] fedora-install: $s is a local/remote .rpm, not tracked (no repo to reinstall from)"
+      continue
+      ;;
+  esac
+  n=$(rpm -q --whatprovides --qf '%{name}\n' "$s" 2>/dev/null | head -n1)
+  if [ -z "$n" ]; then
+    echo "[-] fedora-install: $s isn't installed, not tracked"
+    continue
+  fi
+  names+=("$n")
+done
+[ ${#names[@]} -gt 0 ] || exit 0
+
+sync="$FLAKE_PATH/dotfiles/.scripts/dnf-sync"
+[ -x "$sync" ] || sync=$(command -v dnf-sync) || {
+  echo "[!] fedora-install: dnf-sync not found; run 'dnf-sync --save ${names[*]}' later"
+  exit 1
+}
+"$sync" --save "${names[@]}" || exit $?
+echo "[i] fedora-install: commit setup/dnf-saved.json (update-system does it) so other hosts get it"
