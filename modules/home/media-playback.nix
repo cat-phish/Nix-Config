@@ -15,8 +15,8 @@
 
   home.packages =
     (with pkgs; [
-      fcast-client
-      fcast-receiver
+      # fcast-client
+      # fcast-receiver
       feishin
       grayjay
       # iptvnator: AppImage via update-system (dotfiles/.apps/appimages/appimages.conf)
