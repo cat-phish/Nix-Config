@@ -88,8 +88,8 @@ alias vv="nvim ."
 alias vf='nvim $(fzf -m --preview="bat --color=always {}")'
 alias nvim-ssh="$HOME/.scripts/nvim-ssh"
 alias nixcats="$HOME/code/nixCats/result/bin/nvim"
-alias uv="nvim-unstable"
-alias uvv="nvim-unstable ."
+# alias uv="nvim-unstable"
+# alias uvv="nvim-unstable ."
 
 # Emacs
 alias org="emacs ~/org/Tasks.org"
