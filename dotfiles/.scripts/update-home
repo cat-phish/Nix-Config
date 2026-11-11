@@ -66,10 +66,9 @@ handle_git_workflow() {
   nix flake update
 
   # 2. Check for changes (either flake.lock or your .nix files)
-  # Refresh the DMS plugin lockfile so GUI plugin installs/updates get committed too.
-  if [ -x /usr/bin/dms ]; then
-    /usr/bin/dms plugins lock -o "$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json" >/dev/null 2>&1 || true
-  fi
+  # Save DMS plugin / Vicinae extension installs, updates and uninstalls made in their GUIs
+  # into the repo, so they get committed too.
+  "$FLAKE_PATH/dotfiles/.scripts/save-gui-plugins" || true
   if [ -n "$(git status --porcelain)" ]; then
     echo "--------------------------------------------------------"
     echo "[!] Changes detected (lockfile or config edits):"

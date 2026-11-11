@@ -266,7 +266,7 @@ setup_fedora() {
     # TODO: separate each step into script
 
     # Prompt for Niri installation
-    read -p "Would you like to install Niri? (y/n): " install_niri
+    read -p "Would you like to set up Niri + the DMS greeter? (y/n): " install_niri
     if [[ "$install_niri" =~ ^[Yy]$ ]]; then
         use_niri=true
         TOTAL_STEPS=$((TOTAL_STEPS + 1))
@@ -285,23 +285,11 @@ setup_fedora() {
     fi
     echo ""
 
-    # Prompt for Kitty installation
-    read -p "Would you like to install Kitty? (y/n): " install_kitty
-    if [[ "$install_kitty" =~ ^[Yy]$ ]]; then
-        use_kitty=true
-        TOTAL_STEPS=$((TOTAL_STEPS + 1))
-        echo "[✓] Kitty will be installed."
-    else
-        use_kitty=false
-        echo "[✓] Skipping Kitty installation."
-    fi
-    echo ""
-
     # Prompt for Nix installation
     read -p "Would you like to install Nix? (y/n): " install_nix
     if [[ "$install_nix" =~ ^[Yy]$ ]]; then
       use_nix=true
-      TOTAL_STEPS=$((TOTAL_STEPS + 1))
+      TOTAL_STEPS=$((TOTAL_STEPS + 2)) # Nix + dnf packages
       echo "[✓] Nix will be installed."
       echo ""
       # Prompt for KDE Plasma management
@@ -346,7 +334,7 @@ setup_fedora() {
     echo ""
 
     # Prompt for Wireguard installation
-    read -p "Would you like to install Wireguard? (y/n): " install_wireguard
+    read -p "Would you like to set up the Wireguard tray (pip: pystray, pillow)? (y/n): " install_wireguard
     if [[ "$install_wireguard" =~ ^[Yy]$ ]]; then
         use_wireguard=true
         TOTAL_STEPS=$((TOTAL_STEPS + 1))
@@ -429,137 +417,7 @@ setup_fedora() {
     fi
     echo ""
 
-    # TODO: fix the total steps math here, move the confirmation to above
-    # Setup fingerprint authentication
-    if [ "$use_fingerprint" = true ]; then
-    STEP=$((STEP + 1))
-    echo "[$STEP/$TOTAL_STEPS] Configuring fingerprint authentication..."
-      # Check if fprintd is installed
-      if ! command -v fprintd-enroll &> /dev/null; then
-          echo "Installing fprintd..."
-          sudo dnf install -y fprintd fprintd-pam
-      fi
-
-      PAM_FILE="/etc/pam.d/sudo"
-
-      # Check if already configured
-      if grep -q "pam_fprintd.so" "$PAM_FILE"; then
-          echo "[✓] Fingerprint authentication already configured"
-      else
-          # Backup and configure
-          sudo cp "$PAM_FILE" "${PAM_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
-          sudo sed -i '/#%PAM-1.0/a auth       sufficient   pam_fprintd.so' "$PAM_FILE"
-          echo "[✓] Fingerprint authentication configured"
-      fi
-
-      # Prompt to enroll fingerprint
-      read -p "Enroll fingerprint now? (y/n): " enroll_now
-      if [[ "$enroll_now" =~ ^[Yy]$ ]]; then
-          fprintd-enroll
-          echo "[✓] Fingerprint enrolled"
-      else
-          echo "You can enroll later with: fprintd-enroll"
-      fi
-    fi
-    echo ""
-
-    # Setup Tailscale
-
-    if [ "$use_tailscale" = true ]; then
-      STEP=$((STEP + 1))
-      echo "[$STEP/$TOTAL_STEPS] Setting up Tailscale..."
-      # Check if Tailscale is already installed
-      if !  command -v tailscale &> /dev/null; then
-          echo "Installing Tailscale..."
-
-          # Add Tailscale repository
-          sudo dnf config-manager addrepo --from-repofile=https://pkgs.tailscale.com/stable/fedora/tailscale.repo
-
-          # Install Tailscale
-          sudo dnf install -y tailscale
-
-          echo "[✓] Tailscale installed"
-      else
-          echo "[✓] Tailscale already installed"
-      fi
-
-      # Enable and start Tailscale service
-      sudo systemctl enable --now tailscaled
-      echo "[✓] Tailscale service enabled and started"
-
-      # Check if already authenticated
-      if sudo tailscale status &> /dev/null && sudo tailscale status | grep -q "Logged in"; then
-          echo "[✓] Tailscale already authenticated"
-          echo ""
-          echo "Current Tailscale status:"
-          sudo tailscale status
-      else
-          echo ""
-          echo "Tailscale needs to be authenticated..."
-          read -p "Authenticate Tailscale now? (y/n): " auth_now
-
-          if [[ "$auth_now" =~ ^[Yy]$ ]]; then
-              # Ask about additional options
-              echo ""
-              echo "Tailscale authentication options:"
-              read -p "Accept routes from other devices? (y/n): " accept_routes
-              read -p "Advertise this machine as an exit node? (y/n): " exit_node
-              read -p "Enable SSH access via Tailscale? (y/n): " tailscale_ssh
-
-              # Build tailscale up command
-              TAILSCALE_CMD="sudo tailscale up"
-
-              [[ "$accept_routes" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --accept-routes"
-              [[ "$exit_node" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --advertise-exit-node"
-              [[ "$tailscale_ssh" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --ssh"
-
-              echo ""
-              echo "Running: $TAILSCALE_CMD"
-              echo "This will open a browser window for authentication..."
-
-              eval $TAILSCALE_CMD
-
-              echo ""
-              echo "[✓] Tailscale configured"
-              echo ""
-              echo "Tailscale status:"
-              sudo tailscale status
-          else
-              echo "You can authenticate later with: sudo tailscale up"
-          fi
-      fi
-
-      echo ""
-      echo "Useful Tailscale commands:"
-      echo "  sudo tailscale status      - Show connection status"
-      echo "  sudo tailscale ip          - Show your Tailscale IP"
-      echo "  sudo tailscale ping <host> - Ping another device"
-      echo "  sudo tailscale down        - Disconnect"
-    fi
-    echo ""
-
-    # Install Wireguard (conditional)
-    if [ "$use_wireguard" = true ]; then
-        STEP=$((STEP + 1))
-        echo "[$STEP/$TOTAL_STEPS] Installing Wireguard..."
-        sudo dnf -y install wireguard-tools
-        sudo dnf -y install python3-pip python3-gobject gtk3
-        pip install pystray pillow
-        echo ""
-    fi
-
-
-
-    # Install Kitty
-    if [ "$use_kitty" = true ]; then
-      STEP=$((STEP + 1))
-      echo "[$STEP/$TOTAL_STEPS] Installing Kitty..."
-      sudo dnf copr enable -y gagbo/kitty-latest
-      sudo dnf --refresh install -y kitty
-      echo ""
-    fi
-
-    # Install Kitty
+    # Install Scotty
     if [ "$use_scotty" = true ]; then
       STEP=$((STEP + 1))
       echo "[$STEP/$TOTAL_STEPS] Installing Scotty..."
@@ -630,6 +488,7 @@ setup_fedora() {
       STEP=$((STEP + 1))
       echo "[$STEP/$TOTAL_STEPS] Setting up Nix configuration..."
       if [ ! -d "$HOME/.nix" ]; then
+          command -v git &> /dev/null || sudo dnf install -y git
           git clone https://github.com/cat-phish/Nix-Config.git "$HOME/.nix"
       else
           echo "~/.nix already exists, skipping clone."
@@ -673,7 +532,134 @@ setup_fedora() {
       # Nix GUI apps need Nix GPU drivers at /run/opengl-driver (sudo)
       bash "$HOME/.nix/dotfiles/.scripts/nix-gpu-setup" || true
       echo ""
+
+      # dnf packages and repos declared in my.fedora.dnf (modules/home/fedora-dnf.nix):
+      # niri, DMS, kitty, tailscale, wireguard-tools, ... Asks before installing.
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Installing dnf packages from the config..."
+      bash "$HOME/.nix/dotfiles/.scripts/dnf-sync" --apply || true
+      echo ""
+    else
+      echo "⚠️  Nix skipped: dnf packages from the config (niri, DMS, kitty, tailscale...) weren't installed."
+      echo "   Install Nix, then run: ~/.nix/dotfiles/.scripts/dnf-sync --apply"
+      echo ""
     fi
+
+    # TODO: fix the total steps math here, move the confirmation to above
+    # Setup fingerprint authentication
+    if [ "$use_fingerprint" = true ]; then
+    STEP=$((STEP + 1))
+    echo "[$STEP/$TOTAL_STEPS] Configuring fingerprint authentication..."
+      # fprintd comes from dnf-sync (hosts/fedora-laptop-home.nix: my.fedora.dnf.packages)
+      if ! command -v fprintd-enroll &> /dev/null; then
+          echo "⚠️  fprintd isn't installed. Add fprintd + fprintd-pam to my.fedora.dnf.packages for this host"
+          echo "   and run: ~/.nix/dotfiles/.scripts/dnf-sync --apply"
+      else
+
+      PAM_FILE="/etc/pam.d/sudo"
+
+      # Check if already configured
+      if grep -q "pam_fprintd.so" "$PAM_FILE"; then
+          echo "[✓] Fingerprint authentication already configured"
+      else
+          # Backup and configure
+          sudo cp "$PAM_FILE" "${PAM_FILE}.backup-$(date +%Y%m%d-%H%M%S)"
+          sudo sed -i '/#%PAM-1.0/a auth       sufficient   pam_fprintd.so' "$PAM_FILE"
+          echo "[✓] Fingerprint authentication configured"
+      fi
+
+      # Prompt to enroll fingerprint
+      read -p "Enroll fingerprint now? (y/n): " enroll_now
+      if [[ "$enroll_now" =~ ^[Yy]$ ]]; then
+          fprintd-enroll
+          echo "[✓] Fingerprint enrolled"
+      else
+          echo "You can enroll later with: fprintd-enroll"
+      fi
+      fi
+    fi
+    echo ""
+
+    # Setup Tailscale
+
+    if [ "$use_tailscale" = true ]; then
+      STEP=$((STEP + 1))
+      echo "[$STEP/$TOTAL_STEPS] Setting up Tailscale..."
+      # tailscale (and its repo) come from dnf-sync (modules/home/app-tailscale.nix)
+      if ! command -v tailscale &> /dev/null; then
+          echo "⚠️  tailscale isn't installed. Run: ~/.nix/dotfiles/.scripts/dnf-sync --apply"
+          use_tailscale=false
+      fi
+    fi
+    if [ "$use_tailscale" = true ]; then
+
+      # Enable and start Tailscale service
+      sudo systemctl enable --now tailscaled
+      echo "[✓] Tailscale service enabled and started"
+
+      # Check if already authenticated
+      if sudo tailscale status &> /dev/null && sudo tailscale status | grep -q "Logged in"; then
+          echo "[✓] Tailscale already authenticated"
+          echo ""
+          echo "Current Tailscale status:"
+          sudo tailscale status
+      else
+          echo ""
+          echo "Tailscale needs to be authenticated..."
+          read -p "Authenticate Tailscale now? (y/n): " auth_now
+
+          if [[ "$auth_now" =~ ^[Yy]$ ]]; then
+              # Ask about additional options
+              echo ""
+              echo "Tailscale authentication options:"
+              read -p "Accept routes from other devices? (y/n): " accept_routes
+              read -p "Advertise this machine as an exit node? (y/n): " exit_node
+              read -p "Enable SSH access via Tailscale? (y/n): " tailscale_ssh
+
+              # Build tailscale up command
+              TAILSCALE_CMD="sudo tailscale up"
+
+              [[ "$accept_routes" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --accept-routes"
+              [[ "$exit_node" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --advertise-exit-node"
+              [[ "$tailscale_ssh" =~ ^[Yy]$ ]] && TAILSCALE_CMD="$TAILSCALE_CMD --ssh"
+
+              echo ""
+              echo "Running: $TAILSCALE_CMD"
+              echo "This will open a browser window for authentication..."
+
+              eval $TAILSCALE_CMD
+
+              echo ""
+              echo "[✓] Tailscale configured"
+              echo ""
+              echo "Tailscale status:"
+              sudo tailscale status
+          else
+              echo "You can authenticate later with: sudo tailscale up"
+          fi
+      fi
+
+      echo ""
+      echo "Useful Tailscale commands:"
+      echo "  sudo tailscale status      - Show connection status"
+      echo "  sudo tailscale ip          - Show your Tailscale IP"
+      echo "  sudo tailscale ping <host> - Ping another device"
+      echo "  sudo tailscale down        - Disconnect"
+    fi
+    echo ""
+
+    # Install Wireguard (conditional)
+    if [ "$use_wireguard" = true ]; then
+        STEP=$((STEP + 1))
+        echo "[$STEP/$TOTAL_STEPS] Setting up the Wireguard tray..."
+        # wireguard-tools and the tray's python3-gobject/gtk3/pip come from dnf-sync
+        # (common.nix, app-wireguard-tray.nix)
+        pip install pystray pillow
+        echo ""
+    fi
+
+
+
 
     # Setup kmonad
     if [ "$use_kmonad" = true ]; then
@@ -716,17 +702,14 @@ setup_fedora() {
     # Install Niri (conditional)
     if [ "$use_niri" = true ]; then
         STEP=$((STEP + 1))
-        echo "[$STEP/$TOTAL_STEPS] Installing Niri..."
-        sudo dnf copr enable -y avengemedia/dms
-        # qt6-qtwebsockets-devel: QtWebSockets QML module for the DMS Home Assistant plugin
-        # (Fedora ships the QML module in -devel; it must match the system Qt, so not Nix)
-        sudo dnf install -y niri dms qt6-qtwebsockets-devel
+        echo "[$STEP/$TOTAL_STEPS] Setting up Niri + DMS greeter..."
+        # niri, dms, dux-greeter, dux-calendar, qt6-qtwebsockets-devel and gnome-keyring-pam come
+        # from dnf-sync (desktop-niri.nix, duxlabs/dms COPR), installed after the first switch.
+        if ! command -v niri &> /dev/null || ! command -v dms &> /dev/null; then
+          echo "⚠️  niri/dms aren't installed. Run: ~/.nix/dotfiles/.scripts/dnf-sync --apply"
+          echo "   then re-run this step."
+        else
         systemctl --user add-wants niri.service dms
-        # TODO: add prompt above for dankgreet default
-        # Enable dankgreet
-        sudo dnf copr enable avengemedia/danklinux
-        # gnome-keyring-pam: lets greetd unlock the login keyring with your password
-        sudo dnf install -y dms-greeter gnome-keyring-pam
         dms greeter enable
         dms greeter sync
         dms greeter status
@@ -740,7 +723,7 @@ setup_fedora() {
         fi
         sudo systemctl enable greetd
         sudo systemctl start greetd
-        sudo dnf install dankcalendar-git
+        fi
         echo ""
     fi
 

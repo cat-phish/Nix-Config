@@ -36,6 +36,8 @@ Numen runs as the `numen` systemd user service. It is **not** started at login. 
 | green | running, awake |
 | amber with a "z" | running, asleep |
 
+**Mod+Delete:** start / stop numen (the tray icon stays and shows the state).
+
 - Left click: start / stop numen
 - Middle click: sleep / wake
 - Right click: menu (status, start/stop, restart, sleep/wake, show log, quit tray)
@@ -48,6 +50,7 @@ if it was quit or killed.
 ```sh
 numen-mode on        # start numen (and the tray if needed)
 numen-mode off       # stop numen; the tray stays
+numen-mode power     # on if stopped, off if running (Mod+Delete)
 numen-mode sleep     # only listen for "wake up"
 numen-mode wake
 numen-mode status    # awake / asleep
@@ -175,7 +178,7 @@ Clips are saved to `~/.local/state/numen/bench/`; the sentences are in
 | `modules/home/numen-dictate-buffer.py` | always-on 30 s mic buffer, so "say" catches speech that started before numen recognised it |
 | `modules/home/numen-asr-bench.py` | model comparison |
 | `dotfiles/.config/numen/phrases/` | numen voice commands |
-| `dotfiles/.config/niri/config.kdl` | Mod+D binding |
+| `dotfiles/.config/niri/config.kdl` | Mod+D (dictation) and Mod+Delete (on/off) bindings |
 
 User services: `numen` (on demand), `numen-tray` and `numen-dictate-buffer` (at login).
 

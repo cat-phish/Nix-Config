@@ -32,6 +32,26 @@ in {
   };
 
   config = {
+    # Fedora: niri (Fedora repo), dms + greeter + calendar from the Dux Labs COPR. duxlabs/dms
+    # pulls in duxlabs/dux-repo (greeter, calendar, quickshell) as a COPR dependency.
+    # On NixOS these come from configuration.nix and this is ignored.
+    my.fedora.dnf = {
+      coprs = ["duxlabs/dms"];
+      packages = [
+        "niri"
+        "dms"
+        "dux-greeter"
+        "dux-calendar"
+        "qt6-qtwebsockets-devel" # QtWebSockets QML module for the DMS Home Assistant plugin (must match system Qt)
+        "gnome-keyring-pam" # lets greetd unlock the login keyring with your password
+      ];
+      # Old avengemedia names. dux-calendar doesn't obsolete dankcalendar-git (both ship /usr/bin/dcal).
+      swaps = {
+        "dankcalendar-git" = "dux-calendar";
+        "dms-greeter" = "dux-greeter";
+      };
+    };
+
     home.file =
       {
         ".config/niri/config.kdl".source = ../../dotfiles/.config/niri/config.kdl;

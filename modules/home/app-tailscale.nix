@@ -10,6 +10,11 @@
   # needs root for the TUN device/routes; Home Manager only adds the user-level
   # pieces. One-time prerequisite: `sudo tailscale set --operator=$USER`.
   config = lib.mkIf (!isNixos) {
+    my.fedora.dnf = {
+      repoFiles = ["https://pkgs.tailscale.com/stable/fedora/tailscale.repo"];
+      packages = ["tailscale"];
+    };
+
     # Tray icon, started with the graphical (niri) session.
     systemd.user.services.tailscale-systray = {
       Unit = {

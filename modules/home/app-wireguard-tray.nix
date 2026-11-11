@@ -13,6 +13,10 @@
   # sops.secrets = {
   # };
 
+  # Fedora: the tray script (~/.python-scripts/wireguard-tray.py) runs on the system python
+  # (init.sh also runs `pip install pystray pillow`).
+  my.fedora.dnf.packages = ["python3-pip" "python3-gobject" "gtk3"];
+
   home.packages =
     (with pkgs; [
       ])

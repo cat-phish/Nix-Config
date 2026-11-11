@@ -1,0 +1,475 @@
+#!/usr/bin/env bash
+# Keep dnf packages on the Fedora hosts in line with my.fedora.dnf (modules/home/fedora-dnf.nix).
+# Everything asks first at a plain terminal prompt. See docs/dnf.md.
+#
+#   dnf-sync --save     save packages you installed by hand with dnf into setup/dnf-saved.json
+#                       (one choice per package: common / this host / ignore / skip). No sudo.
+#   dnf-sync --apply    enable listed repos, install listed packages that are missing, and remove
+#                       packages that were dropped from the config since the last apply. Uses sudo.
+#   dnf-sync --status   show what --save and --apply would offer; changes nothing.
+#
+# Removals are found with a snapshot of the last applied list (~/.local/state/dnf-sync-applied.json).
+# A removal you decline stays in the snapshot, so it's offered again on every run until you remove
+# it or put the package back in the config. Without a snapshot (first run) nothing is removed.
+# Not interactive (no terminal): only reports. Exits 0 on NixOS / non-Fedora.
+set -uo pipefail
+
+FLAKE_PATH="${FLAKE_PATH:-$HOME/.nix}"
+SAVED="${DNF_SYNC_SAVED:-$FLAKE_PATH/setup/dnf-saved.json}"
+APPLIED="${XDG_STATE_HOME:-$HOME/.local/state}/dnf-sync-applied.json"
+HOST="${DNF_SYNC_HOST:-$(hostname)}"
+ME="${USER:-$(id -un)}"
+
+usage() {
+  sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
+  exit 2
+}
+
+MODE="${1:-}"
+case "$MODE" in --save | --apply | --status) ;; *) usage ;; esac
+
+OS_ID=""
+[ -f /etc/os-release ] && OS_ID=$(. /etc/os-release && echo "${ID:-}")
+if [ "$OS_ID" != fedora ]; then
+  echo "[-] dnf-sync: not Fedora, skipping"
+  exit 0
+fi
+for c in nix jq dnf rpm; do
+  command -v "$c" >/dev/null 2>&1 || {
+    echo "[!] dnf-sync: '$c' not found"
+    exit 1
+  }
+done
+
+INTERACTIVE=0
+[ "$MODE" != --status ] && [ -t 0 ] && [ -t 1 ] && INTERACTIVE=1
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# --- helpers -----------------------------------------------------------------------------------
+
+# Declared config for this host -> $tmp/decl.json
+load_declared() {
+  if ! nix eval --json "$FLAKE_PATH#homeConfigurations.\"$ME@$HOST\".config.my.fedora.dnf" \
+    >"$tmp/decl.json" 2>"$tmp/eval.err"; then
+    echo "[!] dnf-sync: couldn't evaluate my.fedora.dnf for $ME@$HOST:"
+    grep -v "Git tree .* is dirty" "$tmp/eval.err" | tail -n 5 | sed 's/^/    /'
+    return 1
+  fi
+  # The same package may come from a bundle and from setup/dnf-saved.json; count it once.
+  jq '.packages |= unique | .ignore |= unique' "$tmp/decl.json" >"$tmp/decl.u.json" &&
+    mv "$tmp/decl.u.json" "$tmp/decl.json"
+}
+
+decl() { jq -r "$1" "$tmp/decl.json"; }
+
+# Is something providing <name> installed? (works for package names and virtual provides)
+installed() { rpm -q --whatprovides "$1" >/dev/null 2>&1; }
+
+in_list() {
+  local x="$1"
+  shift
+  local y
+  for y in "$@"; do [ "$x" = "$y" ] && return 0; done
+  return 1
+}
+
+matches_glob() {
+  local x="$1"
+  shift
+  local g
+  for g in "$@"; do
+    # shellcheck disable=SC2053
+    [[ $x == $g ]] && return 0
+  done
+  return 1
+}
+
+# Prompts go to the terminal; chosen items go to stdout.
+say() { printf '%s\n' "$*" >/dev/tty; }
+ask() {
+  printf '%s' "$1" >/dev/tty
+  IFS= read -r REPLY </dev/tty || REPLY=""
+}
+
+# choose <verb> <default y|n> <items...>: numbered list, then "<verb> all? [Y/n/p=pick]".
+# p asks for numbers (e.g. "1 3-4"). Prints the chosen items.
+choose() {
+  local verb="$1" def="$2" hint="[Y/n/p=pick]" tok lo hi n ok
+  shift 2
+  local -a items=("$@") picked
+  [ "$def" = n ] && hint="[y/N/p=pick]"
+  for n in "${!items[@]}"; do printf '  %2d  %s\n' $((n + 1)) "${items[$n]}" >/dev/tty; done
+  while true; do
+    ask "$verb all? $hint "
+    case "${REPLY:-$def}" in
+      [Yy]*)
+        printf '%s\n' "${items[@]}"
+        return 0
+        ;;
+      [Nn]*) return 0 ;;
+      [Pp]*) break ;;
+      *) say "  answer y, n or p" ;;
+    esac
+  done
+  while true; do
+    ask "Numbers to ${verb,,} (e.g. 1 3-4, empty = none): "
+    [ -n "$REPLY" ] || return 0
+    picked=()
+    ok=1
+    for tok in ${REPLY//,/ }; do
+      if [[ $tok =~ ^([0-9]+)-([0-9]+)$ ]]; then
+        lo=${BASH_REMATCH[1]} hi=${BASH_REMATCH[2]}
+      elif [[ $tok =~ ^[0-9]+$ ]]; then
+        lo=$tok hi=$tok
+      else
+        ok=0
+        break
+      fi
+      if ((lo < 1 || hi > ${#items[@]} || lo > hi)); then
+        ok=0
+        break
+      fi
+      for ((n = lo; n <= hi; n++)); do picked[n]=1; done
+    done
+    [ "$ok" = 1 ] && break
+    say "  use numbers from 1 to ${#items[@]}, e.g. 1 3-4"
+  done
+  for n in "${!picked[@]}"; do printf '%s\n' "${items[$((n - 1))]}"; done
+}
+
+to_json_array() { jq -R . | jq -sc 'map(select(length > 0))'; }
+
+# --- --save: manual installs -> setup/dnf-saved.json -------------------------------------------
+
+# Names of packages installed with reason "user" after the OS image/installer transactions,
+# still installed and still marked user-installed.
+manual_installs() {
+  local skip top
+  dnf -q history list 2>/dev/null | awk '$1 ~ /^[0-9]+$/' >"$tmp/hist"
+  top=$(awk 'NR==1 {print $1}' "$tmp/hist")
+  [ -n "$top" ] || return 0
+  skip=$(grep -E -- '--config /|--installroot|anaconda|kiwi|builddir' "$tmp/hist" |
+    awk 'BEGIN {m = 0} $1 > m {m = $1} END {print m}')
+  [ "$top" -gt "$skip" ] || return 0
+  dnf -q history info "$((skip + 1))..$top" 2>/dev/null |
+    awk '$1 == "Install" && $3 == "User" {print $2}' | sed -E 's/-[0-9]+:.*//' | sort -u >"$tmp/hist_names"
+  dnf -q repoquery --userinstalled --qf '%{name}\n' 2>/dev/null | sort -u >"$tmp/userinstalled"
+  comm -12 "$tmp/hist_names" "$tmp/userinstalled"
+}
+
+save_candidates() {
+  local -a declared ignore swapped
+  mapfile -t declared < <(decl '.packages[]')
+  mapfile -t ignore < <(decl '.ignore[]')
+  mapfile -t swapped < <(decl '.swaps | keys[]')
+  local p
+  while read -r p; do
+    [ -n "$p" ] || continue
+    in_list "$p" "${declared[@]}" "${swapped[@]}" && continue
+    matches_glob "$p" "${ignore[@]}" && continue
+    echo "$p"
+  done < <(manual_installs)
+}
+
+# Report entries in setup/dnf-saved.json that contradict each other (e.g. after hand edits).
+check_saved() {
+  [ -f "$SAVED" ] || return 0
+  # shellcheck disable=SC2016
+  jq -r '
+    . as $r | ($r.packages.common // []) as $c
+    | (($r.packages // {}) | to_entries[] | select(.key != "common") | .key as $h
+        | .value[] | select(IN($c[])) | "\(.) is in both common and \($h)"),
+      (($r.ignore // {}) | to_entries[] | .key as $h
+        | .value[] | select(IN($c[]) or ($h != "common" and IN(($r.packages[$h] // [])[])))
+        | "\(.) is both saved and ignored (\($h))")' "$SAVED" 2>/dev/null |
+    sed 's/^/[!] dnf: setup\/dnf-saved.json: /'
+}
+
+print_bucket() {
+  local label="$1"
+  shift
+  [ $# -gt 0 ] && printf '  %-16s %s\n' "$label:" "$*" >/dev/tty
+  return 0
+}
+
+bucket_label() {
+  case "$1" in
+    c) echo "common (all Fedora hosts)" ;;
+    h) echo "$HOST only" ;;
+    i) echo "ignored on $HOST" ;;
+    *) echo "skipped" ;;
+  esac
+}
+
+save_legend() {
+  say ""
+  say "  c  save to common (all Fedora hosts)"
+  say "  h  save to $HOST only"
+  say "  i  ignore on $HOST (never ask again)"
+  say "  s  skip (ask next time; Enter does the same)"
+  say "  C/H/I/S  same for this and all remaining (asks to confirm)"
+  say "  r  start over from the first package"
+  say "  q  stop (rest skipped)"
+  say ""
+}
+
+do_save() {
+  load_declared || return 1
+  check_saved
+  local -a cand common=() hostonly=() ignored=() skipped=()
+  mapfile -t cand < <(save_candidates)
+  if [ ${#cand[@]} -eq 0 ]; then
+    echo "[-] dnf: no new manual installs to save"
+    return 0
+  fi
+  if [ "$INTERACTIVE" = 0 ]; then
+    echo "[i] dnf: installed by hand, not in the config (run 'dnf-sync --save' to sort them):"
+    printf '      %s\n' "${cand[@]}"
+    return 0
+  fi
+
+  local p k w=0 idx total=${#cand[@]}
+  local -a choice
+  for p in "${cand[@]}"; do ((${#p} > w)) && w=${#p}; done
+  say ""
+  say "$total package(s) installed by hand aren't in the config."
+  while true; do
+    save_legend
+    choice=()
+    idx=0
+    while [ "$idx" -lt "$total" ]; do
+      p="${cand[$idx]}"
+      printf '[%d/%d] %-*s  [c/h/i/s] ' $((idx + 1)) "$total" "$w" "$p" >/dev/tty
+      IFS= read -r -n1 k </dev/tty || k=q
+      [ -n "$k" ] && printf '\n' >/dev/tty
+      case "$k" in
+        c | h | i | s | "")
+          choice[idx]="${k:-s}"
+          idx=$((idx + 1))
+          ;;
+        C | H | I | S)
+          k="${k,,}"
+          say ""
+          say "Mark these $((total - idx)) as $(bucket_label "$k"):"
+          printf '    %s\n' "${cand[@]:idx}" >/dev/tty
+          ask "Confirm? [y/N] "
+          if [[ "$REPLY" =~ ^[Yy] ]]; then
+            while [ "$idx" -lt "$total" ]; do
+              choice[idx]="$k"
+              idx=$((idx + 1))
+            done
+          else
+            say "  (not applied)"
+          fi
+          say ""
+          ;;
+        r | R)
+          say ""
+          say "-- starting over --"
+          continue 2
+          ;;
+        q | Q)
+          while [ "$idx" -lt "$total" ]; do
+            choice[idx]=s
+            idx=$((idx + 1))
+          done
+          ;;
+        *) say "  press one of the keys listed above" ;;
+      esac
+    done
+
+    common=() hostonly=() ignored=() skipped=()
+    for idx in "${!cand[@]}"; do
+      case "${choice[$idx]}" in
+        c) common+=("${cand[$idx]}") ;;
+        h) hostonly+=("${cand[$idx]}") ;;
+        i) ignored+=("${cand[$idx]}") ;;
+        *) skipped+=("${cand[$idx]}") ;;
+      esac
+    done
+    say ""
+    say "Summary:"
+    print_bucket "common" "${common[@]}"
+    print_bucket "$HOST" "${hostonly[@]}"
+    print_bucket "ignore here" "${ignored[@]}"
+    print_bucket "skipped" "${skipped[@]}"
+    if [ ${#common[@]} -eq 0 ] && [ ${#hostonly[@]} -eq 0 ] && [ ${#ignored[@]} -eq 0 ]; then
+      ask "Nothing to save. Start over? [y/N] "
+      [[ "$REPLY" =~ ^[Yy] ]] && continue
+      echo "[-] dnf: nothing saved (you'll be asked again next time)"
+      return 0
+    fi
+    while true; do
+      ask "Save? [Y/n/r=start over] "
+      case "$REPLY" in
+        "" | [Yy]*) break 2 ;;
+        [Nn]*)
+          echo "[-] dnf: nothing saved (you'll be asked again next time)"
+          return 0
+          ;;
+        [Rr]*)
+          say ""
+          say "-- starting over --"
+          continue 2
+          ;;
+        *) say "  answer y, n or r" ;;
+      esac
+    done
+  done
+
+  # Each package ends up in exactly one place: saving to common clears it from every host list and
+  # every ignore list; saving to this host clears it from this host's ignore list.
+  # shellcheck disable=SC2016
+  jq --arg h "$HOST" \
+    --argjson c "$(printf '%s\n' "${common[@]}" | to_json_array)" \
+    --argjson p "$(printf '%s\n' "${hostonly[@]}" | to_json_array)" \
+    --argjson i "$(printf '%s\n' "${ignored[@]}" | to_json_array)" '
+      .packages = ((.packages // {}) | with_entries(.value -= $c))
+      | .packages.common = ((.packages.common // []) + $c)
+      | .packages[$h] = ((.packages[$h] // []) + $p)
+      | .ignore = ((.ignore // {}) | with_entries(.value -= $c))
+      | .ignore[$h] = (((.ignore[$h] // []) + $i) - $p)
+      | .packages |= map_values(unique)
+      | .ignore |= map_values(unique)' "$SAVED" >"$tmp/saved.json" || {
+    echo "[!] dnf: couldn't update $SAVED"
+    return 1
+  }
+  cp "$tmp/saved.json" "$SAVED"
+  [ ${#common[@]} -gt 0 ] && echo "[✓] dnf: saved to common: ${common[*]}"
+  [ ${#hostonly[@]} -gt 0 ] && echo "[✓] dnf: saved to $HOST: ${hostonly[*]}"
+  [ ${#ignored[@]} -gt 0 ] && echo "[✓] dnf: ignoring on $HOST: ${ignored[*]}"
+  return 0
+}
+
+# --- --apply: repos, installs, removals ---------------------------------------------------------
+
+apply_repos() {
+  local c f
+  dnf -q repo list --enabled 2>/dev/null | awk '{print $1}' >"$tmp/repos"
+  while read -r c; do
+    [ -n "$c" ] || continue
+    grep -qxF "copr:copr.fedorainfracloud.org:${c%%/*}:${c#*/}" "$tmp/repos" && continue
+    if [ "$INTERACTIVE" = 0 ]; then
+      echo "[i] dnf: would enable COPR $c"
+    elif sudo dnf copr enable -y "$c" >/dev/null; then
+      echo "[✓] dnf: enabled COPR $c"
+    else
+      echo "[!] dnf: failed to enable COPR $c"
+    fi
+  done < <(decl '.coprs[]')
+  while read -r f; do
+    [ -n "$f" ] || continue
+    [ -e "/etc/yum.repos.d/$(basename "$f")" ] && continue
+    if [ "$INTERACTIVE" = 0 ]; then
+      echo "[i] dnf: would add repo $f"
+    elif sudo dnf config-manager addrepo --from-repofile="$f" >/dev/null; then
+      echo "[✓] dnf: added repo $f"
+    else
+      echo "[!] dnf: failed to add repo $f"
+    fi
+  done < <(decl '.repoFiles[]')
+}
+
+do_apply() {
+  load_declared || return 1
+  apply_repos
+
+  local -a declared items ticked installs swaps pending
+  local p old new line
+  mapfile -t declared < <(decl '.packages[]')
+
+  # Installs (and renamed packages to swap)
+  declare -A swap_from=()
+  while IFS=$'\t' read -r old new; do
+    [ -n "$old" ] || continue
+    installed "$new" && continue
+    rpm -q "$old" >/dev/null 2>&1 && swap_from[$new]="$old"
+  done < <(decl '.swaps | to_entries[] | "\(.key)\t\(.value)"')
+  items=()
+  for p in "${declared[@]}"; do
+    installed "$p" && continue
+    if [ -n "${swap_from[$p]:-}" ]; then
+      items+=("$p  (replaces ${swap_from[$p]})")
+    else
+      items+=("$p")
+    fi
+  done
+  if [ ${#items[@]} -eq 0 ]; then
+    echo "[-] dnf: all listed packages are installed"
+  elif [ "$INTERACTIVE" = 0 ]; then
+    echo "[i] dnf: listed but not installed:"
+    printf '      %s\n' "${items[@]}"
+  else
+    say ""
+    say "Listed in the config but not installed on $HOST:"
+    mapfile -t ticked < <(choose Install y "${items[@]}")
+    installs=()
+    swaps=()
+    for line in "${ticked[@]}"; do
+      [ -n "$line" ] || continue
+      p="${line%% *}"
+      if [ -n "${swap_from[$p]:-}" ]; then swaps+=("$p"); else installs+=("$p"); fi
+    done
+    for p in "${swaps[@]}"; do
+      if sudo dnf swap -y "${swap_from[$p]}" "$p"; then
+        echo "[✓] dnf: replaced ${swap_from[$p]} with $p"
+      else
+        echo "[!] dnf: swap ${swap_from[$p]} -> $p failed"
+      fi
+    done
+    if [ ${#installs[@]} -gt 0 ]; then
+      if sudo dnf install -y "${installs[@]}"; then
+        echo "[✓] dnf: installed ${installs[*]}"
+      else
+        echo "[!] dnf: install failed"
+      fi
+    fi
+    [ ${#ticked[@]} -lt ${#items[@]} ] && echo "[-] dnf: skipped installs will be offered again next time"
+  fi
+
+  # Removals: in the last applied snapshot, no longer declared, still installed
+  local -a dropped=()
+  if [ -f "$APPLIED" ]; then
+    while read -r p; do
+      [ -n "$p" ] || continue
+      in_list "$p" "${declared[@]}" && continue
+      installed "$p" && dropped+=("$p")
+    done < <(jq -r '.packages[]?' "$APPLIED" 2>/dev/null)
+  fi
+  pending=()
+  if [ ${#dropped[@]} -gt 0 ]; then
+    if [ "$INTERACTIVE" = 0 ]; then
+      echo "[i] dnf: removed from the config but still installed:"
+      printf '      %s\n' "${dropped[@]}"
+      pending=("${dropped[@]}")
+    else
+      say ""
+      say "Dropped from the config but still installed on $HOST:"
+      mapfile -t ticked < <(choose Remove n "${dropped[@]}")
+      if [ ${#ticked[@]} -gt 0 ]; then
+        # No -y: dnf lists what else goes with them and asks.
+        sudo dnf remove "${ticked[@]}" || echo "[!] dnf: remove cancelled or failed"
+      fi
+      for p in "${dropped[@]}"; do
+        installed "$p" && pending+=("$p")
+      done
+      [ ${#pending[@]} -gt 0 ] && echo "[-] dnf: still pending removal (asked again next time): ${pending[*]}"
+    fi
+  fi
+
+  [ "$INTERACTIVE" = 0 ] && return 0
+  mkdir -p "$(dirname "$APPLIED")"
+  printf '%s\n' "${declared[@]}" "${pending[@]}" | to_json_array |
+    jq --arg h "$HOST" '{host: $h, packages: unique}' >"$APPLIED"
+}
+
+case "$MODE" in
+  --save) do_save ;;
+  --apply) do_apply ;;
+  --status)
+    do_save
+    do_apply
+    ;;
+esac

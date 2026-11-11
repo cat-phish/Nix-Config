@@ -211,6 +211,7 @@ binds {
     // Application Launchers
     Mod+Shift+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
     Mod+D hotkey-overlay-title="Dictation (toggle)" { spawn "numen-dictate" "toggle"; }
+    Mod+Delete hotkey-overlay-title="Numen voice control (on/off)" { spawn "numen-mode" "power"; }
     Mod+Space hotkey-overlay-title="Application Launcher: vicinae" { spawn "vicinae" "toggle"; }
     Mod+Semicolon hotkey-overlay-title="Emoji Picker" { spawn "vicinae" "deeplink" "vicinae://launch/core/search-emojis"; }
     // DMS AI Assistant plugin; API key from ~/.ssh/dms.env (see dms.service drop-in in desktop-niri.nix)

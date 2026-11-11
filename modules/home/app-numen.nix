@@ -156,7 +156,9 @@
             notify "Starting..."
           fi
           ;;
-        *) echo "usage: numen-mode [sleep|wake|toggle|pause|restore|status|on|off]" >&2; exit 2 ;;
+        # Start numen if it isn't running, otherwise quit it (Mod+Delete). The tray stays.
+        power) if pgrep -x numen >/dev/null; then "$0" off; else "$0" on; fi ;;
+        *) echo "usage: numen-mode [sleep|wake|toggle|pause|restore|status|on|off|power]" >&2; exit 2 ;;
       esac
     '';
   };

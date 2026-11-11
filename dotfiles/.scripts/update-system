@@ -47,10 +47,12 @@ check_git_status() {
   if [ ! -d "$FLAKE_PATH/.git" ]; then return 0; fi
   cd "$FLAKE_PATH"
 
-  # Refresh the DMS plugin lockfile so GUI plugin installs/updates get committed too.
-  # (Plugin updates happen later in update_dms_plugins, after syncing with the remote.)
-  if [ -x /usr/bin/dms ]; then
-    /usr/bin/dms plugins lock -o "$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json" >/dev/null 2>&1 || true
+  # Save DMS plugin / Vicinae extension installs, updates and uninstalls made in their GUIs
+  # into the repo, so they get committed too.
+  "$FLAKE_PATH/dotfiles/.scripts/save-gui-plugins" || true
+  # Fedora: offer to save packages installed by hand with dnf into setup/dnf-saved.json.
+  if [ -f /etc/fedora-release ]; then
+    "$FLAKE_PATH/dotfiles/.scripts/dnf-sync" --save || true
   fi
   # Check for both modified tracked files and new untracked .nix files
   if [ -n "$(git status --porcelain)" ]; then
@@ -307,21 +309,29 @@ update_appimages() {
 }
 
 # Update DMS plugins (nothing else does) and record the new commits in the lockfile.
-# Runs after git_sync_remote: first install plugins the other machine added (restore, no
-# prune) so the lock doesn't drop them, then update everything, then lock. git_commit_push
-# commits the lockfile; other machines restore those exact commits on their next switch.
-# (update-home / nix-rebuild-* only lock, so a plain rebuild never pulls plugin updates.)
+# Runs after git_sync_remote: save this machine's GUI changes, sync to the lockfile (installing
+# what the other machine added and removing what it uninstalled), update everything, then lock.
+# git_commit_push commits the lockfile; other machines restore those exact commits on their next
+# switch. (update-home / nix-rebuild-* only save GUI changes, so a plain rebuild never pulls
+# plugin updates.)
 update_dms_plugins() {
   [ -x /usr/bin/dms ] || return 0
   local lockfile="$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json"
+  local applied="${XDG_STATE_HOME:-$HOME/.local/state}/dms-plugins-applied.json"
   echo "Updating DMS plugins..."
-  /usr/bin/dms plugins restore "$lockfile" >/dev/null 2>&1 || true
+  "$FLAKE_PATH/dotfiles/.scripts/save-gui-plugins" --dms >/dev/null 2>&1 || true
+  if ! /usr/bin/dms plugins restore --prune "$lockfile" >/dev/null 2>&1; then
+    echo "[!] DMS plugin sync failed (offline?); keeping current plugins"
+    return 0
+  fi
   if timeout 300 /usr/bin/dms plugins update --all >/dev/null 2>&1; then
     echo "[✓] DMS plugins updated"
   else
     echo "[!] DMS plugin update failed (offline?); keeping current versions"
   fi
-  /usr/bin/dms plugins lock -o "$lockfile" >/dev/null 2>&1 || true
+  if /usr/bin/dms plugins lock -o "$lockfile" >/dev/null 2>&1; then
+    install -Dm644 "$lockfile" "$applied"
+  fi
 }
 
 # Commit flake.lock if changed, and push any unpushed commits
@@ -428,6 +438,8 @@ case "$OS_ID" in
   fedora)
     echo "Applying Fedora DNF Upgrade..."
     sudo dnf upgrade --refresh -y
+    # Install/remove dnf packages to match my.fedora.dnf (asks first; see docs/dnf.md)
+    "$FLAKE_PATH/dotfiles/.scripts/dnf-sync" --apply || true
 
     echo "Updating Zsh Zinit and its Plugins..."
     sudo -u "$ACTUAL_USER" zsh <<-EOF

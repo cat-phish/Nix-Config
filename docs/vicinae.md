@@ -72,7 +72,7 @@ synced like the rest. The new line is committed through `update-system`'s "uncom
 prompt on its next run. Extensions in neither store (local or development builds) are left alone.
 
 **Adding one:** install it from Vicinae's in-app store and it's picked up on the next
-`update-system` (or `vicinae-extensions`) run. Or add it by hand:
+`save-gui-plugins`, rebuild, `update-system` or `vicinae-extensions` run. Or add it by hand:
 
 1. Find its author and name.
    - **Raycast:** from the store URL, `https://www.raycast.com/<author>/<name>`.
@@ -80,8 +80,11 @@ prompt on its next run. Extensions in neither store (local or development builds
 2. Add a line to `dotfiles/.config/vicinae/extensions.conf`, e.g. `raycast:ricoberger/gitmoji`.
 3. Run `vicinae-extensions` (or wait for the next `update-system`), then commit.
 
-**Removing one:** delete its line and run `vicinae-extensions`. Uninstalling it only in the GUI
-doesn't stick: the line is still in `extensions.conf`, so the next run installs it again.
+**Removing one:** uninstall it in the Vicinae GUI and run `save-gui-plugins` (the rebuild and
+update scripts run it too). That drops its line from `extensions.conf`, and the next
+`vicinae-extensions` run on your other machines removes it there. Or delete the line by hand and run
+`vicinae-extensions`. GUI uninstalls are spotted by comparing against
+`~/.local/state/vicinae-extensions-applied`, the list installed after the last run.
 
 **Updating:** automatic. To update right away, run `vicinae-extensions`. To force a reinstall,
 delete the extension's `.update-system-version` file first.

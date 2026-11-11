@@ -15,7 +15,7 @@
     sops-nix.url = "github:Mic92/sops-nix";
     nvim-config.url = "github:cat-phish/Neovim";
     emacs-config = {
-      url = "git+ssh://git@github.com/cat-phish/Emacs.git";
+      url = "github:cat-phish/Emacs";
       flake = false; # Treat as a source repo, not a flake
     };
     kmonad = {
@@ -28,7 +28,7 @@
     };
     nix-flatpak.url = "github:gmodena/nix-flatpak";
     # Dux Shell (formerly DankMaterialShell) and its greeter, for the NixOS hosts.
-    # Fedora gets dms from the avengemedia/dms COPR instead.
+    # Fedora gets dms from the duxlabs/dms COPR instead (declared in desktop-niri.nix).
     dms.url = "github:duxlabs-dev/dux-shell";
     dms-greeter.url = "github:duxlabs-dev/dux-greeter";
     talon-nix.url = "github:nix-community/talon-nix";
@@ -134,7 +134,7 @@
           nix-flatpak.homeManagerModules.nix-flatpak
         ];
         extraSpecialArgs = {
-          inherit inputs pkgs-stable nvim-config emacs-config talon-nix isNixos;
+          inherit inputs pkgs-stable nvim-config emacs-config talon-nix isNixos host;
         };
       };
   in {

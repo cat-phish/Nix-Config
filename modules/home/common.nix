@@ -19,7 +19,18 @@
     ./app-syncthing.nix
     ./app-numen.nix
     ./app-tailscale.nix # Fedora only (guarded inside)
+    ./fedora-dnf.nix # dnf packages for the Fedora hosts (docs/dnf.md)
   ];
+
+  # dnf packages every Fedora host gets (applied by dnf-sync; ignored on NixOS).
+  my.fedora.dnf = {
+    coprs = ["gagbo/kitty-latest"];
+    packages = [
+      "zsh"
+      "kitty"
+      "wireguard-tools"
+    ];
+  };
 
   # Fedora: the login shell stays dnf's /usr/bin/zsh (init.sh runs chsh) so logins
   # survive a broken /nix, but everything else uses Nix zsh (dev-environment.nix).

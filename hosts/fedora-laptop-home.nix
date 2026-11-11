@@ -10,6 +10,9 @@
   my.niri.deviceConfig = ../dotfiles/.config/niri/laptop-config.kdl;
   my.niri.dmsSettings = "laptop-settings.json";
 
+  # Fingerprint sudo (init.sh adds pam_fprintd to /etc/pam.d/sudo)
+  my.fedora.dnf.packages = ["fprintd" "fprintd-pam"];
+
   home.packages = with pkgs; [
     firefox
     kmonad

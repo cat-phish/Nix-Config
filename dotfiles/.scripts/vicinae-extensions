@@ -6,8 +6,18 @@
 # Extensions it installed carry a .update-system-version stamp; only those are pruned when removed
 # from the conf. Extensions installed from Vicinae's in-app stores are added to the conf
 # automatically (Vicinae never updates them itself). Local/dev extensions are left alone.
+# An extension it installed that was uninstalled in the Vicinae GUI is removed from the conf too
+# (so the uninstall carries over to other machines): ~/.local/state/vicinae-extensions-applied lists
+# what was installed after the last run, and anything listed there that's gone was uninstalled here.
+#
+#   vicinae-extensions          install/update/prune, saving GUI installs/uninstalls first
+#   vicinae-extensions --save   only save GUI installs/uninstalls to the conf (save-gui-plugins)
 # Always exits 0.
 set -uo pipefail
+
+SAVE_ONLY=0
+[ "${1:-}" = "--save" ] && SAVE_ONLY=1
+APPLIED="${XDG_STATE_HOME:-$HOME/.local/state}/vicinae-extensions-applied"
 
 FLAKE_PATH="${FLAKE_PATH:-$HOME/.nix}"
 CONF="$FLAKE_PATH/dotfiles/.config/vicinae/extensions.conf"
@@ -108,6 +118,23 @@ update_one() {
   fi
 }
 
+# Extensions uninstalled in the GUI since the last run: drop their lines from extensions.conf
+if [ -f "$APPLIED" ]; then
+  while IFS= read -r name; do
+    [ -n "$name" ] || continue
+    [ -e "$EXT_DIR/$name" ] && continue
+    before=$(cat "$CONF")
+    awk -v n="$name" '{
+      l = $0; sub(/#.*/, "", l); gsub(/[[:space:]]/, "", l)
+      if (l ~ /^(raycast|vicinae):[^\/]+\/[^\/]+$/) { split(l, a, "/"); if (a[2] == n) next }
+      print
+    }' <<<"$before" >"$CONF"
+    if [ "$before" != "$(cat "$CONF")" ]; then
+      echo "[✓] Removed $name from extensions.conf (uninstalled in the Vicinae GUI)"
+    fi
+  done <"$APPLIED"
+fi
+
 # Read extensions.conf into "store author name" entries
 entries=()
 while IFS= read -r raw || [ -n "$raw" ]; do
@@ -122,7 +149,11 @@ while IFS= read -r raw || [ -n "$raw" ]; do
   wanted["${BASH_REMATCH[3]}"]=1
 done <"$CONF"
 
-echo "Updating Vicinae extensions..."
+if [ "$SAVE_ONLY" = 1 ]; then
+  echo "Saving Vicinae extensions installed/uninstalled in the GUI..."
+else
+  echo "Updating Vicinae extensions..."
+fi
 
 # Adopt extensions installed from Vicinae's in-app stores (no stamp): add them to
 # extensions.conf so they get updated and synced like the rest. Vicinae itself never
@@ -161,6 +192,21 @@ for dir in "$EXT_DIR"/*/; do
   echo "[✓] Added $store:$author/$name to extensions.conf (installed from the Vicinae GUI)"
 done
 
+# Record what's installed now, so a later GUI uninstall can be told apart from an extension
+# that was just added on the other machine and isn't installed here yet.
+save_applied() {
+  local name
+  mkdir -p "$(dirname "$APPLIED")"
+  for name in "${!wanted[@]}"; do
+    if [ -e "$EXT_DIR/$name" ] || [ -n "${gui_copy[$name]:-}" ]; then echo "$name"; fi
+  done | sort >"$APPLIED"
+}
+
+if [ "$SAVE_ONLY" = 1 ]; then
+  save_applied
+  exit 0
+fi
+
 for entry in "${entries[@]}"; do
   read -r store author name <<<"$entry"
   update_one "$store" "$author" "$name"
@@ -188,6 +234,8 @@ for dir in "$EXT_DIR"/*/; do
     changed=1
   fi
 done
+
+save_applied
 
 if [ "$changed" = 1 ] && systemctl --user is-active --quiet vicinae 2>/dev/null; then
   systemctl --user restart vicinae && echo "[✓] Restarted vicinae"

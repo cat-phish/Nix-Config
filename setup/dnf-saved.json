@@ -1,0 +1,24 @@
+{
+  "packages": {
+    "common": [
+      "chromium",
+      "clang",
+      "golang",
+      "libxkbcommon-devel",
+      "nheko",
+      "obs-studio",
+      "python3-pip",
+      "rpi-imager",
+      "scdoc",
+      "snapd",
+      "zoom"
+    ],
+    "fedora-desktop": [],
+    "fedora-laptop": []
+  },
+  "ignore": {
+    "common": [],
+    "fedora-desktop": [],
+    "fedora-laptop": []
+  }
+}

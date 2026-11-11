@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# Save plugins/extensions installed, updated or uninstalled from app GUIs into ~/.nix, without
+# running update-system. Commit the result yourself (or let update-system's prompt do it).
+#   DMS:     dotfiles/.config/dms/plugins.lock.json
+#   Vicinae: dotfiles/.config/vicinae/extensions.conf (via vicinae-extensions --save)
+#
+#   save-gui-plugins                        save DMS and Vicinae
+#   save-gui-plugins --dms                  DMS only (no network)
+#   save-gui-plugins --dms-pending <lock>   exit 0 if this machine has DMS GUI changes that <lock>
+#                                           doesn't have, 1 if not, 2 if it can't tell (used by the
+#                                           Home Manager switch before it prunes)
+#
+# The rebuild/update scripts run this first. On switch, plugins missing from the lockfile are
+# removed (restore --prune), so a GUI uninstall on one machine carries over to the others.
+#
+# How GUI changes are told apart from changes made on the other machine: after each successful
+# restore the applied lockfile is copied to ~/.local/state/dms-plugins-applied.json. Compared with
+# that copy, a plugin that's gone was uninstalled here, a new one was installed here, and a
+# different commit was updated here. Plugins added or removed in the lockfile by the other machine
+# (not applied here yet) are left alone, so the next switch syncs them.
+set -uo pipefail
+
+FLAKE_PATH="${FLAKE_PATH:-$HOME/.nix}"
+DMS_LOCK="$FLAKE_PATH/dotfiles/.config/dms/plugins.lock.json"
+DMS_APPLIED="${XDG_STATE_HOME:-$HOME/.local/state}/dms-plugins-applied.json"
+
+find_dms() {
+  local c
+  for c in "$(command -v dms 2>/dev/null)" /usr/bin/dms /run/current-system/sw/bin/dms \
+    "/etc/profiles/per-user/${USER:-$(id -un)}/bin/dms"; do
+    if [ -n "$c" ] && [ -x "$c" ]; then
+      echo "$c"
+      return 0
+    fi
+  done
+  return 1
+}
+
+# Merge this machine's GUI changes into a lockfile. $l: lockfile, $c: installed now, $s: applied copy.
+# shellcheck disable=SC2016
+MERGE='
+  ($l.plugins // {}) as $L | ($c.plugins // {}) as $C | ($s.plugins // {}) as $S
+  | ($L | with_entries(select(($S[.key] != null and $C[.key] == null) | not))) as $kept
+  | ($C | with_entries(select(
+        ($L[.key] == null and $S[.key] == null)
+        or ($L[.key] != null and $S[.key] != null
+            and .value.commit != $S[.key].commit and .value.commit != $L[.key].commit)))) as $local
+  | $l + {plugins: (($kept + $local) | to_entries | sort_by(.key) | from_entries)}'
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+# Write the merged lockfile for <lockfile> to $tmp/merged.json. Returns 2 if it can't.
+dms_merge() {
+  local lock="$1" dms applied
+  dms=$(find_dms) || return 2
+  [ -f "$lock" ] || return 2
+  command -v jq >/dev/null 2>&1 || return 2
+  "$dms" plugins lock -o "$tmp/installed.json" >/dev/null 2>&1 || return 2
+  applied="$DMS_APPLIED"
+  if [ ! -f "$applied" ]; then
+    # Never synced on this machine: only save new installs, assume nothing was removed.
+    echo '{}' >"$tmp/none.json"
+    applied="$tmp/none.json"
+  fi
+  jq -n --slurpfile l "$lock" --slurpfile c "$tmp/installed.json" --slurpfile s "$applied" \
+    "\$l[0] as \$l | \$c[0] as \$c | \$s[0] as \$s | $MERGE" >"$tmp/merged.json" 2>/dev/null || return 2
+}
+
+same_json() { [ "$(jq -S . "$1")" = "$(jq -S . "$2")" ]; }
+
+dms_save() {
+  dms_merge "$DMS_LOCK"
+  case $? in
+    0) ;;
+    *)
+      echo "[-] DMS: skipped (dms or jq not found, or 'dms plugins lock' failed)"
+      return 0
+      ;;
+  esac
+  if same_json "$DMS_LOCK" "$tmp/merged.json"; then
+    echo "[-] DMS plugins: nothing new to save"
+    return 0
+  fi
+  # shellcheck disable=SC2016
+  jq -rn --slurpfile a "$DMS_LOCK" --slurpfile b "$tmp/merged.json" '
+    ($a[0].plugins // {}) as $A | ($b[0].plugins // {}) as $B
+    | (($B | keys) - ($A | keys))[] as $k | "[✓] DMS: saved install of \($k)"' 2>/dev/null
+  # shellcheck disable=SC2016
+  jq -rn --slurpfile a "$DMS_LOCK" --slurpfile b "$tmp/merged.json" '
+    ($a[0].plugins // {}) as $A | ($b[0].plugins // {}) as $B
+    | ((($A | keys) - ($B | keys))[] | "[✓] DMS: saved uninstall of \(.)"),
+      (($A | keys)[] as $k | select($B[$k] != null and $B[$k].commit != $A[$k].commit)
+        | "[✓] DMS: saved update of \($k)")' 2>/dev/null
+  cp "$tmp/merged.json" "$DMS_LOCK"
+}
+
+case "${1:-}" in
+  --dms-pending)
+    [ -n "${2:-}" ] || { echo "usage: save-gui-plugins --dms-pending <lockfile>" >&2; exit 2; }
+    dms_merge "$2" || exit 2
+    if same_json "$2" "$tmp/merged.json"; then exit 1; fi
+    exit 0
+    ;;
+  --dms)
+    dms_save
+    ;;
+  "")
+    dms_save
+    "$FLAKE_PATH/dotfiles/.scripts/vicinae-extensions" --save
+    ;;
+  *)
+    echo "usage: save-gui-plugins [--dms | --dms-pending <lockfile>]" >&2
+    exit 2
+    ;;
+esac
+exit 0
