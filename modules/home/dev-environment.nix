@@ -59,7 +59,6 @@
         };
       }))
       pnpm
-      pre-commit
       ripgrep
       uv
       vscode
