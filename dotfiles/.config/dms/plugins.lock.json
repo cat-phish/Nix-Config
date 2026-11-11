@@ -4,7 +4,7 @@
     "activateLinux": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "activateLinux",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
     },
     "aiAssistant": {
       "repo": "https://github.com/devnullvoid/dms-ai-assistant",
@@ -12,7 +12,7 @@
     },
     "aiOverviewControl": {
       "repo": "https://github.com/bernardopg/AiOverviewControl",
-      "commit": "076194c73bff238c855dc74e54cb1783f3bac594"
+      "commit": "cce8fff14085cad8ba72487f650a621a02e8005b"
     },
     "aibou": {
       "repo": "https://github.com/satoshoe-dev/aibou",
@@ -31,7 +31,7 @@
     "breathing": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "breathing",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
     },
     "cast": {
       "repo": "https://github.com/Conava/dux-plugins",
@@ -45,17 +45,17 @@
     "dankActions": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankActions",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
     },
     "dankBatteryAlerts": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankBatteryAlerts",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
     },
     "dankClight": {
       "repo": "https://github.com/duxlabs-dev/dux-plugins",
       "path": "DankClight",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
     },
     "dankConsoleSteam": {
       "repo": "https://github.com/JessVolet/DankConsoleModeWithSteam",
@@ -64,17 +64,17 @@
     "dankDesktopWeather": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankDesktopWeather",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
     },
     "dankHooks": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankHooks",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
     },
     "dankPomodoroTimer": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankPomodoroTimer",
-      "commit": "70e926ea529c729c7e2368e096046295f0d90d48"
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
     },
     "dankRssWidget": {
       "repo": "https://github.com/BrendonJL/dms-rss-widget",
@@ -149,7 +149,7 @@
     "mediaDownloader": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "mediaDownloader",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
     },
     "modernClock": {
       "repo": "https://github.com/beefsizzle/ModernClockDMS",
@@ -175,7 +175,7 @@
     "ocrScanner": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "ocrScanner",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
     },
     "pokeDash": {
       "repo": "https://github.com/samgrande/PokeDash",
@@ -194,7 +194,7 @@
     "quickCapture": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "quickCapture",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
     },
     "radioAtlasLite": {
       "repo": "https://github.com/alamin147/RadioAtlasLite",
@@ -211,7 +211,7 @@
     "takeABreak": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "takeABreak",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
     },
     "timeUntil": {
       "repo": "https://github.com/fdmarcin/TimeUntil",
