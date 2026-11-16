@@ -45,6 +45,7 @@
       # gcc
       herdr
       herdr-core
+      jdk17
       jq
       # libgcc
       llvm
