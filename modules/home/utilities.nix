@@ -4,6 +4,7 @@
   lib,
   pkgs,
   pkgs-stable,
+  isNixos,
   ...
 }: {
   # Plasma Manager KDE Configuration
@@ -22,7 +23,6 @@
       caligula # iso to disk burning, dd alternative
       chafa
       chirp # ham radio programmer
-      chromium
       cinny-unwrapped
       deskreen # screen mirroring
       # dropbox
@@ -75,6 +75,35 @@
       # netbird-ui
       rssguard
     ]);
+
+  # Avoid the desktop wallet: libsecret can stall Chromium under niri.
+  # The basic store does not protect saved credentials with a wallet key.
+  programs.chromium = {
+    enable = true;
+    commandLineArgs = ["--password-store=basic"];
+  };
+
+  # Fedora's launcher uses /usr/bin directly, bypassing the Nix wrapper.
+  xdg.desktopEntries.chromium-browser = lib.mkIf (!isNixos) {
+    name = "Chromium Web Browser";
+    genericName = "Web Browser";
+    exec = "/usr/bin/chromium-browser --password-store=basic %U";
+    icon = "chromium-browser";
+    terminal = false;
+    categories = ["Network" "WebBrowser"];
+    mimeType = ["text/html" "application/xhtml+xml" "x-scheme-handler/http" "x-scheme-handler/https"];
+    settings.StartupWMClass = "Chromium-browser";
+    actions = {
+      new-window = {
+        name = "Open a New Window";
+        exec = "/usr/bin/chromium-browser --password-store=basic --new-window %U";
+      };
+      new-private-window = {
+        name = "Open a New Private Window";
+        exec = "/usr/bin/chromium-browser --password-store=basic --incognito %U";
+      };
+    };
+  };
 
   services.flatpak = {
     enable = true;

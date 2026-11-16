@@ -35,6 +35,7 @@
       # clang
       clang-tools
       claude-code
+      chromedriver
       docker-compose
       eza # ls replacement
       fd
@@ -61,6 +62,7 @@
       }))
       pnpm
       ripgrep
+      (python3.withPackages (ps: [ps.selenium]))
       trivy
       uv
       vscode
