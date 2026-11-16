@@ -45,7 +45,7 @@
       # gcc
       herdr
       herdr-core
-      jdk17
+      # jdk17
       jq
       # libgcc
       llvm
@@ -94,6 +94,11 @@
 
   programs.lazygit = {
     enable = true;
+  };
+
+  programs.java = {
+    enable = true;
+    package = pkgs.jdk17;
   };
 
   programs.emacs = {
