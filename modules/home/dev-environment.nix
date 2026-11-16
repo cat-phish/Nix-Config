@@ -61,6 +61,7 @@
       }))
       pnpm
       ripgrep
+      trivy
       uv
       vscode
       vim
