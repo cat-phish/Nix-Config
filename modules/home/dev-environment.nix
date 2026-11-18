@@ -113,7 +113,11 @@
     #   withXwidgets = true;
     #   withGTK3 = true;
     # };
-    extraPackages = epkgs: with epkgs; []; # Add any additional packages if desired
+    # Packages that need native parts built by Nix. Everything else comes from
+    # package.el in the emacs-config repo.
+    extraPackages = epkgs: with epkgs; [
+      pdf-tools # ships a prebuilt epdfinfo server, so pdf-tools never compiles it (or runs sudo dnf)
+    ];
   };
   services.emacs.enable = true;
 
