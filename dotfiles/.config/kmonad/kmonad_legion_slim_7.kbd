@@ -261,10 +261,10 @@
 ;; this layer is for commonly used shortcuts and motions when typing or coding
 (deflayer d-cuts
    XX  XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX  XX  @min    XX   XX   XX   XX
-   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   @atab          XX   XX   XX   XX
+   @tild XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   @atab          XX   XX   XX   XX
   @atab  XX  @fw   XX   XX   XX   XX   XX   XX   XX @prv @dkl @dkr  @tild         @eml @msg @dis XX
   @ectl @sfcp  XX   XX  @tmx @rmx  lft  down up rght @tabp @tabn    @acr          @sch @gpt @git
-  lsft     XX  @cmt  @cpy @pst @bw  @nxt @lsd @d1  @d2  @d3         XX            @web @red @twi XX
+  lsft     XX  XX    @cpy @pst @bw  @nxt @lsd @d1  @d2  @d3         XX            @web @red @twi XX
   lctl lmet lalt            @aspc                     XX    XX      @cup           XX        XX
                                                                @clf @cdn  @crt
 )
@@ -320,7 +320,7 @@
  C-esc C-f1 C-f2 C-f3 C-f4 C-f5 C-f6 C-f7 C-f8 C-f9 C-f10 C-f11 C-f12 C-ins C-ssrq C-del C-home C-end C-pgup C-pgdn
  C-grv  C-1  C-2  C-3  C-4  C-5  C-6  C-7  C-8  C-9  C-0  C--  C-=   C-bspc     nlck   C-kp/ C-kp*  C-kp-
  C-tab   C-q  C-w  C-e  C-r  C-t  C-y  C-u  C-i  C-o  C-p C-[ C-]    C-\\       C-kp7  C-kp8 C-kp9  C-kp+
-  XX      @c-a  C-s  C-d  C-f  C-g  C-h  C-j  C-k  C-l  C-;  C-'      C-ret      C-kp4  C-kp5 C-kp6
+  XX      C-a   C-s  C-d  C-f  C-g  C-h  C-j  C-k  C-l  C-;  C-'      C-ret      C-kp4  C-kp5 C-kp6
   _        C-z  C-x  C-c  C-v  C-b  C-n  C-m  C-,  C-.  C-/       _             C-kp1  C-kp2 C-kp3  C-kprt
   _    _    _              C-spc                    _     _         @cup        C-kp0      C-kp.
                                                                @clf @cdn @crt

@@ -238,7 +238,7 @@ testing te
 ;; this layer is for commonly used shortcuts and motions when typing or coding
 (deflayer d-cuts
    XX  XX   XX   XX   XX   XX   XX   XX   XX   XX    XX   XX   XX   XX   XX  @min
-   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      @atab XX
+   @tild XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX   XX      @atab XX
  @atab   XX   @fw  XX   XX   XX   XX   XX   XX   XX   @prv @dkl @dkr   @tild XX
  @ectl  @sfcp  XX   XX  @tmx @rmx  lft  down  up  rght @tabp @tabn     @acr XX
    lsft    XX   XX @cpy  @pst @bw @nxt @lsd  @d1  @d2   @d3    XX    @cup  XX
