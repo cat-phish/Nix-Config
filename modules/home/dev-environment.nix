@@ -162,6 +162,7 @@
     ".wezterm.lua" = {
       source = ../../dotfiles/.wezterm.lua;
     };
+    ".zshenv".source = ../../dotfiles/.zshenv;
     ".zshrc".source = ../../dotfiles/.zshrc;
   };
 }
