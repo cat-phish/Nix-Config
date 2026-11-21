@@ -3,48 +3,50 @@
 @cancel no:
 
 # Transcribe a sentence
-# For example, "plain say please type this".
+# Say "plain say", pause for the beep, talk, pause: Voxtype types it
+# (dictate say, modules/home/app-dictation.nix). If you keep talking straight
+# after "say", numen types its own (less accurate) transcription instead.
 @transcribe plain say: set numen_fmt echo normal \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say normal
 
 # Transcribe a sentence formatted...
 
 # With the first letter uppercase
 @transcribe upper say: set numen_fmt echo sentence \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say sentence
 # With Each First Letter Uppercase
 @transcribe title say: set numen_fmt echo title \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say title
 # with_underscrores_inbetween
 @transcribe snake say: set numen_fmt echo snake \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say snake
 # with-dashes-inbetween
 @transcribe kebab say: set numen_fmt echo dash \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say dash
 # with.dots.inbetween
 @transcribe dot say: set numen_fmt echo dot \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say dot
 # with, commas, inbetween
 @transcribe list say: set numen_fmt echo list \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say list
 # with/slashes/inbetween
 @transcribe path say: set numen_fmt echo path \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say path
 # allsmashedtogether
 @transcribe smash say: set numen_fmt echo smash \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say smash
 # camelCase
 @transcribe camel say: set numen_fmt echo camel \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say camel
 # PascalCase
 @transcribe pascal say: set numen_fmt echo pascal \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say pascal
 # dot.camelCase
 @transcribe dot camel say: set numen_fmt echo dotcamel \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say dotcamel
 # dot.PascalCase
 @transcribe dot pascal say: set numen_fmt echo dotpascal \
-	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
+	eval dictate say dotpascal
 # (You can also do "shout scribe" etc.)
 
 # Erase the transcription
@@ -66,6 +68,6 @@ change: run /etc/numen/scripts/menu change | numenc & \
 huh:
 
 # Dictation (Voxtype, modules/home/app-dictation.nix): say "dictate", then
-# talk; "stop dictating" (or Mod+D) types it. Meanwhile numen only listens for
+# talk; a 2 s pause, "stop dictating" or Mod+D types it. Meanwhile numen only listens for
 # "stop dictating". Backgrounded so numen can process the mode change.
 dictate: run dictate start &
