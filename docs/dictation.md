@@ -12,8 +12,7 @@ Everything is in `modules/home/app-dictation.nix`, imported by `modules/home/com
 |---|---|
 | **hold F9** | let go (push-to-talk) |
 | **Mod+D** | a 2 s pause, or **Mod+D** |
-| say **"dictate"** (numen running) | a 2 s pause, or say **"stop dictating"** |
-| say **"plain say"** (or snake say, camel say, ...), wait for the beep | a 2 s pause |
+| say **"dictate"** or **"say"** (numen running), wait for the panel | a 2 s pause, or say **"stop dictating"** |
 
 Any start works with any stop. A beep plays at start and stop, and a waveform panel shows at
 the bottom of the screen while recording. The text is typed about half a second after you stop.
@@ -29,14 +28,16 @@ is removed from the end of the text, since Voxtype hears it too.
 
 ### Numen "say"
 
-The `say` phrases in `voice.phrases` (plain, upper, title, snake, kebab, dot, list, path, smash,
-camel, pascal, dot camel, dot pascal) run `dictate say <format>`. Numen only acts once you
-pause, so say the phrase, pause for the beep, then talk; Voxtype types it after your next
-pause. Each format is a Voxtype profile (`[profiles.<format>]`) whose post-process command is
-`voxtype-format <format>`. Code formats (snake, camel...) drop case and punctuation first.
+"Say" is the same as "dictate". Numen only acts once you pause, so say "say", wait for the
+panel, then talk. Words said straight after "say", before the panel shows, go to numen as
+commands. The phrase can't use `@transcribe` to swallow them, because numen doesn't run the
+action when nothing follows the phrase.
 
-If you keep talking straight after "say" without pausing, numen has already heard the words
-itself, so it types its own (less accurate) transcription, as before.
+A version that took "say <words>" in one breath (a rolling mic buffer with its own copy of the
+model) worked but showed no panel, so it was dropped; it's in git history.
+
+The formatted phrases ("plain say", "snake say", "camel say"...) use numen's own transcription
+(Vosk), as before.
 
 From a terminal:
 
@@ -45,7 +46,6 @@ dictate            # start, or stop if recording (Mod+D)
 dictate start      # start (numen "dictate")
 dictate stop       # stop and type (numen "stop dictating")
 dictate cancel     # stop without typing
-dictate say snake  # what numen's "snake say" runs
 voxtype status     # idle / recording / transcribing
 journalctl --user -fu voxtype
 ```

@@ -2,51 +2,56 @@
 # For example, "four down no five down" would just do "five down".
 @cancel no:
 
-# Transcribe a sentence
-# Say "plain say", pause for the beep, talk, pause: Voxtype types it
-# (dictate say, modules/home/app-dictation.nix). If you keep talking straight
-# after "say", numen types its own (less accurate) transcription instead.
+# Say "say", pause until the Voxtype panel shows, talk; it types after a 2 s
+# pause (modules/home/app-dictation.nix). Words said straight after "say",
+# before the panel, go to numen as commands. Not @transcribe: numen doesn't run
+# that action when nothing follows. Backgrounded so numen can process the mode
+# change.
+say: run dictate start &
+
+# Transcribe a sentence with numen's own recognizer (Vosk)
+# For example, "plain say please type this".
 @transcribe plain say: set numen_fmt echo normal \
-	eval dictate say normal
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 
 # Transcribe a sentence formatted...
 
 # With the first letter uppercase
 @transcribe upper say: set numen_fmt echo sentence \
-	eval dictate say sentence
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # With Each First Letter Uppercase
 @transcribe title say: set numen_fmt echo title \
-	eval dictate say title
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # with_underscrores_inbetween
 @transcribe snake say: set numen_fmt echo snake \
-	eval dictate say snake
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # with-dashes-inbetween
 @transcribe kebab say: set numen_fmt echo dash \
-	eval dictate say dash
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # with.dots.inbetween
 @transcribe dot say: set numen_fmt echo dot \
-	eval dictate say dot
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # with, commas, inbetween
 @transcribe list say: set numen_fmt echo list \
-	eval dictate say list
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # with/slashes/inbetween
 @transcribe path say: set numen_fmt echo path \
-	eval dictate say path
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # allsmashedtogether
 @transcribe smash say: set numen_fmt echo smash \
-	eval dictate say smash
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # camelCase
 @transcribe camel say: set numen_fmt echo camel \
-	eval dictate say camel
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # PascalCase
 @transcribe pascal say: set numen_fmt echo pascal \
-	eval dictate say pascal
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # dot.camelCase
 @transcribe dot camel say: set numen_fmt echo dotcamel \
-	eval dictate say dotcamel
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # dot.PascalCase
 @transcribe dot pascal say: set numen_fmt echo dotpascal \
-	eval dictate say dotpascal
+	pen /etc/numen/scripts/tweak; /etc/numen/scripts/transcripts | head -n 1
 # (You can also do "shout scribe" etc.)
 
 # Erase the transcription
