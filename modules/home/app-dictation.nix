@@ -2,6 +2,7 @@
   config,
   lib,
   pkgs,
+  isNixos,
   ...
 }:
 # Dictation tools on trial alongside numen-dictate (docs/dictation.md).
@@ -134,6 +135,9 @@ in {
       # Text is typed after you stop: nixpkgs builds voxtype without
       # parakeet.streaming (live typing). Parakeet int8 on CPU is quick anyway.
       ExecStart = "${voxtype}/bin/voxtype daemon";
+      # Fedora: Nix alsa-lib can't find dnf's PipeWire ALSA plugin ("Cannot open
+      # shared library libasound_module_pcm_pipewire.so"), so no mic.
+      Environment = lib.mkIf (!isNixos) ["ALSA_PLUGIN_DIR=${pkgs.pipewire}/lib/alsa-lib"];
       Restart = "on-failure";
       RestartSec = 3;
     };
