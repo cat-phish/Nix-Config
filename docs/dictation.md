@@ -10,15 +10,15 @@ Everything is in `modules/home/app-dictation.nix`, imported by `modules/home/com
 
 | Start | Stop and type |
 |---|---|
-| **hold Right Ctrl** | let go (push-to-talk) |
-| **Mod+D** | **Mod+D**, or a 2 s pause |
+| **hold F9** | let go (push-to-talk) |
+| **Mod+D** | a 2 s pause, or **Mod+D** |
 | say **"dictate"** (numen running) | a 2 s pause, or say **"stop dictating"** |
 | say **"plain say"** (or snake say, camel say, ...), wait for the beep | a 2 s pause |
 
 Any start works with any stop. A beep plays at start and stop, and a waveform panel shows at
 the bottom of the screen while recording. The text is typed about half a second after you stop.
 A recording stops by itself after 10 minutes and types what it has. Filler words (uh, um...)
-are dropped, and recordings with no speech (Right Ctrl used for a shortcut) are thrown away.
+are dropped, and recordings with no speech (an accidental F9 tap) are thrown away.
 
 The 2 s pause stop only applies to recordings started with Mod+D or by voice
 (`external_trigger_silence_timeout_secs`); push-to-talk records until you let go.
@@ -54,7 +54,7 @@ journalctl --user -fu voxtype
 
 - **`voxtype` user service.** Started at login. It keeps the model loaded, so there's no wait
   at start.
-- **Push-to-talk.** Voxtype's own evdev hotkey (`hotkey.key = "RIGHTCTRL"`), which needs the
+- **Push-to-talk.** Voxtype's own evdev hotkey (`hotkey.key = "F9"`), which needs the
   user in the `input` group. The key still reaches apps.
 - **`dictate`.** Starts and stops recording with `voxtype record start|stop`. Voxtype's
   `pre_recording_command` runs `numen-mode dictating` and `post_output_command` runs
@@ -105,9 +105,11 @@ this repo. The old code is in git history (removed in the commit that added this
 ## Troubleshooting
 
 - **No waveform panel.** Check the log for "could not find 'shell.qml'" or OSD child exits.
-- **Right Ctrl does nothing.** `id -nG` must list `input` (log out and in after adding it).
+- **F9 does nothing.** `id -nG` must list `input` (log out and in after adding it).
 - **Say/dictate stops while you're still talking**, or never stops: tune
-  `audio.external_trigger_speech_threshold_dbfs` (default -20; lower it for a quiet mic).
+  `audio.external_trigger_speech_threshold_dbfs` (set to -38; Voxtype's default -20 was louder than
+  this mic, so every recording stopped after 2 s). Lower it if it cuts you off, raise it if it
+  never stops.
 - **Nothing happens on Mod+D.** Run `systemctl --user status voxtype` and check the log.
   "Failed to start audio" means the ALSA plugin fix above is missing.
 - **Numen ignores commands after dictating.** Run `numen-mode restore`, or `numen-mode wake`.

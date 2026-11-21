@@ -6,8 +6,8 @@
   ...
 }:
 # Dictation with Voxtype (Parakeet on CPU, typed with dotool). docs/dictation.md
-#   hold Right Ctrl           push-to-talk: types when you let go
-#   Mod+D                     start/stop (hands-free)
+#   hold F9                   push-to-talk: types when you let go
+#   Mod+D                     start; stops after a pause (or Mod+D again)
 #   numen "dictate", "say"    start; stops after a pause (or "stop dictating")
 # Numen keeps doing voice commands; while Voxtype records it only listens for
 # "stop dictating" (numen-mode dictating, in app-numen.nix).
@@ -104,7 +104,7 @@ let
     # the key still reaches apps. Mod+D and numen call `dictate` instead.
     hotkey = {
       enabled = true;
-      key = "RIGHTCTRL";
+      key = "F9";
       mode = "push_to_talk";
     };
     audio = {
@@ -119,8 +119,12 @@ let
       # Only `voxtype record start` (Mod+D, numen): stop after a pause.
       # Push-to-talk ignores it.
       external_trigger_silence_timeout_secs = 2.0;
+      # Peak level that counts as speech. The default (-20) is louder than
+      # this mic, so recordings always stopped after 2 s. Noise floor here is
+      # about -53, room noise up to -34.
+      external_trigger_speech_threshold_dbfs = -38.0;
     };
-    # Drop silent recordings (e.g. Right Ctrl used for Ctrl+C).
+    # Drop silent recordings (e.g. an accidental F9 tap).
     vad.enabled = true;
     # Waveform panel while recording. The gtk4 frontend isn't built by
     # nixpkgs; the Quickshell one uses DMS's qs and the QML from the source
