@@ -26,6 +26,7 @@ COLORS = {
     "starting": QColor("#58a6ff"),
     "awake": QColor("#3fb950"),
     "asleep": QColor("#d29922"),
+    "ignoring": QColor("#a371f7"),
 }
 LABELS = {
     "stopped": "Numen: stopped",
@@ -33,8 +34,9 @@ LABELS = {
     "starting": "Numen: starting… (not listening yet)",
     "awake": "Numen: running · awake",
     "asleep": "Numen: running · asleep",
+    "ignoring": "Numen: running · ignoring (Alexa)",
 }
-LISTENING = ("awake", "asleep")
+LISTENING = ("awake", "asleep", "ignoring")
 
 
 def run(*cmd):
@@ -67,7 +69,8 @@ def current_state():
     # numen starts arecord only once the model and recognizers are loaded.
     if not any(run("pgrep", "-P", pid, "-x", "arecord") for pid in pids):
         return "starting"
-    return "asleep" if run(NUMEN_MODE, "status") == "asleep" else "awake"
+    status = run(NUMEN_MODE, "status")
+    return status if status in ("asleep", "ignoring") else "awake"
 
 
 def make_icon(state):

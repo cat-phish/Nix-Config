@@ -31,6 +31,7 @@ Numen runs as the `numen` systemd user service. It is **not** started at login. 
 | blue | starting (loading the model; not listening yet) |
 | green | running, awake |
 | amber with a "z" | running, asleep |
+| purple | running, ignoring speech after "Alexa" |
 
 **Mod+Delete:** start / stop numen (the tray icon stays and shows the state).
 
@@ -49,7 +50,8 @@ numen-mode off       # stop numen; the tray stays
 numen-mode power     # on if stopped, off if running (Mod+Delete)
 numen-mode sleep     # only listen for "wake up"
 numen-mode wake
-numen-mode status    # awake / asleep
+numen-mode ignore 20 # ignore speech for 20s, then go back (what "alexa" runs)
+numen-mode status    # awake / asleep / ignoring
 journalctl --user -fu numen   # numen's log (also "Show log" in the tray)
 ```
 
@@ -63,11 +65,19 @@ Phrase files: `dotfiles/.config/numen/phrases/*.phrases`. A few that control num
 |---|---|
 | `sleep` | sleep mode: ignore everything except "wake up" |
 | `wake up` | back to normal |
+| `alexa …` | ignore speech for 20s so Alexa commands and replies don't run numen commands |
 | `newman off` | stop numen (say it like "numen off"; "numen" isn't in Vosk's vocabulary) |
 
 Sleep mode loads `~/.config/numen/sleep.phrases`, which is generated at build time from
 `dotfiles/.config/numen/sleep-filler.words` plus every word in the phrase files, so random
 speech doesn't wake it.
+
+**Alexa:** "alexa" is a `@transcribe` phrase (`control.phrases`), so the rest of that utterance
+("alexa, turn off the lights") is swallowed instead of run as commands; said alone, the next
+utterance is swallowed. It then runs `numen-mode ignore`, which loads
+`~/.config/numen/ignore.phrases` (decoy words plus "alexa", which restarts the timer) for
+`ignoreSeconds` (20, in `app-numen.nix`) and then `numen-mode restore`. Sleep, wake, dictate
+and off cancel the timer; when asleep, "alexa" does nothing.
 
 ## Dictation
 

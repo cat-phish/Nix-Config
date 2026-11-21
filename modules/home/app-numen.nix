@@ -13,9 +13,11 @@
   #
   #   numen-mode sleep|wake|toggle  switch mode (with a notification)
   #   numen-mode dictating          listen only for "stop dictating" (dictate)
+  #   numen-mode ignore [SECS]      ignore speech for SECS (default ${toString ignoreSeconds})
+  #                                 after the Alexa wake word, then restore
   #   numen-mode pause              load nothing
   #   numen-mode restore            reload whatever the current mode is
-  #   numen-mode status             print "awake" or "asleep"
+  #   numen-mode status             print "awake", "asleep" or "ignoring"
   #   numen-mode off                quit numen (voice: "newman off")
   #   numen-mode on                 start numen and the tray icon
   # Vosk model. The default small-en-us (/usr/share/vosk-models) confuses
@@ -34,6 +36,9 @@
   };
 
   wakePhrase = "wake up";
+  # Saying "alexa" (to an Echo) makes numen ignore speech for this long, so
+  # the Alexa command and Alexa's reply don't trigger numen commands.
+  ignoreSeconds = 20;
   stopDictatingPhrase = "stop dictating";
   # Numen restricts recognition to the words of the loaded phrases, so a lone
   # phrase matches *everything*. Pad it with do-nothing phrases for common
@@ -57,14 +62,18 @@
   sleepPhrases = onlyListenFor "sleep" wakePhrase "run numen-mode wake &";
   # Voxtype records meanwhile; dictate (app-dictation.nix) stops it.
   dictatingPhrases = onlyListenFor "dictating" stopDictatingPhrase "run dictate stop &";
+  # Saying "alexa" again while ignoring restarts the timer.
+  ignorePhrases = onlyListenFor "ignore" "alexa" "run numen-mode ignore &";
 
   numen-mode = pkgs.writeShellApplication {
     name = "numen-mode";
-    runtimeInputs = with pkgs; [libnotify coreutils procps gnugrep];
+    runtimeInputs = with pkgs; [libnotify coreutils procps gnugrep util-linux];
     text = ''
       FLAG="''${XDG_RUNTIME_DIR:-/tmp}/numen-asleep"
       SLEEP_FILE="$HOME/.config/numen/sleep.phrases"
       DICTATING_FILE="$HOME/.config/numen/dictating.phrases"
+      IGNORE_FLAG="''${XDG_RUNTIME_DIR:-/tmp}/numen-ignoring"
+      IGNORE_FILE="$HOME/.config/numen/ignore.phrases"
 
       numen_load() {
         pgrep -x numen >/dev/null || return 0
@@ -80,19 +89,43 @@
       # a restarted numen (which always starts awake) is never treated as asleep.
       numen_pid() { pgrep -xo numen || true; }
       asleep() { [ -f "$FLAG" ] && [ -n "$(numen_pid)" ] && [ "$(cat "$FLAG")" = "$(numen_pid)" ]; }
+      # The ignore flag holds "<numen pid> <timer token>". Any other mode change
+      # removes it, so a pending timer never undoes a later sleep/wake/dictate.
+      ignoring() { [ -f "$IGNORE_FLAG" ] && [ -n "$(numen_pid)" ] && [ "$(cut -d' ' -f1 "$IGNORE_FLAG")" = "$(numen_pid)" ]; }
+      end_ignore() { rm -f "$IGNORE_FLAG"; }
 
       case "''${1:-status}" in
-        sleep) numen_pid >"$FLAG"; numen_load "$SLEEP_FILE"; notify "Asleep (say \"${wakePhrase}\")" ;;
-        wake) rm -f "$FLAG"; load_awake; notify "Awake" ;;
+        sleep) end_ignore; numen_pid >"$FLAG"; numen_load "$SLEEP_FILE"; notify "Asleep (say \"${wakePhrase}\")" ;;
+        wake) end_ignore; rm -f "$FLAG"; load_awake; notify "Awake" ;;
         toggle) if asleep; then "$0" wake; else "$0" sleep; fi ;;
         pause) numen_load ;;
-        dictating) numen_load "$DICTATING_FILE" ;;
-        restore) if asleep; then numen_load "$SLEEP_FILE"; else load_awake; fi ;;
-        status) if asleep; then echo asleep; else echo awake; fi ;;
+        dictating) end_ignore; numen_load "$DICTATING_FILE" ;;
+        restore)
+          if asleep; then numen_load "$SLEEP_FILE"
+          elif ignoring; then numen_load "$IGNORE_FILE"
+          else load_awake; fi
+          ;;
+        # Asleep already ignores everything but "wake up"; leave it alone.
+        ignore)
+          asleep && exit 0
+          [ -n "$(numen_pid)" ] || exit 0
+          ignoring || { numen_load "$IGNORE_FILE"; notify "Ignoring (Alexa)"; }
+          token="$$.$(date +%s%N)"
+          echo "$(numen_pid) $token" >"$IGNORE_FLAG"
+          secs=''${2:-${toString ignoreSeconds}}
+          # Detached: when run from a phrase, numen waits for its children.
+          # shellcheck disable=SC2016
+          setsid sh -c '
+            sleep "$1"
+            if [ "$(cut -d" " -f2 "$2" 2>/dev/null)" = "$3" ]; then
+              rm -f "$2"; exec "$4" restore
+            fi' _ "$secs" "$IGNORE_FLAG" "$token" "$0" >/dev/null 2>&1 &
+          ;;
+        status) if asleep; then echo asleep; elif ignoring; then echo ignoring; else echo awake; fi ;;
         # Quit numen (the tray icon stays). --no-block: when run from a numen
         # phrase, this process is in numen's cgroup and gets killed by the stop.
         off)
-          rm -f "$FLAG"
+          rm -f "$FLAG"; end_ignore
           if systemctl --user is-active --quiet numen; then
             systemctl --user --no-block stop numen
           elif pkill -x numen; then
@@ -115,7 +148,7 @@
           ;;
         # Start numen if it isn't running, otherwise quit it (Mod+Delete). The tray stays.
         power) if pgrep -x numen >/dev/null; then "$0" off; else "$0" on; fi ;;
-        *) echo "usage: numen-mode [sleep|wake|toggle|dictating|pause|restore|status|on|off|power]" >&2; exit 2 ;;
+        *) echo "usage: numen-mode [sleep|wake|toggle|dictating|ignore|pause|restore|status|on|off|power]" >&2; exit 2 ;;
       esac
     '';
   };
@@ -194,6 +227,7 @@ in {
       # Outside phrases/ so the *.phrases glob for awake mode doesn't include it.
       ".config/numen/sleep.phrases".source = sleepPhrases;
       ".config/numen/dictating.phrases".source = dictatingPhrases;
+      ".config/numen/ignore.phrases".source = ignorePhrases;
       # numen's helper scripts, at a stable path for the phrase files.
       ".config/numen/scripts".source = "${numen}/share/numen/scripts";
     };
