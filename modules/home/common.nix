@@ -18,6 +18,7 @@
     ./app-foobar2000-wine-dependencies.nix
     ./app-syncthing.nix
     ./app-numen.nix
+    ./app-dictation.nix # Voxtype + Handy dictation on trial (docs/dictation.md)
     ./app-tailscale.nix # Fedora only (guarded inside)
     ./fedora-dnf.nix # dnf packages for the Fedora hosts (docs/dnf.md)
   ];

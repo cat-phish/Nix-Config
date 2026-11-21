@@ -75,9 +75,12 @@ speech doesn't wake it.
 
 ## Dictation
 
+> Being replaced: Voxtype is now on Mod+D and Handy on Mod+Ctrl+D (see `docs/dictation.md`).
+> The `numen-dictate` toggle below has moved to **Mod+Alt+D**.
+
 | How | What happens |
 |---|---|
-| **Mod+D** | start dictating; Mod+D again to stop |
+| **Mod+Alt+D** | start dictating; Mod+Alt+D again to stop |
 | say **"say ..."** (numen running) | types what you say after "say"; stops after ~1 s of silence |
 | `numen-dictate auto` | dictate from now until ~1 s of silence |
 

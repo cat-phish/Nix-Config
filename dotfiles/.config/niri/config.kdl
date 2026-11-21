@@ -210,7 +210,10 @@ binds {
 
     // Application Launchers
     Mod+Shift+D hotkey-overlay-title="Run an Application: fuzzel" { spawn "fuzzel"; }
-    Mod+D hotkey-overlay-title="Dictation (toggle)" { spawn "numen-dictate" "toggle"; }
+    // Dictation trial (docs/dictation.md)
+    Mod+D hotkey-overlay-title="Dictation: Voxtype (toggle)" { spawn "dictate" "voxtype"; }
+    Mod+Ctrl+D hotkey-overlay-title="Dictation: Handy (toggle)" { spawn "dictate" "handy"; }
+    Mod+Alt+D hotkey-overlay-title="Dictation: numen asr4all (toggle)" { spawn "numen-dictate" "toggle"; }
     Mod+Delete hotkey-overlay-title="Numen voice control (on/off)" { spawn "numen-mode" "power"; }
     Mod+Space hotkey-overlay-title="Application Launcher: vicinae" { spawn "vicinae" "toggle"; }
     Mod+Semicolon hotkey-overlay-title="Emoji Picker" { spawn "vicinae" "deeplink" "vicinae://launch/core/search-emojis"; }
