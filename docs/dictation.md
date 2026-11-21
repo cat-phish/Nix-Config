@@ -1,68 +1,87 @@
-# Dictation (Voxtype and Handy trial)
+# Dictation (Voxtype)
 
-Numen does voice **commands** (see `docs/numen.md`). For **dictation** we're trying two
-maintained Linux tools next to the old `numen-dictate`, to pick the one to keep.
+Numen does voice **commands** (see `docs/numen.md`). **Dictation** (typing prose) is
+[Voxtype](https://github.com/peteonrails/voxtype). It runs NVIDIA's Parakeet TDT 0.6B v3 (int8)
+on the CPU and types with dotool.
 
 Everything is in `modules/home/app-dictation.nix`, imported by `modules/home/common.nix`.
 
-## Keys
+## Using it
 
-| Key | Tool | Notes |
-|---|---|---|
-| **Mod+D** | Voxtype | Parakeet TDT 0.6B v3 (int8) on CPU, typed with dotool |
-| **Mod+Ctrl+D** | Handy | model and options set in Handy's own window |
-| **Mod+Alt+D** | `numen-dictate toggle` | the old asr4all setup, kept for comparison |
+| Start | Stop and type |
+|---|---|
+| **Mod+D** | **Mod+D** |
+| say **"dictate"** (numen running) | say **"stop dictating"** |
 
-Press once to start, again to stop. The text is typed after you stop. Pressing one tool's key
-while the other is recording stops that one first. `dictate` pauses numen while you talk, so
-your words aren't run as commands, then restores whatever mode it was in (awake or asleep).
+Any start works with any stop. The text is typed about half a second after you stop. A recording
+stops by itself after 10 minutes and types what it has. Filler words (uh, um...) are dropped.
 
-From a terminal: `dictate voxtype`, `dictate handy`.
+While you dictate, numen listens only for "stop dictating", so your words aren't run as
+commands. Afterwards it goes back to whatever mode it was in (awake or asleep). "Stop dictating"
+is removed from the end of the text, since Voxtype hears it too.
 
-## Why not numen-dictate
+From a terminal:
 
-- **"say …"** starts only after numen's Vosk finishes hearing you, which is after you stop
-  talking. It then reads the audio back from a 30 s buffer, so long dictations lose their start.
-- **asr4all streaming** loads the model on every run (about 1.7 s), and redraws the whole
-  transcript every 320 ms, so it gets slower the longer you talk. Recordings are cut off at
-  120 s.
+```sh
+dictate            # start, or stop if recording (Mod+D)
+dictate start      # start (numen "dictate")
+dictate stop       # stop and type (numen "stop dictating")
+dictate cancel     # stop without typing
+voxtype status     # idle / recording / transcribing
+journalctl --user -fu voxtype
+```
 
-## Voxtype
+## How it fits together
 
-- Daemon: the `voxtype` user service, which keeps the model loaded. Log:
-  `journalctl --user -fu voxtype`.
-- Config: generated from `voxtypeConfig` in `app-dictation.nix` into
+- **`voxtype` user service.** Started at login. It keeps the model loaded, so there's no wait
+  at start.
+- **`dictate`.** Starts and stops recording with `voxtype record start|stop`, and switches numen
+  with `numen-mode dictating` / `numen-mode restore`. Voxtype's `post_output_command` also runs
+  `numen-mode restore`, so numen comes back even when a recording ends on its own.
+- **`numen-mode dictating`.** Loads `~/.config/numen/dictating.phrases`. Like sleep mode, it is
+  generated in `app-numen.nix`: the one real phrase ("stop dictating"), padded with do-nothing
+  decoy words so other speech doesn't trigger it.
+- **Config.** Generated from `voxtypeConfig` in `app-dictation.nix` into
   `~/.config/voxtype/config.toml`. Because the file is read-only, `voxtype config set` and the
-  `voxtype configure` TUI can't save. Edit the Nix file instead, then check the result with
+  `voxtype configure` TUI can't save; edit the Nix file instead. Check the result with
   `voxtype config`. Valid keys: `voxtype config schema`.
-- Model: downloaded by a Home Manager activation step to `~/.local/share/voxtype/models/` on
-  the first switch. To switch models, change `voxtypeModel` (see `voxtype info models`). Whisper
-  instead needs `engine = "whisper"` plus a `whisper.model`.
-- Recordings stop at `audio.max_duration_secs` (600).
-- The nixpkgs build has no `parakeet.streaming`, so text can't appear while you're still
-  talking.
-- `voxtype status` shows idle / recording / transcribing.
+- **Model.** Downloaded by a Home Manager activation step to `~/.local/share/voxtype/models/` on
+  the first switch. To change models, edit `voxtypeModel` (see `voxtype info models`). Whisper
+  instead needs `engine = "whisper"` plus `whisper.model`.
 
-## Handy
+## Local package fixes
 
-- App: the `handy` user service (`handy --start-hidden`), with a tray icon. Open the window
-  from the tray to change settings.
-- Its settings are stored by Handy itself and aren't tracked in this repo. Set these once on
-  each machine:
-  - Model: **Parakeet V3** (recommended, fast on CPU)
-  - Advanced → Paste Method: direct typing (dotool), or leave it on clipboard if typing misbehaves
-  - Turn off Handy's own shortcut: niri's Mod+Ctrl+D runs `handy --toggle-transcription`
-- If the window fails with "Failed to create surface": `nix-gpu-setup`.
+The nixpkgs package is overridden in `app-dictation.nix`:
 
-## Comparing
+- **`onnxSupport = true`.** nixpkgs builds Whisper only by default, and Parakeet needs ONNX.
+- **Extra `sqlite` and `oniguruma` build inputs.** Our nixpkgs pin fails to link without them.
+  Newer nixpkgs has the fix, so drop them after a flake update.
+- **`ALSA_PLUGIN_DIR` on Fedora.** Without it, Nix alsa-lib can't load dnf's PipeWire plugin and
+  recording fails with `snd_pcm_open` errors.
 
-Read the same ~90 s passage into a text editor with Mod+D, Mod+Ctrl+D and Mod+Alt+D. For each,
-note:
+Because of the overrides, Voxtype is compiled from source (about 10 minutes). The Rust build can
+run a laptop out of memory; if it gets killed, build with `--max-jobs 1 --cores 4`.
 
-- the wait between stopping and the text appearing
-- whether the start or end was lost
-- word errors, punctuation and capitals
+The nixpkgs build has no `parakeet.streaming`, so text can't appear while you're still talking.
 
-Then keep the winner on Mod+D, remove the other tool from `app-dictation.nix`, and decide
-whether to remove the asr4all/whisper dictation code and `numen-dictate-buffer` from
-`app-numen.nix`, or point numen's "say" phrase at the winner.
+## Why not the old numen-dictate
+
+Until Nov 2026, dictation was `numen-dictate`, with FUTO asr4all streaming or whisper.cpp,
+plus a 30 s mic buffer for numen's "say …". Problems:
+
+- "say" only started after numen's Vosk finished hearing you, so long dictations lost their
+  start, and nothing was typed until the end.
+- asr4all loaded its model on every run and redrew the whole transcript every 320 ms, so it got
+  slower the longer you talked.
+- Recordings were cut off at 120 s.
+
+Handy was also tried; it worked as well as Voxtype, but its settings live in its own GUI, not in
+this repo. The old code is in git history (removed in the commit that added this section).
+
+## Troubleshooting
+
+- **Nothing happens on Mod+D.** Run `systemctl --user status voxtype` and check the log.
+  "Failed to start audio" means the ALSA plugin fix above is missing.
+- **Numen ignores commands after dictating.** Run `numen-mode restore`, or `numen-mode wake`.
+- **"Stop dictating" isn't recognised.** Use Mod+D. Check numen's log
+  (`journalctl --user -u numen`) for unknown-word warnings when the dictating phrases load.

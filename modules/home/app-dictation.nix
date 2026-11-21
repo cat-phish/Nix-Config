@@ -5,11 +5,10 @@
   isNixos,
   ...
 }:
-# Dictation tools on trial alongside numen-dictate (docs/dictation.md).
-#   Mod+D       Voxtype (Parakeet, types with dotool)
-#   Mod+Ctrl+D  Handy   (configured in its own GUI)
-#   Mod+Alt+D   the old numen-dictate (asr4all)
-# Numen keeps doing voice commands; `dictate` pauses it while you talk.
+# Dictation with Voxtype (Parakeet on CPU, typed with dotool). docs/dictation.md
+#   Mod+D, or say "dictate"   start; Mod+D or "stop dictating" to stop
+# Numen keeps doing voice commands; while you dictate it only listens for
+# "stop dictating" (numen-mode dictating, in app-numen.nix).
 let
   # onnxSupport: Parakeet/Moonshine (off by default in nixpkgs, Whisper only).
   # sqlite/oniguruma: our nixpkgs pin links them without listing them ("cannot
@@ -17,74 +16,55 @@ let
   voxtype = (pkgs.voxtype.override {onnxSupport = true;}).overrideAttrs (old: {
     buildInputs = (old.buildInputs or []) ++ [pkgs.sqlite pkgs.oniguruma];
   });
-  handy = pkgs.handy;
   voxtypeModel = "parakeet-tdt-0.6b-v3-int8";
 
-  # dictate voxtype|handy: start dictating with that tool, or stop if it's
-  # already recording (pressing the other tool's key stops this one first).
-  # numen is paused at start and restored at stop, so you can talk freely.
+  #   dictate [toggle]  start, or stop if recording (Mod+D)
+  #   dictate start     start (numen "dictate")
+  #   dictate stop      stop and type (numen "stop dictating")
+  #   dictate cancel    stop without typing
+  # Numen goes into dictating mode at start and back to its previous mode
+  # (awake/asleep) at stop. numen-mode comes from app-numen.nix via PATH.
   dictate = pkgs.writeShellApplication {
     name = "dictate";
-    runtimeInputs = [voxtype handy pkgs.coreutils pkgs.libnotify];
-    # numen-mode comes from app-numen.nix (on PATH via the HM profile).
+    runtimeInputs = [voxtype pkgs.coreutils pkgs.libnotify];
     text = ''
-      RUNDIR="''${XDG_RUNTIME_DIR:-/tmp}/dictate"
-      STATE="$RUNDIR/active" # holds the tool that is recording
-      mkdir -p "$RUNDIR"
-
       notify() { (notify-send -a Dictation -t 1500 "Dictation" "$1" || true) & }
-      pause_numen() { command -v numen-mode >/dev/null && numen-mode pause || true; }
-      restore_numen() { command -v numen-mode >/dev/null && numen-mode restore || true; }
+      numen() { if command -v numen-mode >/dev/null; then numen-mode "$1" || true; fi; }
+      recording() { [ "$(voxtype status 2>/dev/null)" = recording ]; }
 
       start() {
-        case "$1" in
-          voxtype) voxtype record start ;;
-          handy) handy --toggle-transcription ;;
-        esac
+        if ! systemctl --user is-active --quiet voxtype; then
+          notify "voxtype isn't running (systemctl --user status voxtype)"
+          exit 1
+        fi
+        numen dictating
+        voxtype record start || { numen restore; exit 1; }
       }
       stop() {
-        case "$1" in
-          voxtype) voxtype record stop ;;
-          handy) handy --toggle-transcription ;;
-        esac
+        voxtype record "$1" || true
+        numen restore
       }
 
-      tool="''${1:-voxtype}"
-      case "$tool" in
-        voxtype | handy) ;;
-        *) echo "usage: dictate [voxtype|handy]" >&2; exit 2 ;;
+      case "''${1:-toggle}" in
+        toggle) if recording; then stop stop; else start; fi ;;
+        start) recording || start ;;
+        stop) stop stop ;;
+        cancel) stop cancel ;;
+        *) echo "usage: dictate [toggle|start|stop|cancel]" >&2; exit 2 ;;
       esac
-
-      active=$(cat "$STATE" 2>/dev/null || true)
-      # Voxtype stops by itself at max_duration_secs: forget a stale state.
-      if [ "$active" = voxtype ] && [ "$(voxtype status 2>/dev/null)" != recording ]; then
-        rm -f "$STATE"
-        restore_numen
-        active=""
-      fi
-
-      if [ -n "$active" ]; then
-        stop "$active"
-        rm -f "$STATE"
-        restore_numen
-        [ "$active" = "$tool" ] && exit 0
-      fi
-
-      pause_numen
-      if start "$tool"; then
-        echo "$tool" >"$STATE"
-      else
-        restore_numen
-        notify "$tool isn't running (systemctl --user status $tool)"
-        exit 1
-      fi
     '';
   };
+
+  # Voxtype is still recording when you say "stop dictating", so it hears the
+  # phrase too: drop it from the end of the text (empty output types nothing).
+  stripStopPhrase = pkgs.writeShellScript "voxtype-strip-stop" ''
+    ${pkgs.gnused}/bin/sed -zE 's/[[:space:],]*\bstop dictat(ing|ion)[[:punct:]]*[[:space:]]*$//I'
+  '';
 
   voxtypeConfig = (pkgs.formats.toml {}).generate "voxtype-config.toml" {
     engine = "parakeet";
     state_file = "auto"; # needed by `voxtype record toggle` / `voxtype status`
-    hotkey.enabled = false; # niri binds call `dictate`
+    hotkey.enabled = false; # Mod+D and numen call `dictate`
     audio = {
       device = "default";
       sample_rate = 16000;
@@ -99,6 +79,13 @@ let
       driver_order = ["dotool" "wtype" "clipboard"];
       fallback_to_clipboard = true;
       type_delay_ms = 0;
+      # After typing (also when it hits max_duration_secs): put numen back.
+      post_output_command = "numen-mode restore";
+      post_process = {
+        command = "${stripStopPhrase}";
+        timeout_ms = 2000;
+        fallback_on_empty = false; # "stop dictating" alone types nothing
+      };
       notification = {
         on_recording_start = false;
         on_recording_stop = false;
@@ -109,7 +96,7 @@ let
     text.filter_filler_words = true;
   };
 in {
-  home.packages = [voxtype handy dictate];
+  home.packages = [voxtype dictate];
 
   # Linked out of the store would block `voxtype config set`/the TUI; that's
   # fine: edit it here. Validate with `voxtype config`.
@@ -138,21 +125,6 @@ in {
       # Fedora: Nix alsa-lib can't find dnf's PipeWire ALSA plugin ("Cannot open
       # shared library libasound_module_pcm_pipewire.so"), so no mic.
       Environment = lib.mkIf (!isNixos) ["ALSA_PLUGIN_DIR=${pkgs.pipewire}/lib/alsa-lib"];
-      Restart = "on-failure";
-      RestartSec = 3;
-    };
-    Install.WantedBy = ["graphical-session.target"];
-  };
-
-  # Handy keeps its settings in its own GUI store (not tracked here).
-  systemd.user.services.handy = {
-    Unit = {
-      Description = "Handy dictation";
-      PartOf = ["graphical-session.target"];
-      After = ["graphical-session.target" "dms.service" "pipewire-pulse.service"];
-    };
-    Service = {
-      ExecStart = "${handy}/bin/handy --start-hidden";
       Restart = "on-failure";
       RestartSec = 3;
     };
