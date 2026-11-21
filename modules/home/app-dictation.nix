@@ -10,7 +10,11 @@
 #   Mod+Alt+D   the old numen-dictate (asr4all)
 # Numen keeps doing voice commands; `dictate` pauses it while you talk.
 let
-  voxtype = pkgs.voxtype;
+  # nixpkgs' voxtype links -lsqlite3 without sqlite in buildInputs (fails
+  # with "cannot find -lsqlite3"); drop this once fixed upstream.
+  voxtype = pkgs.voxtype.overrideAttrs (old: {
+    buildInputs = (old.buildInputs or []) ++ [pkgs.sqlite];
+  });
   handy = pkgs.handy;
   voxtypeModel = "parakeet-tdt-0.6b-v3-int8";
 
