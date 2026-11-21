@@ -32,6 +32,11 @@
     dms.url = "github:duxlabs-dev/dux-shell";
     dms-greeter.url = "github:duxlabs-dev/dux-greeter";
     talon-nix.url = "github:nix-community/talon-nix";
+    # numen voice control (upstream master), built by pkgs/numen.nix.
+    numen-src = {
+      url = "sourcehut:~geb/numen";
+      flake = false;
+    };
     # Declarative partitioning for headless servers (used by nixos-anywhere installs).
     disko = {
       url = "github:nix-community/disko";

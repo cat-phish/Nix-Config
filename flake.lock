@@ -497,6 +497,22 @@
         "type": "github"
       }
     },
+    "numen-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1761499851,
+        "narHash": "sha256-3AwRejCecNoYdNDbBR6raGtbL4sUpm3G84Ns1ApE4RA=",
+        "owner": "~geb",
+        "repo": "numen",
+        "rev": "b5c3976beeb9bc07b668c76373be7af005d937f5",
+        "type": "sourcehut"
+      },
+      "original": {
+        "owner": "~geb",
+        "repo": "numen",
+        "type": "sourcehut"
+      }
+    },
     "nvim-config": {
       "inputs": {
         "neovim-nightly-overlay": "neovim-nightly-overlay",
@@ -564,6 +580,7 @@
         "nixpkgs": "nixpkgs_3",
         "nixpkgs-hold": "nixpkgs-hold",
         "nixpkgs-stable": "nixpkgs-stable",
+        "numen-src": "numen-src",
         "nvim-config": "nvim-config",
         "sops-nix": "sops-nix",
         "talon-nix": "talon-nix"

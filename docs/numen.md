@@ -94,13 +94,15 @@ User services: `numen` (on demand) and `numen-tray` (at login); `voxtype` is in
 
 ## Setting up a new machine
 
-Home Manager installs everything above, but numen itself is not packaged by Nix yet (see the
-backlog). On Fedora it needs, outside this repo:
+Home Manager installs numen itself: `pkgs/numen.nix` builds `numen`/`numenc` from the
+`numen-src` flake input (upstream master, updated by `nix flake update` / `update-system`) with
+the prebuilt libvosk and the `en-us-0.22-lgraph` Vosk model, and links its helper scripts to
+`~/.config/numen/scripts` (used by `voice.phrases`). If an update fails with a hash mismatch on
+`numen-…-go-modules`, upstream changed its Go dependencies: paste the "got:" hash into
+`vendorHash` in `pkgs/numen.nix`. Still needed outside this repo on Fedora:
 
-- `numen` and `numenc` built from source (`~/.apps/source/numen`) into `/usr/local/bin`, with
-  `/etc/numen/` (its scripts) and the Vosk model in `/usr/share/vosk-models/small-en-us`
-- `dotool`, `dotoolc`, `dotoold` in `/usr/local/bin`, plus the uinput udev rule
-  (`/etc/udev/rules.d/80-dotool.rules`) and your user in the `input` group
+- the uinput udev rule (`/etc/udev/rules.d/80-dotool.rules`) and your user in the `input` group
+  (dotool itself comes from nixpkgs)
 
 Then `home-manager switch --flake ~/.nix#jordan@<host>` and log out and back in (or
 `systemctl --user start numen-tray`).

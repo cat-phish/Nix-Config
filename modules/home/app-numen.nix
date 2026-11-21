@@ -3,6 +3,7 @@
 {
   lib,
   pkgs,
+  inputs,
   ...
 }: let
   # Talon-style sleep mode. Numen's own pause (`load` with no files) can't be
@@ -17,6 +18,21 @@
   #   numen-mode status             print "awake" or "asleep"
   #   numen-mode off                quit numen (voice: "newman off")
   #   numen-mode on                 start numen and the tray icon
+  # Vosk model. The default small-en-us (/usr/share/vosk-models) confuses
+  # near-homophones like "aitch"/"eight"; en-us-0.22-lgraph is much more
+  # accurate and, unlike the full 0.22 model, still supports the runtime
+  # grammar numen relies on. Built into numen as its default model.
+  voskModel = pkgs.fetchzip {
+    url = "https://alphacephei.com/vosk/models/vosk-model-en-us-0.22-lgraph.zip";
+    hash = "sha256-GVheflRwix9PnQjIVFl1mkNRduaYRNvZGhTZaobTibY=";
+  };
+
+  numen = pkgs.callPackage ../../pkgs/numen.nix {
+    src = inputs.numen-src;
+    version = "0.7-${inputs.numen-src.shortRev or "dirty"}";
+    model = voskModel;
+  };
+
   wakePhrase = "wake up";
   stopDictatingPhrase = "stop dictating";
   # Numen restricts recognition to the words of the loaded phrases, so a lone
@@ -115,12 +131,12 @@
     );
 in {
   config = {
-    home.packages = [numen-mode numen-tray];
+    home.packages = [numen numen-mode numen-tray];
 
     # numen itself. No Install section: it's never started automatically, only
     # from the tray (or `systemctl --user start numen`). Inherits the user
     # manager's PATH/WAYLAND_DISPLAY, so phrase `run` actions work as in a
-    # terminal. numen is built from source into /usr/local/bin (Fedora).
+    # terminal. numen is built by pkgs/numen.nix.
     systemd.user.services.numen = {
       Unit = {
         Description = "Numen voice control";
@@ -128,7 +144,7 @@ in {
         After = ["graphical-session.target" "pipewire-pulse.service"];
       };
       Service = {
-        ExecStart = "/usr/local/bin/numen";
+        ExecStart = "${numen}/bin/numen";
         Restart = "on-failure";
         RestartSec = 2;
         # On SIGTERM numen often hangs freeing the Vosk recognizer, which held
@@ -178,6 +194,8 @@ in {
       # Outside phrases/ so the *.phrases glob for awake mode doesn't include it.
       ".config/numen/sleep.phrases".source = sleepPhrases;
       ".config/numen/dictating.phrases".source = dictatingPhrases;
+      # numen's helper scripts, at a stable path for the phrase files.
+      ".config/numen/scripts".source = "${numen}/share/numen/scripts";
     };
   };
 }
