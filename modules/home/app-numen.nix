@@ -177,7 +177,9 @@ in {
         After = ["graphical-session.target" "pipewire-pulse.service"];
       };
       Service = {
-        ExecStart = "${numen}/bin/numen";
+        # Matched (and ignored) phrases: tail -f $XDG_RUNTIME_DIR/numen-phrases.log
+        # (not /dev/stdout: numen can't open the journal socket as a file).
+        ExecStart = "${numen}/bin/numen --phraselog=%t/numen-phrases.log";
         Restart = "on-failure";
         RestartSec = 2;
         # On SIGTERM numen often hangs freeing the Vosk recognizer, which held

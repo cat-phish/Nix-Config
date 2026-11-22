@@ -12,7 +12,7 @@ Everything is in `modules/home/app-dictation.nix`, imported by `modules/home/com
 |---|---|
 | **hold F9** | let go (push-to-talk) |
 | **Mod+D** | a 2 s pause, or **Mod+D** |
-| say **"dictate"** or **"say"** (numen running), wait for the panel | a 2 s pause, or say **"stop dictating"** |
+| say **"dictate"** (numen running), wait for the panel | a 2 s pause, or say **"stop dictating"** |
 
 Any start works with any stop. A beep plays at start and stop, and a waveform panel shows at
 the bottom of the screen while recording. The text is typed about half a second after you stop.
@@ -26,18 +26,14 @@ While Voxtype records, numen listens only for "stop dictating", so your words ar
 commands. Afterwards it goes back to whatever mode it was in (awake or asleep). "Stop dictating"
 is removed from the end of the text, since Voxtype hears it too.
 
-### Numen "say"
+### Numen "dictate"
 
-"Say" is the same as "dictate". Numen only acts once you pause, so say "say", wait for the
-panel, then talk. Words said straight after "say", before the panel shows, go to numen as
-commands. The phrase can't use `@transcribe` to swallow them, because numen doesn't run the
-action when nothing follows the phrase.
+Numen only acts once you pause, so say "dictate", wait for the panel, then talk. Words said
+straight after "dictate", before the panel shows, go to numen as commands.
 
-A version that took "say <words>" in one breath (a rolling mic buffer with its own copy of the
-model) worked but showed no panel, so it was dropped; it's in git history.
-
-The formatted phrases ("plain say", "snake say", "camel say"...) use numen's own transcription
-(Vosk), as before.
+"Say" used to start Voxtype too, but numen's Vosk grammar snapped stray sounds to that one
+short word and opened the panel at random. "Say <words>" and the formatted phrases ("snake
+say", "camel say"...) use numen's own transcription (Vosk).
 
 From a terminal:
 
@@ -112,6 +108,11 @@ this repo. The old code is in git history (removed in the commit that added this
   never stops.
 - **Nothing happens on Mod+D.** Run `systemctl --user status voxtype` and check the log.
   "Failed to start audio" means the ALSA plugin fix above is missing.
+- **Panel flashes up for a moment on its own.** Something ran `dictate start`: the voxtype log
+  (`journalctl --user -u voxtype`) shows "Recording started (external trigger)" then "No speech
+  detected". Usually numen matched a dictation phrase from noise; check
+  `$XDG_RUNTIME_DIR/numen-phrases.log` at that time. This is why "say" no longer starts Voxtype
+  and only "dictate" does.
 - **Numen ignores commands after dictating.** Run `numen-mode restore`, or `numen-mode wake`.
 - **"Stop dictating" isn't recognised.** Use Mod+D. Check numen's log
   (`journalctl --user -u numen`) for unknown-word warnings when the dictating phrases load.

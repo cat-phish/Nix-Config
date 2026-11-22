@@ -46,6 +46,22 @@ in
     vendorHash = "sha256-Y3CbAnIK+gEcUfll9IlEGZE/s3wxdhAmTJkj9zlAtoQ=";
     subPackages = ["."];
 
+    # Add "[unk]" to the Vosk grammar so speech and noise that aren't a phrase
+    # come out as [unk] instead of being forced onto the nearest command, and
+    # drop such utterances (unless a @transcribe phrase came first). Also
+    # prefixes each --phraselog line with the time.
+    patches = [./numen-unk.patch];
+
+    # A transcribe phrase ("say", "snake say"...) set off by noise transcribes
+    # that noise, which Vosk hears as "the" or another filler word: type
+    # nothing instead.
+    postPatch = ''
+      substituteInPlace scripts/tweak --replace-fail \
+        '	{ print; print line }' \
+        '	/^(the|a|an|uh|um|huh|hmm|ah|oh|and)$/ { $0 = ""; line = "" }
+	{ print; print line }'
+    '';
+
     buildInputs = [libvosk];
     nativeBuildInputs = [scdoc makeWrapper];
 

@@ -8,7 +8,7 @@
 # Dictation with Voxtype (Parakeet on CPU, typed with dotool). docs/dictation.md
 #   hold F9                   push-to-talk: types when you let go
 #   Mod+D                     start; stops after a pause (or Mod+D again)
-#   numen "dictate" or "say"  start; stops after a pause (or "stop dictating")
+#   numen "dictate"  start; stops after a pause (or "stop dictating")
 # Numen keeps doing voice commands; while Voxtype records it only listens for
 # "stop dictating" (numen-mode dictating, in app-numen.nix).
 let

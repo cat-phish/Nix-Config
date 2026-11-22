@@ -40,7 +40,7 @@ Fedora (niri + Dux Shell/DMS, standalone Home Manager) is the daily driver. The 
 
 **Home Manager layers:**
 - `home.nix`: user, stateVersion, HM nixpkgs config/overlays, repo git config; imports `modules/home/common.nix`.
-- `modules/home/common.nix`: the bundles every host gets (communications, dev-environment, media, office, utilities, wine, syncthing, numen (voice commands, see `docs/numen.md`), dictation (Voxtype: hold F9, Mod+D, or numen "dictate"/"say", see `docs/dictation.md`), tailscale), base flatpaks, personal dotfiles (`.scripts`, `.img`, kmonad configs...), `nix.gc`, and Fedora-only bits guarded by `isNixos`.
+- `modules/home/common.nix`: the bundles every host gets (communications, dev-environment, media, office, utilities, wine, syncthing, numen (voice commands, built by `pkgs/numen.nix` with local fixes: `[unk]` noise rejection in `pkgs/numen-unk.patch` and a filler-word filter; matched/ignored phrases logged to `$XDG_RUNTIME_DIR/numen-phrases.log`; see `docs/numen.md`), dictation (Voxtype: hold F9, Mod+D, or numen "dictate", see `docs/dictation.md`), tailscale), base flatpaks, personal dotfiles (`.scripts`, `.img`, kmonad configs...), `nix.gc`, and Fedora-only bits guarded by `isNixos`.
 - `modules/home/desktop-niri.nix`: niri config + scripts, portal config, DMS plugins (`dms-plugins.nix`; installed from the DMS GUI, recorded in `dotfiles/.config/dms/plugins.lock.json` by `.scripts/save-gui-plugins` and synced on switch with `--prune`, so GUI uninstalls carry over; `update-system` updates them all and commits the lockfile), the Vicinae launcher/clipboard on Mod+Space/Mod+Y (`app-vicinae.nix`: settings, theme, Raycast extensions; script commands in `dotfiles/.local/share/vicinae/scripts`; extensions are listed in `dotfiles/.config/vicinae/extensions.conf` and installed/updated/pruned by `.scripts/vicinae-extensions` from `update-system`; GUI installs/uninstalls are saved to it by `.scripts/save-gui-plugins`, see `docs/vicinae.md`), Mod+A opens the DMS AI Assistant, whose API key comes from `~/.ssh/dms.env` via a `dms.service` drop-in; KDE-apps-under-niri fixes (`niri-kde-apps.nix`), ntfy listener. Hosts set `my.niri.deviceConfig` (per-machine niri file) and optionally `my.niri.dmsSettings` (file under `dotfiles/.config/dms/`, linked out of store so the GUI can edit it).
 - `hosts/<host>-home.nix`: only what's specific to that machine (extra bundles like `games.nix`/`app-beets.nix`, rclone mounts, services). Start new hosts from `hosts/_template-*.nix`, new bundles from `modules/home/_template.nix`.
 
@@ -65,6 +65,10 @@ Some apps install plugins/extensions from their own GUI (today: DMS plugins, Vic
 - Tell the two apart with a "last applied" snapshot in `~/.local/state/<app>-...applied...`, written after each successful sync. Gone since the snapshot means uninstalled here. New and in neither file means installed here. In the file but not in the snapshot means added elsewhere: install it, don't drop it.
 - Sync on switch or update, including removing what's no longer listed. If there are unsaved GUI changes, skip the sync so they aren't lost; never fail the switch.
 - Document it in `docs/` and in the Architecture section above.
+
+## Documenting changes
+
+Every behaviour change, however small (phrases, patches, script tweaks, service flags, keybindings), is documented in the matching `docs/*.md` in the same change, with the reason for it. Update this file too when it changes the architecture summary above.
 
 ## Known breakage / gotchas
 

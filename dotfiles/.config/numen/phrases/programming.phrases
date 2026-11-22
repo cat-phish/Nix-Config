@@ -52,6 +52,22 @@ get push: type git push
 get pull: type git pull
 get add: type git add .
 
+# Claude Code slash commands: "slash" prefix because bare "clear" is
+# modifier-clear in control.phrases. Type only, say "enter" to run.
+slash clear: type /clear
+slash compact: type /compact
+slash resume: type /resume
+slash review: type /code-review
+slash model: type /model
+slash context: type /context
+slash init: type /init
+slash help: type /help
+# Cycle permission modes (normal / auto-accept / plan)
+mode switch: press shift+Tab
+# Esc Esc: rewind or edit the previous prompt ("escape" alone interrupts)
+rewind: press Escape \
+	press Escape
+
 # Misc
 nicks: type nix
 comment: mod shift \

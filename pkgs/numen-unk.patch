@@ -1,0 +1,46 @@
+diff -ru a/numen.go b/numen.go
+--- a/numen.go	2026-11-21 22:11:53.400869747 -0800
++++ b/numen.go	2026-11-21 22:29:55.045540171 -0800
+@@ -70,7 +70,7 @@
+ 
+ func writeLine(f *os.File, s string) {
+ 	if f != nil {
+-		_, err := io.WriteString(f, s+"\n")
++		_, err := io.WriteString(f, time.Now().Format("15:04:05 ")+s+"\n")
+ 		if err != nil {
+ 			warn(err)
+ 		}
+@@ -665,6 +665,12 @@
+ 						}
+ 						break
+ 					}
++					// Unrecognised speech or noise: drop the whole utterance
++					// instead of trying the next alternative.
++					if strings.Contains(result.Text, "[unk]") {
++						writeLine(opts.PhraseLog, "(ignored: "+result.Text+")")
++						break
++					}
+ 				}
+ 			}
+ 		} else {
+diff -ru a/vox/vox.go b/vox/vox.go
+--- a/vox/vox.go	2026-11-21 22:11:53.401178286 -0800
++++ b/vox/vox.go	2026-11-21 22:12:01.471757430 -0800
+@@ -53,7 +53,7 @@
+ 			return nil, err
+ 		}
+ 	} else {
+-		j, err := json.Marshal(phrases)
++		j, err := json.Marshal(append(append([]string{}, phrases...), "[unk]"))
+ 		if err != nil {
+ 			panic(err.Error())
+ 		}
+@@ -71,7 +71,7 @@
+ }
+ 
+ func (r *Recognizer) SetGrm(phrases []string) {
+-	j, err := json.Marshal(phrases)
++	j, err := json.Marshal(append(append([]string{}, phrases...), "[unk]"))
+ 	if err != nil {
+ 		panic(err.Error())
+ 	}

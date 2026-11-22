@@ -2,16 +2,9 @@
 # For example, "four down no five down" would just do "five down".
 @cancel no:
 
-# Say "say", pause until the Voxtype panel shows, talk; it types after a 2 s
-# pause (modules/home/app-dictation.nix). Words said straight after "say",
-# before the panel, go to numen as commands. Not @transcribe: numen doesn't run
-# that action when nothing follows. Backgrounded so numen can process the mode
-# change.
-say: run dictate start &
-
 # Transcribe a sentence with numen's own recognizer (Vosk)
-# For example, "plain say please type this".
-@transcribe plain say: set numen_fmt echo normal \
+# For example, "say please type this".
+@transcribe say: set numen_fmt echo normal \
 	pen ~/.config/numen/scripts/tweak; ~/.config/numen/scripts/transcripts | head -n 1
 
 # Transcribe a sentence formatted...
