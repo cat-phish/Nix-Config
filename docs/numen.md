@@ -80,6 +80,8 @@ Sleep mode loads `~/.config/numen/sleep.phrases`, which is generated at build ti
 `dotfiles/.config/numen/sleep-filler.words` plus every word in the phrase files, so random
 speech doesn't wake it.
 
+**herdr-app** (`environment.phrases`): "agent up/down" and "space up/down" switch herdr-app agents and spaces through `herdr-app do`, so they work without focusing the app. See `docs/herdr.md`.
+
 **Typing text:** "say <words>" types the words using numen's own Vosk transcription, and
 "snake say", "camel say", "title say"... type them formatted (`voice.phrases`). If the whole
 transcript is a single filler word (the, a, an, uh, um, huh, hmm, ah, oh, and), nothing is

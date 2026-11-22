@@ -124,6 +124,11 @@
   home.file = {
     # ".ssh/.env".text = "cat ${config.sops.secrets."env_file".path}";
     ".bashrc".source = ../../dotfiles/.bashrc;
+    # herdr-app keybindings (see docs/herdr.md). Out-of-store link so the app
+    # can still edit the file live.
+    ".config/herdr-app/keys.json".source =
+      config.lib.file.mkOutOfStoreSymlink
+      "${config.home.homeDirectory}/.nix/dotfiles/.config/herdr-app/keys.json";
     ".clang-format" = {
       source = ../../dotfiles/.clang-format;
     };

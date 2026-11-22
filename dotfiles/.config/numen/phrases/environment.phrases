@@ -97,6 +97,17 @@ tab left: stick off \
 tab right: stick off \
   press ctrl+shift+l
 
+# herdr-app agents and spaces (docs/herdr.md). Sent to the app's command
+# socket, so they work even when another window has focus.
+agent up: stick off \
+  run herdr-app do agent.prev >/dev/null &
+agent down: stick off \
+  run herdr-app do agent.next >/dev/null &
+space up: stick off \
+  run herdr-app do space.prev >/dev/null &
+space down: stick off \
+  run herdr-app do space.next >/dev/null &
+
 next: stick off \
   press ctrl+n
 last: stick off \
