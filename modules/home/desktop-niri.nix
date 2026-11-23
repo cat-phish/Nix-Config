@@ -116,7 +116,11 @@ in {
       listener = pkgs.writeShellScript "ntfy-listener" ''
         if ${pkgs.iputils}/bin/ping -c 1 -W 2 "$MEDIASERVER_HOST" >/dev/null 2>&1; then
           export NTFY_TOKEN="$MEDIASERVER_NTFY_AUTH_TOKEN"
-          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/Tracearr" ${notify}
+          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/Server" ${notify}
+          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/TV" ${notify}
+          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/Movies" ${notify}
+          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/Barista-Assistant" ${notify}
+          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/Providers" ${notify}
         fi
         sleep 60
       '';
