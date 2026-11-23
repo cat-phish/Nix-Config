@@ -35,6 +35,10 @@
     model = voskModel;
   };
 
+  # Minimum Vosk score for a command utterance; tuned from the "(score ...)"
+  # lines in the phrase log. 0 turns the gate off.
+  minConfidence = 0;
+
   wakePhrase = "wake up";
   # Saying "alexa" (to an Echo) makes numen ignore speech for this long, so
   # the Alexa command and Alexa's reply don't trigger numen commands.
@@ -180,6 +184,11 @@ in {
         # Matched (and ignored) phrases: tail -f $XDG_RUNTIME_DIR/numen-phrases.log
         # (not /dev/stdout: numen can't open the journal socket as a file).
         ExecStart = "${numen}/bin/numen --phraselog=%t/numen-phrases.log";
+        # Utterances whose top Vosk score is below this are ignored (noise
+        # forced onto a short command like "up" or "say" scores low); every
+        # score is in the phrase log as "(score ...)". 0 = off. See
+        # docs/numen.md (pkgs/numen-unk.patch).
+        Environment = ["NUMEN_MIN_CONFIDENCE=${toString minConfidence}"];
         Restart = "on-failure";
         RestartSec = 2;
         # On SIGTERM numen often hangs freeing the Vosk recognizer, which held

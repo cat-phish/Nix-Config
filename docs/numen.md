@@ -123,7 +123,7 @@ User services: `numen` (on demand) and `numen-tray` (at login); `voxtype` is in
 
 ## Local package fixes
 
-`pkgs/numen.nix` changes upstream numen in two ways:
+`pkgs/numen.nix` changes upstream numen in these ways:
 
 - **`numen-unk.patch`: noise rejection.** Numen limits Vosk's grammar to the words in your
   phrases, so stock numen maps any speech or noise onto the nearest command: random "say",
@@ -133,7 +133,22 @@ User services: `numen` (on demand) and `numen-tray` (at login); `voxtype` is in
   next alternative, unless a `@transcribe` phrase ("say", "snake say"...) matched first; dropped
   utterances are logged as `(ignored: ...)`. The patch also puts the time at the start of each
   `--phraselog` line. Limit: short filler sounds can still match short commands (in a test,
-  "um yeah I guess so" still ran "gust" and "oh").
+  "um yeah I guess so" still ran "gust" and "oh"). In practice `[unk]` almost never wins: a
+  session with several ghost "up", "left" and "say" commands logged no `(ignored: ...)` lines.
+- **`numen-unk.patch`: empty best guess.** Numen asks Vosk for 3 alternatives per utterance.
+  When the best one is empty (Vosk's verdict on noise), stock numen skips it and runs the next
+  alternative. That ran ghost commands: a lone "oh" (types `o`) with no score line in the log.
+  The patch drops the utterance instead and logs `(ignored: best guess empty, next: ...)`.
+- **`numen-unk.patch`: score gate.** Because `[unk]` rarely wins, the patch also checks Vosk's
+  score for each command utterance (the `confidence` of the top alternative; numen asks for 3).
+  Every utterance is logged as `(score <top>, <seconds>s: <text> | next <score>: <text>)`
+  (the score grows with length, so long noise heard as "the" scores high), and when the top
+  score is below `NUMEN_MIN_CONFIDENCE` (set in the service from `minConfidence` in
+  `modules/home/app-numen.nix`; 0 = off) the utterance is dropped and logged with
+  `| ignored: low score`. Added because ghost arrow keys and "say" kept firing with nobody
+  talking; lowering mic gain doesn't help, since Vosk has no loudness threshold and largely
+  cancels out input volume. The score applies only to commands, not to what a transcribe
+  phrase types.
 - **`postPatch`: filler-word filter.** A transcribe phrase triggered by noise transcribes that
   noise, which Vosk hears as "the". A rule added to `scripts/tweak` empties the transcript when
   it is one filler word (the, a, an, uh, um, huh, hmm, ah, oh, and), so nothing is typed.
@@ -166,7 +181,10 @@ Then `home-manager switch --flake ~/.nix#jordan@<host>` and log out and back in 
 - **Dictation:** see the troubleshooting section of `docs/dictation.md`.
 - **Commands or words firing on their own:** see what numen matched or ignored, and when:
   `tail -f $XDG_RUNTIME_DIR/numen-phrases.log`. The `[unk]` patch catches most stray speech
-  (see "Local package fixes"); a short phrase that keeps misfiring needs a longer name.
+  (see "Local package fixes"); a short phrase that keeps misfiring needs a longer name. Each
+  utterance's `(score ...)` line shows how close a ghost was to real speech: raise
+  `minConfidence` in `modules/home/app-numen.nix` above the ghosts' scores (and below your real
+  commands'), switch, and restart numen.
 - **Ghost "the" typed:** a transcribe phrase ("say"...) was triggered by noise. The filler
   filter should stop it typing anything; if another word gets through, find it in the phrase
   log and add it to the filter in `pkgs/numen.nix`.

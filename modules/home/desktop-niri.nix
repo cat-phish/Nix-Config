@@ -103,8 +103,24 @@ in {
       pages;
 
     # Desktop notifications from the media server's ntfy topic.
-    # Secrets (NTFY_AUTH_TOKEN, MEDIASERVER_HOST) come from ~/.ssh/.env, outside the repo.
-    systemd.user.services.ntfy-listener = {
+    # Secrets (MEDIASERVER_HOST, MEDIASERVER_NTFY_SERVER, MEDIASERVER_NTFY_AUTH_TOKEN)
+    # come from ~/.ssh/.env, outside the repo.
+    systemd.user.services.ntfy-listener = let
+      # Own script so title/message stay quoted (ntfy runs the command through sh -c).
+      notify = pkgs.writeShellScript "ntfy-notify" ''
+        exec ${pkgs.libnotify}/bin/notify-send "[$NTFY_TOPIC] $NTFY_TITLE" "$NTFY_MESSAGE"
+      '';
+      # If the server answers a ping, hand over to ntfy (exec). Otherwise sleep 60s and exit,
+      # so systemd retries: about 70s between checks when away from home.
+      # The token goes through $NTFY_TOKEN, not --token, so it never shows up in ps.
+      listener = pkgs.writeShellScript "ntfy-listener" ''
+        if ${pkgs.iputils}/bin/ping -c 1 -W 2 "$MEDIASERVER_HOST" >/dev/null 2>&1; then
+          export NTFY_TOKEN="$MEDIASERVER_NTFY_AUTH_TOKEN"
+          exec ${pkgs.ntfy-sh}/bin/ntfy sub "$MEDIASERVER_NTFY_SERVER/Tracearr" ${notify}
+        fi
+        sleep 60
+      '';
+    in {
       Unit = {
         Description = "ntfy Desktop Notifications";
         After = ["graphical-session.target"];
@@ -112,20 +128,7 @@ in {
       Install.WantedBy = ["graphical-session.target"];
       Service = {
         EnvironmentFile = "%h/.ssh/.env";
-        # If the server answers a ping, hand over to ntfy (exec). Otherwise sleep 60s and exit,
-        # so systemd retries: about 70s between checks when away from home.
-        ExecStart = ''
-          ${pkgs.bash}/bin/bash -c ' \
-            if ${pkgs.iputils}/bin/ping -c 1 -W 2 "''${MEDIASERVER_HOST}" >/dev/null 2>&1; then \
-              exec ${pkgs.ntfy-sh}/bin/ntfy sub \
-                --token "''${NTFY_AUTH_TOKEN}" \
-                "http://''${MEDIASERVER_HOST}:3924/Tracearr" \
-                "${pkgs.libnotify}/bin/notify-send \"[\$$NTFY_TOPIC] \$$NTFY_TITLE\" \"\$$NTFY_MESSAGE\""; \
-            else \
-              sleep 60; \
-            fi \
-          '
-        '';
+        ExecStart = "${listener}";
         Restart = "always";
         RestartSec = "10";
       };

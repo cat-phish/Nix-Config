@@ -1,8 +1,28 @@
 diff -ru a/numen.go b/numen.go
---- a/numen.go	2026-11-21 22:11:53.400869747 -0800
-+++ b/numen.go	2026-11-21 22:29:55.045540171 -0800
-@@ -70,7 +70,7 @@
+--- a/numen.go	2026-11-22 12:43:11.717182798 -0800
++++ b/numen.go	2026-11-22 13:03:29.779240406 -0800
+@@ -13,6 +13,7 @@
+ 	"os/exec"
+ 	"os/signal"
+ 	"path/filepath"
++	"strconv"
+ 	"strings"
+ 	"syscall"
+ 	"time"
+@@ -68,9 +69,19 @@
+ 	}
+ }
  
++// Utterances whose top Vosk score is below this are ignored; 0 disables.
++// Set with the NUMEN_MIN_CONFIDENCE environment variable.
++var minConfidence = func() float64 {
++	v, err := strconv.ParseFloat(os.Getenv("NUMEN_MIN_CONFIDENCE"), 64)
++	if err != nil {
++		return 0
++	}
++	return v
++}()
++
  func writeLine(f *os.File, s string) {
  	if f != nil {
 -		_, err := io.WriteString(f, s+"\n")
@@ -10,7 +30,44 @@ diff -ru a/numen.go b/numen.go
  		if err != nil {
  			warn(err)
  		}
-@@ -665,6 +665,12 @@
+@@ -641,7 +652,35 @@
+ 			}
+ 			if finalized || ((*handler).Sticky() && cmdRec.Results()[0].Text != "") {
+ 				var result vox.Result
+-				for _, result = range cmdRec.FinalResults() {
++				results := cmdRec.FinalResults()
++				// Vosk's best guess is "nothing" (noise): stock numen skips
++				// the empty result and runs the next alternative instead,
++				// which typed ghost letters and arrow keys. Drop it.
++				if len(results) > 1 && results[0].Text == "" {
++					for _, r := range results[1:] {
++						if r.Text != "" {
++							writeLine(opts.PhraseLog, "(ignored: best guess empty, next: "+r.Text+")")
++							break
++						}
++					}
++					results = nil
++				}
++				if len(results) > 0 && results[0].Text != "" {
++					// Log Vosk's score for each utterance (to tune
++					// NUMEN_MIN_CONFIDENCE) and drop utterances that score
++					// below it: noise forced onto a short command scores low.
++					line := fmt.Sprintf("(score %.1f, %.1fs: %s", results[0].Confidence, float64(len(cmdRec.Audio))/32000, results[0].Text)
++					if len(results) > 1 {
++						line += fmt.Sprintf(" | next %.1f: %s", results[1].Confidence, results[1].Text)
++					}
++					if minConfidence > 0 && results[0].Confidence >= 0 && results[0].Confidence < minConfidence {
++						writeLine(opts.PhraseLog, line+" | ignored: low score)")
++						results = nil
++					} else {
++						writeLine(opts.PhraseLog, line+")")
++					}
++				}
++				for _, result = range results {
+ 					if result.Text == "" {
+ 						continue
+ 					}
+@@ -665,6 +704,12 @@
  						}
  						break
  					}
@@ -24,8 +81,8 @@ diff -ru a/numen.go b/numen.go
  			}
  		} else {
 diff -ru a/vox/vox.go b/vox/vox.go
---- a/vox/vox.go	2026-11-21 22:11:53.401178286 -0800
-+++ b/vox/vox.go	2026-11-21 22:12:01.471757430 -0800
+--- a/vox/vox.go	2026-11-22 12:43:11.723840062 -0800
++++ b/vox/vox.go	2026-11-22 12:43:11.761145080 -0800
 @@ -53,7 +53,7 @@
  			return nil, err
  		}
