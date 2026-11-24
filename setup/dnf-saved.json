@@ -1,6 +1,8 @@
 {
   "packages": {
     "common": [
+      "SFML-devel",
+      "android-tools",
       "chromium",
       "clang",
       "golang",
@@ -8,6 +10,7 @@
       "nheko",
       "obs-studio",
       "python3-pip",
+      "python3-pyusb",
       "rpi-imager",
       "scdoc",
       "snapd",
