@@ -146,7 +146,7 @@
     nixosConfigurations = {
       nixos-desktop = mkNixos "nixos-desktop";
       nixos-laptop = mkNixos "nixos-laptop";
-      agent-vm = mkServer "agent-vm"; # isolated coding-agent VM on the Unraid server
+      code = mkServer "code"; # isolated coding-agent VM on Proxmox VE (code.vm.lan)
     };
     homeConfigurations = {
       "jordan@fedora-desktop" = mkHome {

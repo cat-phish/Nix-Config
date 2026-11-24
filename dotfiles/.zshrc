@@ -741,5 +741,5 @@ alias lsl="eza --color=always --long --icons=always"
 # Zoxide
 eval "$(zoxide init --cmd cd zsh)"
 
-# direnv (per-project dev shells; installed on agent-vm)
+# direnv (per-project dev shells; installed on the code VM)
 command -v direnv >/dev/null && eval "$(direnv hook zsh)"

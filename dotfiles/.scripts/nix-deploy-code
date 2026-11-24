@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# Update and deploy the agent VM (nixosConfigurations.agent-vm) from this machine.
+# Update and deploy the agent VM (nixosConfigurations.code, code.vm.lan) from this machine.
 #
-#   nix-deploy-agent-vm               commit check, git sync, flake update, build, deploy
-#   nix-deploy-agent-vm --no-update   deploy the current config without updating flake inputs
-#   nix-deploy-agent-vm --dry         build only; don't touch the VM
+#   nix-deploy-code               commit check, git sync, flake update, build, deploy
+#   nix-deploy-code --no-update   deploy the current config without updating flake inputs
+#   nix-deploy-code --dry         build only; don't touch the VM
 #
 # Options:
-#   --host <name>    flake output to deploy (default: agent-vm)
-#   --target <ssh>   where to deploy (default: the <host>-admin alias from ~/.ssh/config, see docs/agent-vm.md Step 8)
+#   --host <name>    flake output to deploy (default: code)
+#   --target <ssh>   where to deploy (default: the <host>-admin alias from ~/.ssh/config, see docs/code-vm.md Step 8)
 #
 # The VM never builds anything: the system is built here and copied over as `jordan`.
 
 set -euo pipefail
 
 FLAKE_PATH="$HOME/.nix"
-HOST="agent-vm"
+HOST="code"
 TARGET=""
 DO_UPDATE=true
 DRY=false

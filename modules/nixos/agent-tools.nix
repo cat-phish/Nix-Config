@@ -1,4 +1,4 @@
-# Agent tooling for agent-vm. This is the swappable layer: changing which agent CLI
+# Agent tooling for the `code` VM (code.vm.lan). This is the swappable layer: changing which agent CLI
 # or multiplexer the VM runs should only mean editing this file.
 {pkgs, ...}: {
   # Lets prebuilt Linux binaries run (pip wheels with C extensions, uv-downloaded Pythons,
@@ -6,9 +6,8 @@
   programs.nix-ld.enable = true;
 
   # Rootless Docker: each user runs their own daemon (`docker`/`docker compose` just work,
-  # no docker group, which would be root-equivalent). It also keeps containers behind the
-  # LAN egress block: their traffic leaves as a user process through the `output` chain,
-  # where rootful Docker's would be routed (forward chain) around it.
+  # no docker group, which would be root-equivalent). LAN egress is blocked outside the
+  # guest by the Proxmox firewall, so container traffic is covered either way.
   virtualisation.docker.rootless = {
     enable = true;
     setSocketVariable = true; # sets DOCKER_HOST for every user
@@ -40,7 +39,7 @@
     tmux
 
     # --- herdr ---
-    # herdr-core provides `hc`; herdr-app on the desktop attaches over SSH (`ssh agent-vm hc connect`).
+    # herdr-core provides `hc`; herdr-app on the desktop attaches over SSH (`ssh agent@code.vm.lan hc connect`, or the `code` alias from docs/code-vm.md).
     herdr-core
   ];
 

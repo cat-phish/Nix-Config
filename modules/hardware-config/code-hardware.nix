@@ -1,4 +1,7 @@
-# agent-vm hardware: Unraid (QEMU/KVM) VM, Q35 + OVMF, one virtio disk.
+# code hardware: Proxmox VE (QEMU/KVM) VM, Q35 + OVMF, one VirtIO disk.
+# PLACEHOLDER carried over from the Unraid VM. Once the Proxmox VM boots, replace the
+# hardware part with `nixos-generate-config --show-hardware-config` output (drop its
+# fileSystems/swapDevices: disko below owns the disk layout). See docs/code-vm.md Step 6.
 # The disk layout is declared with disko, so nixos-anywhere partitions it at install time.
 {modulesPath, ...}: {
   imports = [(modulesPath + "/profiles/qemu-guest.nix")];
