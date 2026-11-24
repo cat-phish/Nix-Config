@@ -4,15 +4,15 @@
     "activateLinux": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "activateLinux",
-      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
+      "commit": "02c227521db94aae8f805aa6b41db6a5ee33399b"
     },
     "aiAssistant": {
       "repo": "https://github.com/devnullvoid/dms-ai-assistant",
-      "commit": "0fe69b550518b402dfee50603bb1b855a964a2a9"
+      "commit": "cd7cee1590d5abcf0c2e83cc739abed4d145967e"
     },
     "aiOverviewControl": {
       "repo": "https://github.com/bernardopg/AiOverviewControl",
-      "commit": "cce8fff14085cad8ba72487f650a621a02e8005b"
+      "commit": "fb5f36b2b0104971edf97608edce9b6d6b032855"
     },
     "aibou": {
       "repo": "https://github.com/satoshoe-dev/aibou",
@@ -31,7 +31,7 @@
     "breathing": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "breathing",
-      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
+      "commit": "02c227521db94aae8f805aa6b41db6a5ee33399b"
     },
     "cast": {
       "repo": "https://github.com/Conava/dux-plugins",
@@ -40,22 +40,22 @@
     },
     "colorPickerDms": {
       "repo": "https://github.com/bernardopg/color-picker-dms",
-      "commit": "b16ec4b3aefddfadac25c94275c4ff494ce1cd62"
+      "commit": "04ab9c4354f8e5fbe966eafc0f0264b7794ef719"
     },
     "dankActions": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankActions",
-      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+      "commit": "a486ffcf15f81d578710fae31d6129b3a210d3f5"
     },
     "dankBatteryAlerts": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankBatteryAlerts",
-      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+      "commit": "a486ffcf15f81d578710fae31d6129b3a210d3f5"
     },
     "dankClight": {
       "repo": "https://github.com/duxlabs-dev/dux-plugins",
       "path": "DankClight",
-      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+      "commit": "a486ffcf15f81d578710fae31d6129b3a210d3f5"
     },
     "dankConsoleSteam": {
       "repo": "https://github.com/JessVolet/DankConsoleModeWithSteam",
@@ -64,17 +64,17 @@
     "dankDesktopWeather": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankDesktopWeather",
-      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+      "commit": "a486ffcf15f81d578710fae31d6129b3a210d3f5"
     },
     "dankHooks": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankHooks",
-      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+      "commit": "a486ffcf15f81d578710fae31d6129b3a210d3f5"
     },
     "dankPomodoroTimer": {
       "repo": "https://github.com/AvengeMedia/dms-plugins",
       "path": "DankPomodoroTimer",
-      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+      "commit": "a486ffcf15f81d578710fae31d6129b3a210d3f5"
     },
     "dankRssWidget": {
       "repo": "https://github.com/BrendonJL/dms-rss-widget",
@@ -86,15 +86,15 @@
     },
     "developerUtilities": {
       "repo": "https://github.com/xxyangyoulin/dms-plugin-developer-utilities",
-      "commit": "b115dcbbe0d82c80190f4fcc255a935e33889f4a"
+      "commit": "3e8543f5876648bfcf346253e61221cbb200dd0e"
     },
     "discordVoice": {
       "repo": "https://github.com/PandorasFox/dms-discord-widget",
-      "commit": "7771a41ed2b8810150afadfdd9241e1e8d97b7b9"
+      "commit": "2fe282e3d7a8c37c7581391f90eea8906e426ec8"
     },
     "displayManager": {
       "repo": "https://github.com/felri/display-manager-plugin-niri-dank-linux",
-      "commit": "64348e6ecf09737de75328c3f38f2d5c8c5fa313"
+      "commit": "ba8e9418e0393ca3e9bbcda76be044f126cbed14"
     },
     "displayMirror": {
       "repo": "https://github.com/jfchenier/dms-display-mirror",
@@ -149,7 +149,7 @@
     "mediaDownloader": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "mediaDownloader",
-      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
+      "commit": "02c227521db94aae8f805aa6b41db6a5ee33399b"
     },
     "modernClock": {
       "repo": "https://github.com/beefsizzle/ModernClockDMS",
@@ -175,7 +175,7 @@
     "ocrScanner": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "ocrScanner",
-      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
+      "commit": "02c227521db94aae8f805aa6b41db6a5ee33399b"
     },
     "pokeDash": {
       "repo": "https://github.com/samgrande/PokeDash",
@@ -194,7 +194,7 @@
     "quickCapture": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "quickCapture",
-      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
+      "commit": "02c227521db94aae8f805aa6b41db6a5ee33399b"
     },
     "radioAtlasLite": {
       "repo": "https://github.com/alamin147/RadioAtlasLite",
@@ -206,12 +206,12 @@
     },
     "tailscaleDashboard": {
       "repo": "https://github.com/HotcocoaCanary/Canary-DMS-TailscaleDashboard",
-      "commit": "48b5aa68c69d82434110d2bd1332f82f6fe735c4"
+      "commit": "7d2f522d2e5086ad5e0ae642664752c684a42933"
     },
     "takeABreak": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "takeABreak",
-      "commit": "b7d5dbff7b768b8500d8d57ca9bdb3cae8957159"
+      "commit": "02c227521db94aae8f805aa6b41db6a5ee33399b"
     },
     "timeUntil": {
       "repo": "https://github.com/fdmarcin/TimeUntil",
@@ -232,7 +232,7 @@
     },
     "wallabag": {
       "repo": "https://github.com/arqueon/dms-wallabag",
-      "commit": "ff69a337f503816c636d9b1177942d076a3130f7"
+      "commit": "025a6a38278957953ae6c4b636387255d6784b38"
     },
     "wallpaperBing": {
       "repo": "https://github.com/max72bra/DankPluginBingWallpaper",
