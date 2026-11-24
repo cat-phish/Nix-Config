@@ -99,7 +99,7 @@ in {
       pnpm
       ripgrep
       # pyspark ships its own Spark (spark-submit, pyspark shell); runs on the jdk17 below.
-      (python3.withPackages (ps: [ps.selenium ps.pyspark]))
+      (python3.withPackages (ps: [ps.selenium ps.pyspark ps.numpy]))
       trivy
       uv
       vscode
