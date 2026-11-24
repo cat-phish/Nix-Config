@@ -7,7 +7,43 @@
   nvim-config,
   emacs-config,
   ...
-}: {
+}: let
+  # nixpkgs wraps claude with `--prefix LD_LIBRARY_PATH : <alsa-lib>/lib` so it
+  # can load libasound. Everything Claude runs (Bash tool, hooks) inherits it,
+  # and on Fedora non-Nix programs (e.g. Playwright's Chromium) then load Nix's
+  # libasound, built against a newer glibc than Fedora's, and crash. Claude
+  # itself must keep the path (patchelf-ing an RPATH in breaks the Bun binary),
+  # so CLAUDE_CODE_SHELL_PREFIX strips it from each command instead.
+  # See docs/claude-code.md.
+  claudeAlsaLib = lib.makeLibraryPath [pkgs.alsa-lib];
+  claudeShellPrefix = pkgs.writeShellScript "claude-shell-prefix" ''
+    a=":${claudeAlsaLib}:"
+    p=":''${LD_LIBRARY_PATH:-}:"
+    while [[ $p == *"$a"* ]]; do p=''${p//"$a"/:}; done
+    p=''${p#:}
+    p=''${p%:}
+    if [ -n "$p" ]; then export LD_LIBRARY_PATH="$p"; else unset LD_LIBRARY_PATH; fi
+    # Claude passes the whole command as one string, written for $SHELL.
+    if [ "$#" -eq 1 ]; then
+      case "''${SHELL:-}" in
+        */zsh | */bash) exec "$SHELL" -c "$1" ;;
+        *) exec ${pkgs.bash}/bin/bash -c "$1" ;;
+      esac
+    fi
+    exec "$@"
+  '';
+  claude-code = pkgs.symlinkJoin {
+    name = "claude-code-${pkgs.claude-code.version}";
+    paths = [pkgs.claude-code];
+    nativeBuildInputs = [pkgs.makeWrapper];
+    postBuild = ''
+      rm $out/bin/claude
+      makeWrapper ${pkgs.claude-code}/bin/claude $out/bin/claude \
+        --set-default CLAUDE_CODE_SHELL_PREFIX ${claudeShellPrefix}
+    '';
+    inherit (pkgs.claude-code) meta;
+  };
+in {
   # Plasma Manager KDE Configuration
   imports = [
   ];
@@ -34,7 +70,7 @@
       bat # cat replacement with syntax highlighting
       # clang
       clang-tools
-      claude-code
+      claude-code # local wrapper above (strips alsa LD_LIBRARY_PATH from commands)
       chromedriver
       docker-compose
       eza # ls replacement
@@ -62,7 +98,8 @@
       }))
       pnpm
       ripgrep
-      (python3.withPackages (ps: [ps.selenium]))
+      # pyspark ships its own Spark (spark-submit, pyspark shell); runs on the jdk17 below.
+      (python3.withPackages (ps: [ps.selenium ps.pyspark]))
       trivy
       uv
       vscode
@@ -97,6 +134,20 @@
 
   programs.lazygit = {
     enable = true;
+  };
+
+  # MongoDB server, mongosh and mongoimport/mongoexport. The nixpkgs mongodb builds from
+  # source (very slow), so on Fedora it comes from MongoDB's own dnf repo. See docs/dnf.md.
+  my.fedora.dnf = {
+    repoFiles = ["${pkgs.writeTextDir "mongodb-org-7.0.repo" ''
+      [mongodb-org-7.0]
+      name=MongoDB Repository
+      baseurl=https://repo.mongodb.org/yum/redhat/9/mongodb-org/7.0/x86_64/
+      gpgcheck=1
+      enabled=1
+      gpgkey=https://www.mongodb.org/static/pgp/server-7.0.asc
+    ''}/mongodb-org-7.0.repo"];
+    packages = ["mongodb-org" "mongodb-mongosh" "mongodb-database-tools"];
   };
 
   programs.java = {

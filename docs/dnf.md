@@ -30,7 +30,15 @@ my.fedora.dnf.packages = ["fprintd" "fprintd-pam"];
 | `swaps` | Renamed packages, `{ old = "new"; }`: if old is installed, `dnf swap old new` instead of installing new |
 
 Current declarations live in `common.nix`, `desktop-niri.nix` (niri, DMS from `duxlabs/dms`),
-`app-tailscale.nix`, `app-wireguard-tray.nix` and `hosts/fedora-laptop-home.nix`.
+`app-tailscale.nix`, `app-wireguard-tray.nix`, `dev-environment.nix` and `hosts/fedora-laptop-home.nix`.
+
+`repoFiles` also takes a local path. A repo that publishes no `.repo` URL can be written with
+`pkgs.writeTextDir "<name>.repo"` and passed as `"${dir}/<name>.repo"`, which keeps the basename
+clean for the `/etc/yum.repos.d` check. `dev-environment.nix` does this for MongoDB 7.0
+(`mongodb-org`, `mongodb-mongosh`, `mongodb-database-tools`): the nixpkgs `mongodb` builds from
+source and takes too long, and the database course projects need the server, `mongosh` and
+`mongoimport`. Spark comes from Nix instead (`pyspark` in the Python env, which includes
+`spark-submit`).
 
 Packages saved by the capture step are stored in `setup/dnf-saved.json` (`packages.common`,
 `packages.<host>`, `ignore.<host>`), which the module merges in. You can move an entry from there
