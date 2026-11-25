@@ -6,7 +6,13 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
-REPO="$1"
+RAW_REPO="$1"
+REPO="${RAW_REPO#git@github.com:}"
+REPO="${REPO#https://github.com/}"
+REPO="${REPO#http://github.com/}"
+REPO="${REPO%/}"
+REPO="${REPO%.git}"
+
 VM_HOST="${2:-code}"
 NAME="${REPO##*/}"
 SSH_ALIAS="github-${NAME}"
