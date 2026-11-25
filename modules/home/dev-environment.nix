@@ -90,12 +90,7 @@ in {
       navi
       nodejs_22
       oh-my-zsh
-      # TODO: drop override once nixpkgs fixes the opencode node_modules hash (broken in 2.2.5)
-      (opencode.overrideAttrs (old: {
-        node_modules = old.node_modules.overrideAttrs {
-          outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
-        };
-      }))
+      opencode
       pnpm
       ripgrep
       # pyspark ships its own Spark (spark-submit, pyspark shell); runs on the jdk17 below.

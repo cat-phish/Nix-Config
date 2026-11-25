@@ -1,6 +1,18 @@
 # Agent tooling for the `code` VM (code.vm.lan). This is the swappable layer: changing which agent CLI
 # or multiplexer the VM runs should only mean editing this file.
-{pkgs, ...}: {
+{
+  pkgs,
+  inputs,
+  ...
+}: let
+  # TEMPORARY: codex fails to build on current unstable (aws-lc-sys wants a system AWS-LC), so
+  # it comes from the nixpkgs-hold input, same as modules/home/dev-environment.nix. Move it back
+  # into the list below once it builds again (see backlog.md).
+  pkgs-hold = import inputs.nixpkgs-hold {
+    system = pkgs.stdenv.hostPlatform.system;
+    config.allowUnfree = true;
+  };
+in {
   # Lets prebuilt Linux binaries run (pip wheels with C extensions, uv-downloaded Pythons,
   # npm packages that ship binaries). Without it they fail with "No such file or directory".
   programs.nix-ld.enable = true;
@@ -19,13 +31,8 @@
     # --- Agent CLIs ---
     antigravity-cli
     claude-code
-    codex
-    # TODO: drop override once nixpkgs fixes the opencode node_modules hash (same as modules/home/dev-environment.nix)
-    (opencode.overrideAttrs (old: {
-      node_modules = old.node_modules.overrideAttrs {
-        outputHash = "sha256-prx9dX7kUvs/E3zopkaPk5LXh3xJAy5sZeum/W8L7cA=";
-      };
-    }))
+    pkgs-hold.codex # held back, see the let block above
+    opencode
 
     # --- Dev basics ---
     fd
