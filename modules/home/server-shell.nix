@@ -1,5 +1,5 @@
 # Terminal comforts for headless servers (the `code` VM): the same zsh, p10k, tmux, nvim and
-# git setup as the desktops, without anything graphical. Used for both `jordan` and
+# git setup as the desktops, without anything graphical. Used for both `admin` and
 # `agent` through the Home Manager NixOS module in mkServer (flake.nix).
 # zsh plugins (zinit, p10k) and tmux plugins (tpm) clone themselves from GitHub on first start.
 {

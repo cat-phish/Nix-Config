@@ -3,7 +3,7 @@
 How to set up `code` (`code.vm.lan`): a small, headless NixOS VM where coding agents run
 away from your personal machines. It's built from this flake (`nixosConfigurations.code`),
 so the whole VM is reproducible and is redeployed from your desktop. It runs on the Proxmox
-VE host `vm.lan`; clients log in as `agent@code.vm.lan`, deploys go to `jordan@code.vm.lan`.
+VE host `vm.lan`; clients log in as `agent@code.vm.lan`, deploys go to `admin@code.vm.lan`.
 
 The steps work on any KVM/QEMU host. The [Proxmox VE](#proxmox-ve) and
 [Fedora desktop (virt-manager)](#fedora-desktop-virt-manager) sections cover the
@@ -43,7 +43,7 @@ security group), where the guest can't turn it off, so the guest nftables block 
 | **OS** | Headless NixOS: no desktop, audio, flatpak or talon |
 | **Size** | 2 vCPU, 4 GB RAM, 40 GB disk (enough for 1–3 agents doing light builds) |
 | **Access** | SSH with keys only, over Tailscale (and over the LAN) |
-| **Users** | `jordan`: admin and deploys (wheel, passwordless sudo). `agent`: runs the agents (no sudo) |
+| **Users** | `admin`: admin and deploys (wheel, passwordless sudo). `agent`: runs the agents (no sudo) |
 | **Isolation** | The Proxmox firewall (`agent-isolated` security group) stops it opening connections to your LAN; Tailscale ACLs stop it from reaching tailnet devices |
 | **Tools** | claude-code, codex, opencode, antigravity (`agy`), git, gh, gitleaks, node 22, python 3 + uv, rootless Docker + compose, ripgrep, fd, jq, tmux, your nvim/zsh setup, herdr-core (`hc`) |
 
@@ -60,11 +60,11 @@ desktop and copied over.
 | File | What it does |
 |---|---|
 | `flake.nix` | `mkServer` helper and the `code` output; `disko` input |
-| `server-configuration.nix` | Shared headless base: SSH hardening, Tailscale, firewall, nix GC, `jordan` user |
+| `server-configuration.nix` | Shared headless base: SSH hardening, Tailscale, firewall, nix GC, configurable admin account (`admin` on `code`) |
 | `hosts/code-configuration.nix` | Hostname/domain, SSH keys, the `agent` user, IPv6 off, boot loader, `stateVersion` |
 | `modules/nixos/agent-tools.nix` | The swappable tool layer: agent CLIs and herdr. Edit only this file to change tools |
 | `modules/hardware-config/code-hardware.nix` | QEMU guest profile and the disk layout (disko). Placeholder until regenerated on Proxmox (Step 6) |
-| `modules/home/server-shell.nix` | Your zsh/p10k/tmux/nvim/git setup for `jordan` and `agent` (Home Manager), plus direnv for per-project dev shells |
+| `modules/home/server-shell.nix` | Your zsh/p10k/tmux/nvim/git setup for `admin` and `agent` (Home Manager), plus direnv for per-project dev shells |
 
 ---
 
@@ -72,7 +72,7 @@ desktop and copied over.
 
 You need **two different keys**:
 
-- **Admin key**: your normal key (or a dedicated one) for `jordan`, used to deploy and
+- **Admin key**: your normal key (or a dedicated one) for `admin`, used to deploy and
   for sudo.
 - **Agent key**: a new key that clients (herdr-app, `hc`, plain ssh) use to log in as
   `agent`. Keep it separate so that anything holding it can't deploy or sudo.
@@ -221,14 +221,14 @@ After it reboots:
 The installed system has **no passwords**. Log in with SSH using your admin key:
 
 ```sh
-ssh jordan@<ip>
+ssh admin@<ip>
 ```
 
 **Regenerate the hardware config.** `code-hardware.nix` is a placeholder carried over from the
 Unraid VM. Once the Proxmox VM has booted:
 
 ```sh
-ssh jordan@<ip> nixos-generate-config --show-hardware-config
+ssh admin@<ip> nixos-generate-config --show-hardware-config
 ```
 
 Copy the `boot.initrd.*`, `boot.kernelModules` and similar lines into
@@ -260,19 +260,19 @@ restricted from the start.
 2. On the VM:
 
    ```sh
-   ssh jordan@<ip>
+   ssh admin@<ip>
    sudo tailscale up --advertise-tags=tag:agent
    ```
 
    Open the login URL it prints and approve the device. Tagged devices have key expiry
    turned off by default; check that it's off in the Machines list.
 
-3. Confirm from your desktop: `ssh jordan@code` (MagicDNS name). On the LAN, `code.vm.lan`
+3. Confirm from your desktop: `ssh admin@code` (MagicDNS name). On the LAN, `code.vm.lan`
    works too; the Step 8 aliases use it.
 
 4. **`tailscale serve` for PWA testing.** Tailscale is enabled for every `mkServer` host by
    `server-configuration.nix`. `tailscale serve` needs root or a Tailscale operator, so run
-   it as `jordan` (`sudo tailscale serve --bg 3000`) for a port `agent` is listening on, and
+   it as `admin` (`sudo tailscale serve --bg 3000`) for a port `agent` is listening on, and
    enable **HTTPS certificates** in the admin console (DNS page) for the `https://code.<tailnet>.ts.net`
    URL. Making `agent` the operator (`--operator=agent`) would let agents run it themselves,
    but also reconfigure or stop Tailscale, so it isn't set.
@@ -291,13 +291,33 @@ Host code
 
 Host code-admin
     HostName code.vm.lan
-    User jordan
+    User admin
     ForwardAgent no
 ```
 
 The SSH config isn't managed by Home Manager (it lives in `~/.ssh`, outside the repo).
 Test it: `ssh code` (same as `ssh agent@code.vm.lan`) should give you a shell as `agent`.
-`nix-deploy-code` deploys through `code-admin` (`jordan@code.vm.lan`).
+`nix-deploy-code` deploys through `code-admin` (`admin@code.vm.lan`).
+
+**Renaming an existing VM's admin account:** `my.server.adminUser = "admin"` in
+`hosts/code-configuration.nix` selects the account used for sudo, trusted Nix uploads,
+and the login-key assertion. It must be inside the module's `in { ... }` configuration;
+putting it in `let` only creates an unused local binding. The `agent` account stays
+unprivileged, and Home Manager configures shells for `admin` and `agent`.
+
+For a VM still running the old `jordan` configuration, deploy once using the existing
+login (run this from your desktop):
+
+```sh
+nix run 'nixpkgs#nixos-rebuild' -- switch \
+  --flake "$HOME/.nix#code" --target-host jordan@code.vm.lan --sudo
+```
+
+Then set `User admin` in your desktop's `code-admin` SSH alias and check
+`ssh code-admin whoami` and `ssh code-admin sudo -n true`. This creates a new account
+with `/home/admin`; it does not move `/home/jordan` or its files. Keep the agent key
+separate from the admin keys; comments such as `jordan@fedora-desktop` on public keys
+identify their source and do not set the VM login name.
 
 **herdr** (current agent tool):
 
@@ -396,7 +416,7 @@ Proxmox VM):
   bus in the hypervisor, or change `device` in `code-hardware.nix` to what `lsblk` shows.
 - **The VM won't boot after install (drops to the UEFI shell or "no bootable device").** The VM
   is in legacy BIOS mode. Recreate it with OVMF/UEFI.
-- **`nixos-rebuild --target-host` fails copying paths ("lacks a signature").** Deploy as `jordan`,
+- **`nixos-rebuild --target-host` fails copying paths ("lacks a signature").** Deploy as `admin`,
   which is a trusted Nix user. `agent` isn't.
 - **herdr core isn't running.** It's started at boot by the `herdr-core` user unit for `agent`
   (`modules/nixos/agent-tools.nix`). Check it with `ssh code systemctl --user status herdr-core`

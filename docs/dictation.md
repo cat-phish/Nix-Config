@@ -103,9 +103,18 @@ this repo. The old code is in git history (removed in the commit that added this
 - **No waveform panel.** Check the log for "could not find 'shell.qml'" or OSD child exits.
 - **F9 does nothing.** `id -nG` must list `input` (log out and in after adding it).
 - **Say/dictate stops while you're still talking**, or never stops: tune
-  `audio.external_trigger_speech_threshold_dbfs` (set to -38; Voxtype's default -20 was louder than
-  this mic, so every recording stopped after 2 s). Lower it if it cuts you off, raise it if it
-  never stops.
+  `my.dictation.speechThresholdDbfs` (Voxtype's `audio.external_trigger_speech_threshold_dbfs`).
+  Lower it if it cuts you off, raise it if it never stops. Set it per host in
+  `hosts/<host>-home.nix`. The threshold has to sit above that mic's room noise and below speech:
+  - **Default -38** (desktop). Voxtype's own default, -20, was louder than the desktop mic, so
+    every recording stopped after 2 s. Desktop noise floor is about -53, room noise up to -34.
+  - **fedora-laptop -15.** The X1 Carbon's digital mic runs a DSP compressor
+    (`Dmic0 Capture DRC`, on), which lifts a quiet room to 100 ms peaks of -28 median and
+    -20 max (RMS -35). That was above -38, so recordings never stopped by themselves.
+
+  To measure a mic, stay quiet for 5 s with
+  `pw-record --rate 16000 --channels 1 --format s16 /tmp/noise.wav` and look at the peak levels.
+  Pick a threshold a few dB above the loudest noise.
 - **Nothing happens on Mod+D.** Run `systemctl --user status voxtype` and check the log.
   "Failed to start audio" means the ALSA plugin fix above is missing.
 - **Panel flashes up for a moment on its own.** Something ran `dictate start`: the voxtype log

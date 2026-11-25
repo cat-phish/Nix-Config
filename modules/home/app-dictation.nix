@@ -85,10 +85,8 @@ let
       # Only `voxtype record start` (Mod+D, numen): stop after a pause.
       # Push-to-talk ignores it.
       external_trigger_silence_timeout_secs = 2.0;
-      # Peak level that counts as speech. The default (-20) is louder than
-      # this mic, so recordings always stopped after 2 s. Noise floor here is
-      # about -53, room noise up to -34.
-      external_trigger_speech_threshold_dbfs = -38.0;
+      # Peak level that counts as speech; per host, see my.dictation below.
+      external_trigger_speech_threshold_dbfs = config.my.dictation.speechThresholdDbfs;
     };
     # Drop silent recordings (e.g. an accidental F9 tap).
     vad.enabled = true;
@@ -126,14 +124,24 @@ let
     text.filter_filler_words = true;
   };
 in {
-  home.packages = [voxtype dictate];
+  # Voxtype's default (-20) is louder than the desktop mic, so recordings
+  # always stopped after 2 s. Desktop noise floor is about -53, room noise up
+  # to -34. A host whose mic is noisier (fedora-laptop) raises it, or its
+  # recordings never stop by themselves.
+  options.my.dictation.speechThresholdDbfs = lib.mkOption {
+    type = lib.types.float;
+    default = -38.0;
+    description = "Peak level (dBFS) Voxtype counts as speech for its silence auto-stop.";
+  };
+
+  config.home.packages = [voxtype dictate];
 
   # Linked out of the store would block `voxtype config set`/the TUI; that's
   # fine: edit it here. Validate with `voxtype config`.
-  xdg.configFile."voxtype/config.toml".source = voxtypeConfig;
+  config.xdg.configFile."voxtype/config.toml".source = voxtypeConfig;
 
   # Download the model once (~640 MB, into ~/.local/share/voxtype/models).
-  home.activation.voxtypeModel = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  config.home.activation.voxtypeModel = lib.hm.dag.entryAfter ["writeBoundary"] ''
     if [ ! -e "${config.xdg.dataHome}/voxtype/models/${voxtypeModel}" ]; then
       echo "voxtype: downloading ${voxtypeModel}..."
       run ${voxtype}/bin/voxtype setup --download --model ${voxtypeModel} --quiet \
@@ -141,7 +149,7 @@ in {
     fi
   '';
 
-  systemd.user.services.voxtype = {
+  config.systemd.user.services.voxtype = {
     Unit = {
       Description = "Voxtype dictation daemon";
       PartOf = ["graphical-session.target"];

@@ -5,11 +5,10 @@
 # The tools themselves are in modules/nixos/agent-tools.nix.
 # Setup guide: docs/code-vm.md.
 {
-  lib,
   pkgs,
   ...
 }: let
-  # Public keys only. jordan = the admin/deploy key; agent = the key the agent clients use.
+  # Public keys only. admin = the admin/deploy key; agent = the key the agent clients use.
   # Keep them different so the agent key can't deploy or sudo.
   adminKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOa80EdbiAlEsJgMvotXA0jcicun018mby+0Nlh6IWIp jordan@fedora-laptop"
@@ -38,8 +37,9 @@ in {
 
   services.qemuGuest.enable = true;
 
-  users.users.jordan.openssh.authorizedKeys.keys = adminKeys;
-  my.server.shellUsers = ["jordan" "agent"];
+  my.server.adminUser = "admin";
+  users.users.admin.openssh.authorizedKeys.keys = adminKeys;
+  my.server.shellUsers = ["admin" "agent"];
 
   # Unprivileged account that runs the agents. No wheel, no sudo.
   users.users.agent = {

@@ -9,7 +9,7 @@
 #   --host <name>    flake output to deploy (default: code)
 #   --target <ssh>   where to deploy (default: the <host>-admin alias from ~/.ssh/config, see docs/code-vm.md Step 8)
 #
-# The VM never builds anything: the system is built here and copied over as `jordan`.
+# The VM never builds anything: the system is built here and copied over as `admin`.
 
 set -euo pipefail
 

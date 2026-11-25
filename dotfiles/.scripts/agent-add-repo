@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [ "$#" -lt 1 ]; then
+  echo "Usage: $(basename "$0") <owner/repo> [ssh-host=code]" >&2
+  exit 1
+fi
+
+REPO="$1"
+VM_HOST="${2:-code}"
+NAME="${REPO##*/}"
+SSH_ALIAS="github-${NAME}"
+
+# 1. Verify gh is authenticated locally
+gh auth status >/dev/null
+
+# 2. Generate deploy key on the VM (idempotent) and fetch public key
+PUBKEY="$(ssh "$VM_HOST" bash -s -- "$NAME" <<'REMOTE'
+  set -euo pipefail
+  NAME="$1"
+  mkdir -p "$HOME/.ssh" && chmod 700 "$HOME/.ssh"
+  KEY="$HOME/.ssh/deploy-$NAME"
+  if [ ! -f "$KEY" ]; then
+    ssh-keygen -t ed25519 -N "" -C "code.vm.lan-$NAME" -f "$KEY" >/dev/null
+  fi
+  cat "$KEY.pub"
+REMOTE
+)"
+
+# 3. Register read/write deploy key on GitHub if not already present
+KEY_BODY="$(awk '{print $2}' <<<"$PUBKEY")"
+if gh repo deploy-key list --repo "$REPO" --json key -q '.[].key' | grep -Fq "$KEY_BODY"; then
+  echo "Deploy key already registered on $REPO"
+else
+  TMPKEY="$(mktemp)"
+  trap 'rm -f "$TMPKEY"' EXIT
+  printf '%s\n' "$PUBKEY" > "$TMPKEY"
+  gh repo deploy-key add "$TMPKEY" \
+    --repo "$REPO" \
+    --title "code.vm.lan (agent)" \
+    --allow-write
+  echo "Added read/write deploy key to $REPO"
+fi
+
+# 4. Create protect-main ruleset if not already present (actor_id 5 = Repository admin)
+if gh api "repos/$REPO/rulesets" --jq '.[].name' | grep -Fxq "protect-main"; then
+  echo "Ruleset 'protect-main' already exists on $REPO"
+else
+  if gh api --method POST "repos/$REPO/rulesets" --input - >/dev/null <<'JSON'
+{
+  "name": "protect-main",
+  "target": "branch",
+  "enforcement": "active",
+  "bypass_actors": [
+    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }
+  ],
+  "conditions": {
+    "ref_name": { "include": ["~DEFAULT_BRANCH"], "exclude": [] }
+  },
+  "rules": [
+    { "type": "deletion" },
+    { "type": "non_fast_forward" },
+    {
+      "type": "pull_request",
+      "parameters": {
+        "dismiss_stale_reviews_on_push": false,
+        "require_code_owner_review": false,
+        "require_last_push_approval": false,
+        "required_approving_review_count": 0,
+        "required_review_thread_resolution": false
+      }
+    }
+  ]
+}
+JSON
+  then
+    echo "Created 'protect-main' ruleset on $REPO"
+  else
+    echo "Warning: could not create ruleset (check GitHub Pro/admin perms on $REPO)" >&2
+  fi
+fi
+
+# 5. Add SSH Host alias, clone repo into ~/code, and set agent git identity on the VM
+ssh "$VM_HOST" bash -s -- "$REPO" "$NAME" "$SSH_ALIAS" <<'REMOTE'
+  set -euo pipefail
+  REPO="$1"
+  NAME="$2"
+  ALIAS="$3"
+
+  touch "$HOME/.ssh/config" && chmod 600 "$HOME/.ssh/config"
+  if ! grep -Fq "Host $ALIAS" "$HOME/.ssh/config"; then
+    cat <<EOF >> "$HOME/.ssh/config"
+
+Host $ALIAS
+  HostName github.com
+  User git
+  IdentityFile ~/.ssh/deploy-$NAME
+  IdentitiesOnly yes
+EOF
+  fi
+
+  mkdir -p "$HOME/code"
+  if [ ! -d "$HOME/code/$NAME/.git" ]; then
+    git clone "git@$ALIAS:$REPO.git" "$HOME/code/$NAME"
+  fi
+
+  cd "$HOME/code/$NAME"
+  git config user.name "Code Agent"
+  git config user.email "agent@code.vm.lan"
+REMOTE
+
+echo "Ready: ~/code/$NAME on $VM_HOST (alias: $SSH_ALIAS)"

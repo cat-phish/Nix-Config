@@ -10,6 +10,11 @@
   my.niri.deviceConfig = ../dotfiles/.config/niri/laptop-config.kdl;
   my.niri.dmsSettings = "laptop-settings.json";
 
+  # The X1's mic DSP compressor (Dmic0 Capture DRC) lifts room noise to peaks
+  # of -28 to -20 dBFS, above the default -38, so dictation never auto-stopped.
+  # See docs/dictation.md.
+  my.dictation.speechThresholdDbfs = -15.0;
+
   # Fingerprint sudo (init.sh adds pam_fprintd to /etc/pam.d/sudo)
   my.fedora.dnf.packages = ["fprintd" "fprintd-pam"];
 
