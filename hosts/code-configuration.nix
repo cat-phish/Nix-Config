@@ -4,18 +4,20 @@
 # hypervisor firewall (`agent-isolated` Security Group).
 # The tools themselves are in modules/nixos/agent-tools.nix.
 # Setup guide: docs/code-vm.md.
-{
-  pkgs,
-  ...
-}: let
+{pkgs, ...}: let
   # Public keys only. admin = the admin/deploy key; agent = the key the agent clients use.
   # Keep them different so the agent key can't deploy or sudo.
   adminKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOa80EdbiAlEsJgMvotXA0jcicun018mby+0Nlh6IWIp jordan@fedora-laptop"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAF5vqA1M8gffxvQvF5ojYUWlX4OT/bwxPBn8aCgmTF0 jordan@fedora-desktop"
+    # New
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVw6soJTbmKk5uSZ4Ua9Wf0PEuPrteTazCSfXsSRP7b jordan@fedora-laptop-admin-2026-11"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLe2bPGZaRwoGPX4XSIzkWGe7ztv4noMY7GlOvTXarA jordan@fedora-desktop-admin-2026-11"
   ];
   agentKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIw9XfzPYZI4YWmGqj8JR7P67NN55UbyN2ks5JOmal0f agent-vm client"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIH47GR2htvvu0yQF6+EeP07u1A3wkWXYYrdQdqoAJmG3 herdr-mobile"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDrF+PEhboRipFzns/+TnHYxLfHvRfgwDbQZMjfQrtQU herdr-mobile"
   ];
 in {
   imports = [
@@ -49,6 +51,12 @@ in {
     openssh.authorizedKeys.keys = agentKeys;
     # Keep user services (e.g. an agent backend) alive after SSH logout.
     linger = true;
+  };
+
+  # In hosts/code-configuration.nix
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
   };
 
   # LAN egress filtering is enforced by the Proxmox host firewall.
