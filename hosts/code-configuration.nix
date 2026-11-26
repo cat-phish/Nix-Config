@@ -8,9 +8,6 @@
   # Public keys only. admin = the admin/deploy key; agent = the key the agent clients use.
   # Keep them different so the agent key can't deploy or sudo.
   adminKeys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOa80EdbiAlEsJgMvotXA0jcicun018mby+0Nlh6IWIp jordan@fedora-laptop"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAF5vqA1M8gffxvQvF5ojYUWlX4OT/bwxPBn8aCgmTF0 jordan@fedora-desktop"
-    # New
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPVw6soJTbmKk5uSZ4Ua9Wf0PEuPrteTazCSfXsSRP7b jordan@fedora-laptop-admin-2026-11"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINLe2bPGZaRwoGPX4XSIzkWGe7ztv4noMY7GlOvTXarA jordan@fedora-desktop-admin-2026-11"
   ];
