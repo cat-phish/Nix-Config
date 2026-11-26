@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
+# Roll back (or run: nix-rebuild-system --rollback):
+#   sudo nixos-rebuild switch --rollback
 
 # sudo nixos-rebuild switch --flake ~/.nix
 
 set -euo pipefail
+
+if [ "${1:-}" = --rollback ]; then
+  sudo nixos-rebuild switch --rollback
+  exit
+fi
 
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)

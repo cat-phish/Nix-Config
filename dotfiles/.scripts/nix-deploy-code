@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
+# Roll back the VM to its previous generation (or run: nix-deploy-code --rollback):
+#   ssh -t code-admin sudo nixos-rebuild switch --rollback
 # Update and deploy the agent VM (nixosConfigurations.code, code.vm.lan) from this machine.
 #
 #   nix-deploy-code               commit check, git sync, flake update, build, deploy
 #   nix-deploy-code --no-update   deploy the current config without updating flake inputs
 #   nix-deploy-code --dry         build only; don't touch the VM
+#   nix-deploy-code --rollback    switch the VM back to its previous generation
 #
 # Options:
 #   --host <name>    flake output to deploy (default: code)
@@ -18,13 +21,15 @@ HOST="code"
 TARGET=""
 DO_UPDATE=true
 DRY=false
+ROLLBACK=false
 
-usage() { sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '4,15p' "$0" | sed 's/^# \{0,1\}//'; }
 
 while [ $# -gt 0 ]; do
   case "$1" in
     --no-update) DO_UPDATE=false ;;
     --dry) DRY=true ;;
+    --rollback) ROLLBACK=true ;;
     --host) HOST="$2"; shift ;;
     --target) TARGET="$2"; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -33,6 +38,13 @@ while [ $# -gt 0 ]; do
   shift
 done
 TARGET="${TARGET:-$HOST-admin}"
+
+if $ROLLBACK; then
+  echo "Rolling back $TARGET to its previous generation..."
+  ssh -t "$TARGET" sudo nixos-rebuild switch --rollback
+  echo "[✓] $HOST rolled back"
+  exit 0
+fi
 
 if [ "$(id -u)" -eq 0 ]; then
   echo "Run this as your regular user (not root)."

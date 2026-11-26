@@ -293,6 +293,11 @@ Host code-admin
     HostName code.vm.lan
     User admin
     ForwardAgent no
+
+Host vm                          # the Proxmox VE host; used by update-system
+    HostName vm.lan
+    User root
+    ForwardAgent no
 ```
 
 The SSH config isn't managed by Home Manager (it lives in `~/.ssh`, outside the repo).
@@ -380,17 +385,49 @@ As `agent` (`ssh code`):
 
 | Task | Command (from your desktop) |
 |---|---|
+| Update everything (prompts) | `update-system`, answer **y** to the VM and/or Proxmox prompts (see [below](#updating-from-update-system)) |
 | Update + deploy (script) | `nix-deploy-code` (`--no-update` to skip `nix flake update`, `--dry` to only build) |
 | Deploy config changes | `nix run 'nixpkgs#nixos-rebuild' -- switch --flake "$HOME/.nix#code" --target-host code-admin --sudo` |
 | Build without deploying | `nix build "$HOME/.nix#nixosConfigurations.code.config.system.build.toplevel" --no-link` |
 | Update packages | `nix flake update` in `~/.nix`, then deploy |
-| Roll back | `ssh code-admin sudo nixos-rebuild switch --rollback`, or pick an older entry in the boot menu |
+| Roll back | `nix-deploy-code --rollback` (runs `ssh -t code-admin sudo nixos-rebuild switch --rollback`), or pick an older entry in the boot menu |
 | Add or swap agent tools | Edit `modules/nixos/agent-tools.nix`, then deploy |
 | Resize | Shut down, then change CPU/RAM in the hypervisor. To grow the disk, enlarge it (**Hardware → Disk Action → Resize**), then run `growpart` and `resize2fs` on the VM |
 
 **What's state and what's rebuilt:** everything outside `/home` comes from the flake. The only
 thing worth backing up is `/home/agent` (agent logins and work in progress). Keep real work
 pushed to git, and the VM can be rebuilt from scratch with Steps 4–6.
+
+### Updating from update-system
+
+`update-system` (the regular desktop/laptop update) also offers to update the Proxmox host and
+the agent VM, so they don't drift without needing a separate routine. They aren't updated on
+every run: right after the sudo prompt it asks, for each one, `Update ... at the end of this
+run? [y/N]` (default no), and runs the chosen ones after the local system is done. Asking up
+front means the rest of the run needs no attention.
+
+- **How long since the last update** is shown before each prompt, in red with `[!]` once it's
+  14 days or more (`REMOTE_WARN_DAYS` in the script). The time is read from the machines
+  themselves over SSH, so it's the same whether you update from the desktop or the laptop, and
+  nothing is stored in the repo:
+  - VM: the modification time of `/nix/var/nix/profiles/system`, which every deploy replaces.
+  - Proxmox: the newest `dist-upgrade`/`full-upgrade` in `/var/log/apt/history.log*`. The web
+    UI's **Upgrade** button and `pveupgrade` both run `apt-get dist-upgrade`, so upgrades done
+    there count too. If the logs have none (e.g. rotated away), it says so in red.
+- **Unreachable** (laptop away from home, Tailscale down, or the SSH key needs a passphrase
+  that no agent has): the probe uses `BatchMode` and a 5 s timeout, prints `[-] ...
+  unreachable` and skips that machine without asking.
+- **Proxmox** is upgraded first (host before guest) with `ssh -t vm 'apt-get update && apt-get
+  dist-upgrade'`, interactively, so apt's confirmations and config questions work. It needs the
+  `vm` alias above (`root@vm.lan`). If a new kernel was installed or `/var/run/reboot-required`
+  exists, it asks `Reboot vm now? [y/N]` (default no), because a reboot also stops the code VM.
+  If it does reboot, the VM deploy is skipped for that run; run `nix-deploy-code --no-update`
+  once the VM is back.
+- **VM** is deployed with `nix-deploy-code --no-update --target code-admin`: `update-system`
+  has already updated, committed and pushed `flake.lock`, so the VM gets the same inputs as the
+  desktops.
+- **Flags:** `--vm`, `--pve`, `--remote` (both) update without asking; `--no-remote` skips the
+  checks and prompts entirely.
 
 ## Running a second VM elsewhere
 

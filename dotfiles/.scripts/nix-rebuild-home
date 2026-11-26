@@ -1,8 +1,22 @@
 #!/usr/bin/env bash
+# Roll back to the previous generation (or run: nix-rebuild-home --rollback):
+#   "$(home-manager generations | sed -n 2p | awk '{print $NF}')/activate"
 
 # home-manager switch -b backup --flake ~/.nix
 
 set -euo pipefail
+
+rollback_home() {
+  local prev
+  prev=$(home-manager generations | sed -n 2p | awk '{print $NF}')
+  [ -n "$prev" ] || { echo "[!] No previous Home Manager generation"; return 1; }
+  echo "Activating previous Home Manager generation: $prev"
+  "$prev/activate"
+}
+if [ "${1:-}" = --rollback ]; then
+  rollback_home
+  exit
+fi
 
 FLAKE_PATH="$HOME/.nix"
 ORIGINAL_DIR=$(pwd)

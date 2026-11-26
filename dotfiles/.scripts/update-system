@@ -9,6 +9,36 @@ ORIGINAL_DIR=$(pwd) # Used in sudo trap command below
 ACTUAL_USER=${SUDO_USER:-$USER}
 USER_HOME=$(getent passwd "$ACTUAL_USER" | cut -d: -f6)
 
+# Remote machines offered at the start of each run (see docs/code-vm.md "Updating from update-system")
+VM_TARGET="code-admin"   # ~/.ssh/config alias for admin@code.vm.lan (the agent VM)
+PVE_TARGET="vm"          # ~/.ssh/config alias for root@vm.lan (the Proxmox VE host)
+REMOTE_WARN_DAYS=14      # show the age in red once a machine hasn't been updated for this long
+DO_VM=""                 # yes/no; empty = ask
+DO_PVE=""
+
+usage() {
+  cat <<EOF
+Usage: update-system [--vm] [--pve] [--remote] [--no-remote]
+  --vm         also deploy the agent VM ($VM_TARGET) without asking
+  --pve        also upgrade the Proxmox host ($PVE_TARGET) without asking
+  --remote     both of the above
+  --no-remote  don't check or offer either
+With no flags, asks for each (default no) and shows how long ago it was last updated.
+EOF
+}
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --vm) DO_VM=yes ;;
+    --pve) DO_PVE=yes ;;
+    --remote) DO_VM=yes; DO_PVE=yes ;;
+    --no-remote) DO_VM=no; DO_PVE=no ;;
+    -h|--help) usage; exit 0 ;;
+    *) echo "Unknown option: $1"; usage; exit 1 ;;
+  esac
+  shift
+done
+
 # Source the zinit script so the 'zinit' command is available
 # if [ -f "$ZINIT_HOME/zinit.zsh" ]; then
 #     source "$ZINIT_HOME/zinit.zsh"
@@ -372,6 +402,77 @@ rebuild_home() {
   echo "[✓] Home Manager switch succeeded"
 }
 
+# --- Remote machines (agent VM, Proxmox host) ---
+# The "last updated" time is read from each machine over SSH, so it's the same on every
+# desktop/laptop and nothing is stored in the repo.
+SSH_PROBE=(ssh -o BatchMode=yes -o ConnectTimeout=5)
+RED=$'\e[31m' YELLOW=$'\e[33m' RESET=$'\e[0m'
+
+# Epoch seconds of the VM's last system switch (the system profile link is replaced on every deploy)
+vm_last_update() {
+  "${SSH_PROBE[@]}" "$VM_TARGET" stat -c %Y /nix/var/nix/profiles/system 2>/dev/null
+}
+
+# Epoch seconds of the Proxmox host's last dist-upgrade/full-upgrade (pveupgrade and the web UI's
+# "Upgrade" button both run apt-get dist-upgrade, so upgrades made there count too).
+# Prints "never" if the apt logs show none.
+pve_last_update() {
+  local when
+  when=$("${SSH_PROBE[@]}" "$PVE_TARGET" \
+    "zcat -f /var/log/apt/history.log* 2>/dev/null | awk '/^Start-Date:/{d=\$2\" \"\$3} /^Commandline:.*(dist-upgrade|full-upgrade)/{print d}' | sort | tail -n1" \
+    2>/dev/null) || return 1
+  if [ -z "$when" ]; then echo never; else date -d "$when" +%s; fi
+}
+
+# ask_remote_update <description> <var name> <probe function>
+# Shows how long ago the machine was updated and asks (default no). Unreachable: sets no, no prompt.
+ask_remote_update() {
+  local desc="$1" var="$2" probe="$3" ts age msg answer
+  [ -n "${!var}" ] && return 0
+  if ! ts=$("$probe"); then
+    echo "[-] $desc unreachable (offline, or the SSH key needs unlocking); skipping"
+    printf -v "$var" no
+    return 0
+  fi
+  if [ "$ts" = never ]; then
+    msg="${RED}[!] $desc: no upgrade found in its logs${RESET}"
+  else
+    age=$(( ($(date +%s) - ts) / 86400 ))
+    msg="$desc: last updated $age day(s) ago"
+    [ "$age" -ge "$REMOTE_WARN_DAYS" ] && msg="${RED}[!] $msg${RESET}"
+  fi
+  echo "$msg"
+  read -r -p "Update $desc at the end of this run? [y/N] " answer
+  if [[ "$answer" =~ ^[Yy]$ ]]; then printf -v "$var" yes; else printf -v "$var" no; fi
+}
+
+# Upgrade the Proxmox host interactively (apt prompts and config questions work), then offer a
+# reboot if a new kernel or a package asked for one. Returns 2 if it rebooted.
+update_pve() {
+  echo "Upgrading Proxmox host ($PVE_TARGET)..."
+  if ! ssh -t "$PVE_TARGET" 'apt-get update && apt-get dist-upgrade'; then
+    echo "[!] Proxmox upgrade failed"
+    return 1
+  fi
+  echo "[✓] Proxmox host upgraded"
+  if ssh "$PVE_TARGET" '[ -e /var/run/reboot-required ] || [ "/boot/vmlinuz-$(uname -r)" != "$(ls -t /boot/vmlinuz-* | head -n1)" ]'; then
+    echo "${YELLOW}[!] $PVE_TARGET needs a reboot (new kernel). Rebooting also stops the code VM.${RESET}"
+    local answer
+    read -r -p "Reboot $PVE_TARGET now? [y/N] " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+      ssh "$PVE_TARGET" reboot || true
+      echo "[✓] Reboot started"
+      return 2
+    fi
+    echo "[-] Not rebooting; reboot it from the web UI when convenient."
+  fi
+}
+
+# Build locally and deploy the agent VM. Flake inputs were already updated and pushed above.
+update_vm() {
+  "$FLAKE_PATH/dotfiles/.scripts/nix-deploy-code" --no-update --target "$VM_TARGET"
+}
+
 # Run Nix Garbage Collection
 gc_nix() {
   echo "Running Nix garbage collection (older than 14d)..."
@@ -401,6 +502,11 @@ if [ -f /etc/os-release ]; then
 fi
 
 echo "Detected OS: $OS_ID"
+echo "---------------------------------------"
+
+# Ask about the remote machines now, so the rest of the run needs no attention
+ask_remote_update "Proxmox host ($PVE_TARGET)" DO_PVE pve_last_update
+ask_remote_update "agent VM ($VM_TARGET)" DO_VM vm_last_update
 echo "---------------------------------------"
 
 # Step 1: Safety Checks & Sync
@@ -462,6 +568,20 @@ EOF
     rebuild_home || true
     ;;
 esac
+
+# Step 4: Remote machines (host before guest)
+pve_rebooted=false
+if [ "$DO_PVE" = yes ]; then
+  rc=0; update_pve || rc=$?
+  [ "$rc" -eq 2 ] && pve_rebooted=true
+fi
+if [ "$DO_VM" = yes ]; then
+  if $pve_rebooted; then
+    echo "[-] Skipping the agent VM deploy: $PVE_TARGET is rebooting. Run nix-deploy-code --no-update later."
+  else
+    update_vm || echo "[!] Agent VM deploy failed"
+  fi
+fi
 
 echo "---------------------------------------"
 echo "Done."
